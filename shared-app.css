@@ -1,0 +1,69 @@
+/* App bottom navigation */
+.prototype-shell { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.flow-switcher { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.flow-btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; color: #666; border: 1.5px solid #e0e0e0; background: white; cursor: pointer; font-family: inherit; transition: 0.15s; }
+.flow-btn:hover { background: #f5f5f7; border-color: #ccc; }
+.flow-btn.active { background: #333; color: white; border-color: #333; }
+
+.app-nav {
+	height: 60px;
+	border-top: 1px solid #eee;
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	background: white;
+	z-index: 30;
+}
+.app-nav-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 3px;
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 10px;
+	color: #999;
+	padding: 6px 10px;
+	font-family: inherit;
+}
+.app-nav-item.active { color: #111; font-weight: 600; }
+.app-nav-icon { font-size: 17px; line-height: 1; }
+.screen.has-app-nav { padding-bottom: 60px; }
+#guide-agenda, #guide-detail { padding: 0; }
+
+/* Facilitator guide */
+.guide-header { padding: 50px 20px 12px; background: white; border-bottom: 1px solid #e8e8e8; flex-shrink: 0; }
+.guide-header h3 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+.guide-header p { font-size: 12px; color: #999; line-height: 1.45; }
+.guide-agenda { padding: 8px 16px 12px; flex: 1; overflow-y: auto; }
+.guide-item { display: flex; align-items: center; gap: 14px; padding: 14px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 4px; }
+.guide-item:hover { background: #f4f4f5; }
+.guide-num { width: 28px; height: 28px; border-radius: 50%; background: #e5e5ea; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #8e8e93; flex-shrink: 0; }
+.guide-text .title { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.guide-text .sub { font-size: 12px; color: #8e8e93; }
+.guide-detail-header { padding: 50px 16px 14px; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; gap: 10px; flex-shrink: 0; background: white; }
+.guide-back { width: 36px; height: 36px; border-radius: 50%; background: #f4f4f5; border: none; cursor: pointer; font-size: 18px; color: #333; }
+.guide-badge { width: 32px; height: 32px; background: #333; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700; }
+.guide-detail-title { font-size: 18px; font-weight: 700; flex: 1; line-height: 1.2; }
+.guide-mode { display: flex; gap: 6px; margin: 14px 20px; padding: 4px; background: #f4f4f5; border-radius: 10px; flex-shrink: 0; }
+.guide-mode-btn { flex: 1; padding: 10px 8px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 8px; border: none; background: transparent; color: #666; font-family: inherit; }
+.guide-mode-btn.active { background: white; color: #333; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.guide-body { padding: 0 20px 16px; flex: 1; overflow-y: auto; font-size: 14px; line-height: 1.65; color: #555; }
+.guide-block { background: #f9f9fb; border-radius: 10px; padding: 16px; margin-bottom: 10px; }
+.guide-block .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; color: #999; margin-bottom: 6px; font-weight: 600; }
+.guide-block p, .guide-block ul { color: #444; line-height: 1.65; }
+.guide-block ul { padding-left: 18px; margin-top: 4px; }
+.guide-block li { margin-bottom: 4px; }
+.guide-audio-box { border: 2px dashed #d1d1d6; border-radius: 12px; padding: 28px 20px; text-align: center; color: #999; font-size: 13px; margin-top: 8px; }
+.guide-audio-bars { display: flex; align-items: center; justify-content: center; gap: 3px; height: 28px; margin-bottom: 10px; }
+.guide-audio-bar { width: 4px; background: #d1d1d6; border-radius: 2px; animation: guidePulse 1.5s ease-in-out infinite alternate; }
+@keyframes guidePulse { from { opacity: 0.3; } to { opacity: 0.85; } }
+.guide-section-nav { padding: 12px 20px; border-top: 1px solid #eee; display: flex; gap: 10px; flex-shrink: 0; background: white; }
+.guide-sec-btn { flex: 1; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; border: none; font-family: inherit; }
+.guide-sec-btn.gray { background: #f4f4f5; color: #8e8e93; }
+.guide-sec-btn.dark { background: #333; color: white; }

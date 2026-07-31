@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flow 3: Facilitator Guide</title>
+<link rel="stylesheet" href="shared-app.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f5f5f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; padding: 24px 16px; }
+.prototype-nav { display: flex; align-items: center; gap: 20px; }
+.slide-arrow { width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid #d5d5d5; background: white; font-size: 22px; color: #333; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: 0.15s; }
+.slide-arrow:hover:not(:disabled) { background: #f5f5f7; border-color: #999; }
+.slide-arrow:disabled { opacity: 0.25; cursor: default; }
+.slide-counter { position: absolute; top: 12px; right: 12px; font-size: 11px; color: #aaa; background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 6px; z-index: 20; pointer-events: none; }
+.phone-frame { width: 375px; height: 812px; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.12); background: white; position: relative; }
+.screen { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; top: 0; left: 0; background: white; overflow-y: auto; }
+.screen.active { display: flex; }
+</style>
+</head>
+<body>
+<div class="prototype-shell">
+<div class="flow-switcher">
+ <a href="flow1.html" class="flow-btn">Flow 1 · Onboarding</a>
+ <a href="flow2.html" class="flow-btn">Flow 2 · Returning</a>
+ <a href="flow3_facilitator_guide.html" class="flow-btn active">Flow 3 · Guide</a>
+</div>
+<div class="prototype-nav">
+<button class="slide-arrow slide-prev" onclick="navPrev()" aria-label="Previous screen">←</button>
+<div class="phone-frame">
+<span class="slide-counter" id="slide-counter"></span>
+
+<!-- Guide Agenda -->
+<div id="guide-agenda" class="screen active has-app-nav">
+ <div class="guide-header">
+  <h3>Facilitator Guide</h3>
+  <p>Live Gathering · Available to everyone — encourage others to lead.</p>
+ </div>
+ <div class="guide-agenda" id="guide-agenda-list"></div>
+ <div class="guide-section-nav">
+  <button class="guide-sec-btn gray" disabled>Previous</button>
+  <button class="guide-sec-btn dark" onclick="openGuideSection(0)">Start Section →</button>
+ </div>
+</div>
+
+<!-- Guide Detail -->
+<div id="guide-detail" class="screen has-app-nav">
+ <div class="guide-detail-header">
+  <button class="guide-back" onclick="goGuideAgenda()">←</button>
+  <div class="guide-badge" id="guide-num">1</div>
+  <div class="guide-detail-title" id="guide-title"></div>
+ </div>
+ <p style="font-size:13px;color:#999;padding:12px 20px 0;" id="guide-subtitle"></p>
+ <div class="guide-mode">
+  <button class="guide-mode-btn active" onclick="switchGuideMode(this,'text')">Text</button>
+  <button class="guide-mode-btn" onclick="switchGuideMode(this,'audio')">Audio</button>
+ </div>
+ <div class="guide-body" id="guide-text"></div>
+ <div class="guide-body" id="guide-audio" style="display:none;">
+  <div class="guide-block"><div class="label">Audio Guide</div>
+  <p>Listen along as you facilitate this section. Tap play when ready.</p></div>
+  <div class="guide-audio-box">
+   <div class="guide-audio-bars">
+    <div class="guide-audio-bar" style="height:12px;animation-delay:0s"></div>
+    <div class="guide-audio-bar" style="height:22px;animation-delay:0.2s"></div>
+    <div class="guide-audio-bar" style="height:16px;animation-delay:0.4s"></div>
+    <div class="guide-audio-bar" style="height:28px;animation-delay:0.6s"></div>
+    <div class="guide-audio-bar" style="height:18px;animation-delay:0.1s"></div>
+   </div>
+   <p>[ Tap to play facilitator audio ]</p>
+  </div>
+  <div class="guide-block" style="margin-top:12px;"><div class="label">While You Listen</div>
+  <p>Glance at key prompts on screen, or switch to Text for the full script.</p></div>
+ </div>
+ <div class="guide-section-nav">
+  <button class="guide-sec-btn gray" onclick="guidePrevSection()">← Previous</button>
+  <button class="guide-sec-btn dark" onclick="guideNextSection()">Next →</button>
+ </div>
+</div>
+
+<nav class="app-nav">
+ <button class="app-nav-item" data-tab="today" onclick="appTab('today')"><span class="app-nav-icon">⌂</span>Today</button>
+ <button class="app-nav-item" data-tab="practice" onclick="appTab('practice')"><span class="app-nav-icon">◎</span>Practice</button>
+ <button class="app-nav-item" data-tab="patterns" onclick="appTab('patterns')"><span class="app-nav-icon">▦</span>Patterns</button>
+ <button class="app-nav-item active" data-tab="guide" onclick="appTab('guide')"><span class="app-nav-icon">☰</span>Guide</button>
+</nav>
+
+</div>
+<button class="slide-arrow slide-next" onclick="navNext()" aria-label="Next screen">→</button>
+</div>
+</div>
+
+<script src="shared-facilitator.js"></script>
+<script>
+const appScreens = ['guide-agenda'];
+const slideNav = createSlideNav(appScreens);
+
+function show(id) {
+ document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ setAppNavActive('guide');
+ slideNav.syncFromShow(id);
+}
+
+function appTab(tab) {
+ if (tab === 'guide') goGuideAgenda();
+ else if (tab === 'today') window.location.href = 'flow1.html';
+ else if (tab === 'practice') window.location.href = 'flow1.html';
+ else if (tab === 'patterns') window.location.href = 'flow2.html';
+}
+
+function navNext() { slideNav.navNext(); }
+function navPrev() { slideNav.navPrev(); }
+
+document.addEventListener('keydown', e => {
+ if (e.key === 'ArrowRight') navNext();
+ if (e.key === 'ArrowLeft') navPrev();
+});
+
+initAppNav('guide');
+slideNav.updateSlideNav();
+</script>
+</body>
+</html>

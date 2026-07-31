@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flow 1: Onboarding</title>
+<link rel="stylesheet" href="shared-app.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; color: #333; }
+body { background: #f5f5f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 24px 16px; }
+.prototype-nav { display: flex; align-items: center; gap: 20px; }
+.slide-arrow { width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid #d5d5d5; background: white; font-size: 22px; color: #333; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: 0.15s; }
+.slide-arrow:hover:not(:disabled) { background: #f5f5f7; border-color: #999; }
+.slide-arrow:disabled { opacity: 0.25; cursor: default; }
+.slide-counter { position: absolute; top: 12px; right: 12px; font-size: 11px; color: #aaa; background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 6px; z-index: 10; pointer-events: none; }
+.phone-frame { width: 375px; height: 812px; background: white; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+.screen { display: none; flex-direction: column; padding: 30px 20px; height: 100%; width: 100%; position: absolute; top: 0; left: 0; background: white; overflow-y: auto; }
+.screen.active { display: flex; }
+h1 { font-size: 32px; font-weight: 700; margin-bottom: 12px; line-height: 1.15; color: #111; }
+p.desc { font-size: 15px; color: #666; line-height: 1.55; margin-bottom: 22px; }
+
+/* buttons */
+.btn { padding: 17px 16px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: auto; text-align: center; }
+.btn-dark { background: #1a1a1a; color: white; border: none; }
+.btn-light { background: transparent; color: #333; border: 1.5px solid #e0e0e0; }
+.btn-small { width: auto; padding: 12px 24px; display: inline-block; font-size: 14px; margin-top: 8px; }
+.input-box { width: 100%; padding: 15px 16px; border: 1.5px solid #e8e8e8; border-radius: 10px; font-size: 15px; background: white; margin-bottom: 12px; }
+.input-box:focus { outline: none; border-color: #999; }
+
+/* cards */
+.card { padding: 18px; background: #fafafa; border-radius: 12px; cursor: pointer; margin-bottom: 14px; transition: 0.2s; }
+.card:hover { background: #f3f3f3; }
+
+/* swiper */
+.swiper-box { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding-top: 50px; height: 100%; width: 100%; }
+.swiper-icon { width: 85px; height: 85px; border: 2.5px solid #d5d5d5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #b0b0b0; margin-bottom: 28px; background: white; }
+.swiper-dots { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); display: flex; gap: 7px; }
+.dot-ctr { width: 9px; height: 9px; background: #e8e8e8; border-radius: 50%; }
+
+/* progress */
+.progress-bg { height: 10px; background: #f0f0f0; border-radius: 20px; overflow: hidden; margin-bottom: 16px; display: flex;}
+.progress-fill { height: 100%; background: #333; }
+
+/* checklist */
+.chk-item { display: flex; align-items: center; gap: 14px; }
+.chk-circle { width: 26px; height: 26px; border: 2px solid #d5d5d5; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; background: white; }
+.chk-done { background: #333; color: white; border-color: #333; }
+.prep-badge { display: inline-block; font-size: 11px; font-weight: 600; color: #2e7d32; background: #e8f5e9; padding: 4px 10px; border-radius: 20px; margin-bottom: 8px; }
+
+/* krl */
+.video-ph { height: 180px; background: #f7f7f7; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #aaa; border-radius: 6px; margin-bottom: 8px; }
+.rec-status { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.rec-dot { width: 10px; height: 10px; background: #e53935; border-radius: 50%; animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+.waveform { display: flex; align-items: center; gap: 4px; height: 48px; margin-bottom: 20px; }
+.wave-bar { width: 4px; background: #333; border-radius: 2px; animation: wave 0.8s ease-in-out infinite; }
+.wave-bar:nth-child(1) { animation-delay: 0s; height: 12px; }
+.wave-bar:nth-child(2) { animation-delay: 0.1s; height: 24px; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; height: 36px; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; height: 28px; }
+.wave-bar:nth-child(5) { animation-delay: 0.15s; height: 40px; }
+.wave-bar:nth-child(6) { animation-delay: 0.25s; height: 20px; }
+.wave-bar:nth-child(7) { animation-delay: 0.05s; height: 32px; }
+@keyframes wave { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+.transcript-box { background: #f5f5f7; border-radius: 10px; min-height: 180px; padding: 20px; font-size: 15px; line-height: 1.6; color: #333; }
+.transcript-cursor { display: inline-block; width: 2px; height: 18px; background: #333; margin-left: 2px; vertical-align: text-bottom; animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* heat-map */
+.hm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; height: 70px; border-radius: 6px; overflow: hidden; opacity: 0.55; margin-top: 12px; }
+.hm-block { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; }
+.hm-1 { background: #f8b195; } .hm-2 { background: #a1c4fd; } .hm-3 { background: #c2e9a0; }
+
+/* facilitator nav */
+.fac-mode-btn { width: 60px; height: 32px; border-radius: 8px; border: 1.5px solid #d5d5d5; font-size: 18px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+
+<div class="prototype-shell">
+<div class="flow-switcher">
+	<a href="flow1.html" class="flow-btn active">Flow 1 · Onboarding</a>
+	<a href="flow2.html" class="flow-btn">Flow 2 · Returning</a>
+	<a href="flow3_facilitator_guide.html" class="flow-btn">Flow 3 · Guide</a>
+</div>
+<div class="prototype-nav">
+<button class="slide-arrow slide-prev" onclick="navPrev()" aria-label="Previous screen">←</button>
+
+<div class="phone-frame">
+<span class="slide-counter" id="slide-counter"></span>
+
+<!-- S1 Intro -->
+<div id="s1" class="screen active">
+	<div class="swiper-box"><div class="swiper-icon">{ }</div><h2>"What Attune Is"</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio praesent sed blandit libero volutpat.</p>
+	<button onclick="show('s2')" class="btn btn-dark btn-small">Next</button></div>
+	<div class="swiper-dots"><span class="dot-ctr" style="background:#333"></span><span class="dot-ctr" onclick="show('s1')"></span><span class="dot-ctr" onclick="show('s3')"></span></div>
+</div>
+
+<!-- S2 Intro -->
+<div id="s2" class="screen">
+	<div class="swiper-box"><div class="swiper-icon">↑</div><h2>"How It Helps You Grow"</h2><p>Fusce dapibus, tellus ac cursus commodo tortor mauris condimentum nibh ut fermentum justo sit.</p>
+	<button onclick="show('s3')" class="btn btn-dark btn-small">Next</button></div>
+	<div class="swiper-dots"><span class="dot-ctr" onclick="show('s1')"></span><span class="dot-ctr" style="background:#333"></span><span class="dot-ctr" onclick="show('s3')"></span></div>
+</div>
+
+<!-- S3 Intro -->
+<div id="s3" class="screen">
+	<div class="swiper-box"><div class="swiper-icon">↻</div><h2>"Your Journey to Attunement"</h2><p>Aenean eu leo quam. Pellentesque ornare sem lacinia venenatis sed bibendum libero quis.</p>
+	<button onclick="show('s4')" class="btn btn-dark btn-small">Begin</button></div>
+	<div class="swiper-dots"><span class="dot-ctr" onclick="show('s1')"></span><span class="dot-ctr" onclick="show('s2')"></span><span class="dot-ctr" style="background:#333"></span></div>
+</div>
+
+<!-- S4 Signup -->
+<div id="s4" class="screen">
+	<h1>Create your account.</h1><p class="desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+	<input type="text" placeholder="Username" class="input-box"><input type="password" placeholder="Password" class="input-box">
+	<button onclick="show('s5')" class="btn btn-dark">Create Account</button>
+<div style="height:40px"></div></div>
+
+<!-- S5 Home -->
+<div id="s5" class="screen has-app-nav">
+	<h1>Welcome Back,</h1><p>Emma 👋</p><br>
+	<h3>Your Next Gathering</h3><p class="desc" style="font-size:12px;color:#999;margin-bottom:8px;">Get ready for Session 1.</p>
+	<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b style="font-size:18px">Session 1</b></div>
+	<div class="progress-bg"><div class="progress-fill" style="width:15%"></div></div>
+	<button onclick="show('s6')" class="btn btn-dark btn-small">Let's Get Prepped</button></div>
+	<div class="card" style="opacity:0.5"><h3 style="font-size:16px">Your Growth Map</h3><p class="desc" style="font-size:13px;margin-bottom:0">It will appear after your first few reflections.</p></div>
+	<button onclick="show('s8')" class="btn btn-light" style="margin-top:16px;">Or jump to Personal Practice →</button>
+</div>
+
+<!-- S6 Prep Checklist -->
+<div id="s6" class="screen">
+	<button onclick="show('s5')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Home</button>
+	<h1>Your Prep Checklist</h1><p class="desc" style="font-size:13px;margin-bottom:18px;">Complete these three steps to be ready for the gathering.</p>
+	<div class="card chk-item" onclick="show('s7')"><div class="chk-circle"></div><div><b style="font-size:17px">Classroom</b><p class="desc" style="font-size:12px;margin:0">Bite-sized learning chunk.</p></div></div>
+	<div class="card chk-item" onclick="show('s8')"><div class="chk-circle"></div><div><b style="font-size:17px">KRL Exercise</b><p class="desc" style="font-size:12px;margin:0">Complete your Key Relationship Lens.</p></div></div>
+	<div class="card chk-item" onclick="show('s9')"><div class="chk-circle"></div><div><b style="font-size:17px">Reflect & Prepare</b><p class="desc" style="font-size:12px;margin:0">Take a moment to reflect on what you learned.</p></div></div>
+	<div style="height:40px"></div></div>
+
+<!-- S7 Classroom -->
+<div id="s7" class="screen">
+	<button onclick="show('s6')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Prep</button>
+	<h1>Classroom</h1><p class="desc">The week's learning chunk. Click below to start.</p>
+	<div class="card" style="padding:0;overflow:hidden"><div class="video-ph">[ Video Placeholder · 6 min ]</div><div style="padding:16px"><strong style="font-size:16px">What Is Attunement?</strong><p class="desc" style="font-size:13px;margin:4px 0 0;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent blandit.</p></div></div>
+	<button onclick="show('s8')" class="btn btn-dark">Continue to KRL Exercise →</button>
+	<div style="height:20px"></div></div>
+
+<!-- S8 KRL -->
+<div id="s8" class="screen">
+	<button onclick="show('s7')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Prep</button>
+	<h1>KRL Exercise</h1><p class="desc" style="font-size:13px;">Key Relationship Lens · Practice Mode.</p>
+	<div class="card" style="padding:22px;border-left:4px solid #333"><p class="desc" style="font-size:17px;line-height:1.5;margin-bottom:0;font-weight:600">"What do you notice when you step back and look at this situation from a distance?"</p></div>
+	<div style="border-top:1px solid #eee;margin-top:18px;padding-top:14px;display:flex;gap:9px;"><button onclick="show('s8r')" class="btn btn-dark" style="width:auto;padding:13px 20px;">Record</button><button class="btn btn-light">Write ✍️</button></div>
+	<button onclick="show('s9')" class="btn btn-dark" style="margin-top:auto;">Save & Continue →</button>
+	<div style="height:20px"></div></div>
+
+<!-- S8 Record (voice to text) -->
+<div id="s8r" class="screen">
+	<button onclick="show('s8')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to KRL</button>
+	<h1>KRL Exercise</h1>
+	<div class="rec-status"><span class="rec-dot"></span><span style="font-size:14px;color:#e53935;font-weight:600;">Listening…</span></div>
+	<div class="waveform"><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span></div>
+	<p class="desc" style="font-size:12px;margin-bottom:10px;">Voice to text</p>
+	<div class="transcript-box">I notice that when I step back, there's more space between me and the situation. It feels less urgent than it did before<span class="transcript-cursor"></span></div>
+	<button onclick="show('s8')" class="btn btn-dark" style="margin-top:auto;">Done</button>
+	<div style="height:20px"></div></div>
+
+<!-- S9 Reflect -->
+<div id="s9" class="screen">
+	<button onclick="show('s8')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Prep</button>
+	<h1>Reflect & Prepare</h1><p class="desc" style="font-size:13px">What is one takeaway you want to share with your group tonight?</p>
+	<div style="background:#f5f5f7;border-radius:10px;min-height:200px;color:#bbb;padding:20px;font-style:italic;line-height:1.6;">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</div>
+	<button onclick="show('s10')" class="btn btn-dark" style="margin-top:auto;">Submit</button>
+	<div style="height:20px"></div></div>
+
+<!-- S10 Ready -->
+<div id="s10" class="screen">
+	<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+		<div style="width:75px;height:75px;border-radius:50%;background:#333;color:white;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:24px">✓</div>
+		<h1>You're ready for Session 1.</h1><p class="desc" style="color:#777">You've completed your prep. Take a deep breath — you're all set for the gathering. 🌱</p>
+		<button onclick="show('s11')" class="btn btn-light">Back to Home</button></div></div>
+
+<!-- S11 Home (prepped) -->
+<div id="s11" class="screen has-app-nav">
+	<h1>Welcome Back,</h1><p>Emma 👋</p><br>
+	<h3>Your Next Gathering</h3>
+	<p class="desc" style="font-size:12px;color:#999;margin-bottom:8px;">You're prepped for Session 1.</p>
+	<div class="card">
+		<span class="prep-badge">✓ Prepped</span>
+		<div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b style="font-size:18px">Session 1</b></div>
+		<div class="progress-bg"><div class="progress-fill" style="width:100%"></div></div>
+		<p class="desc" style="font-size:12px;margin:12px 0 0;color:#666;">All prep steps complete. You're ready for the gathering.</p>
+	</div>
+	<div class="card" style="opacity:0.5"><h3 style="font-size:16px">Your Growth Map</h3><p class="desc" style="font-size:13px;margin-bottom:0">It will appear after your first few reflections.</p></div>
+	<button onclick="show('s8')" class="btn btn-light" style="margin-top:16px;">Jump to Personal Practice →</button>
+</div>
+
+<nav class="app-nav">
+	<button class="app-nav-item active" data-tab="today" onclick="appTab('today')"><span class="app-nav-icon">⌂</span>Today</button>
+	<button class="app-nav-item" data-tab="practice" onclick="appTab('practice')"><span class="app-nav-icon">◎</span>Practice</button>
+	<button class="app-nav-item" data-tab="patterns" onclick="appTab('patterns')"><span class="app-nav-icon">▦</span>Patterns</button>
+	<button class="app-nav-item" data-tab="guide" onclick="appTab('guide')"><span class="app-nav-icon">☰</span>Guide</button>
+</nav>
+
+</div>
+
+<button class="slide-arrow slide-next" onclick="navNext()" aria-label="Next screen">→</button>
+</div>
+</div>
+
+<script>
+const screens = ['s1','s2','s3','s4','s5','s6','s7','s8','s8r','s9','s10','s11'];
+let current = 0;
+
+function setAppNavActive(tab) {
+	document.querySelectorAll('.app-nav-item').forEach(item => {
+		item.classList.toggle('active', item.dataset.tab === tab);
+	});
+}
+
+function show(id) {
+	document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+	document.getElementById(id).classList.add('active');
+	const idx = screens.indexOf(id);
+	if (idx !== -1) current = idx;
+	if (id === 's5' || id === 's11') setAppNavActive('today');
+	else if (id === 's8' || id === 's8r') setAppNavActive('practice');
+	updateNav();
+}
+
+function appTab(tab) {
+	if (tab === 'today') show('s5');
+	else if (tab === 'practice') show('s8');
+	else if (tab === 'patterns') window.location.href = 'flow2.html';
+	else if (tab === 'guide') window.location.href = 'flow3_facilitator_guide.html';
+}
+
+function navNext() { if (current < screens.length - 1) show(screens[current + 1]); }
+function navPrev() { if (current > 0) show(screens[current - 1]); }
+
+function updateNav() {
+	document.querySelector('.slide-prev').disabled = current === 0;
+	document.querySelector('.slide-next').disabled = current === screens.length - 1;
+	document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + screens.length;
+}
+
+document.addEventListener('keydown', e => {
+	if (e.key === 'ArrowRight') navNext();
+	if (e.key === 'ArrowLeft') navPrev();
+});
+
+setAppNavActive('today');
+updateNav();
+</script>
+</body>
+</html>

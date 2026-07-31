@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attune — Clickable Prototype</title>
+<link rel="stylesheet" href="shared-app.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+	background: #f5f5f7;
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 32px 20px;
+	font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+	color: #333;
+}
+.landing { max-width: 420px; width: 100%; text-align: center; }
+.landing h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: #111; }
+.landing p { font-size: 15px; color: #666; line-height: 1.55; margin-bottom: 28px; }
+.flow-list { display: flex; flex-direction: column; gap: 12px; }
+.flow-link {
+	display: block;
+	padding: 18px 20px;
+	background: white;
+	border: 1.5px solid #e0e0e0;
+	border-radius: 12px;
+	text-decoration: none;
+	color: #111;
+	text-align: left;
+	transition: 0.15s;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.flow-link:hover { border-color: #999; background: #fafafa; }
+.flow-link strong { display: block; font-size: 16px; margin-bottom: 4px; }
+.flow-link span { font-size: 13px; color: #888; }
+.hint { margin-top: 24px; font-size: 12px; color: #aaa; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="landing">
+	<h1>Attune Prototype</h1>
+	<p>Click a flow to explore. Use ← → arrows to step through screens, or the buttons at the top to switch flows.</p>
+	<div class="flow-list">
+		<a href="flow1.html" class="flow-link">
+			<strong>Flow 1 · Onboarding</strong>
+			<span>New user — intro, signup, prep, and first session</span>
+		</a>
+		<a href="flow2.html" class="flow-link">
+			<strong>Flow 2 · Returning User</strong>
+			<span>Home with patterns snippet and full growth map</span>
+		</a>
+		<a href="flow3_facilitator_guide.html" class="flow-link">
+			<strong>Flow 3 · Facilitator Guide</strong>
+			<span>Live gathering agenda with text and audio guides</span>
+		</a>
+	</div>
+	<p class="hint">Wireframe only — placeholder copy and visuals.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Flow 2: Returning User</title>
+<link rel="stylesheet" href="shared-app.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,sans-serif;color:#333}
+body{background:#f5f5f7;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:24px 16px}
+.prototype-nav{display:flex;align-items:center;gap:20px}
+.slide-arrow{width:48px;height:48px;border-radius:50%;border:1.5px solid #d5d5d5;background:white;font-size:22px;color:#333;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:.15s}
+.slide-arrow:hover:not(:disabled){background:#f5f5f7;border-color:#999}
+.slide-arrow:disabled{opacity:.25;cursor:default}
+.slide-counter{position:absolute;top:12px;right:12px;font-size:11px;color:#aaa;background:rgba(255,255,255,.9);padding:4px 8px;border-radius:6px;z-index:10;pointer-events:none}
+.phone-frame{width:375px;height:812px;background:white;position:relative;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.1)}
+.screen{display:none;flex-direction:column;padding:30px 20px;height:100%;width:100%;position:absolute;top:0;left:0;background:white;overflow-y:auto}
+.screen.active{display:flex}
+h1{font-size:32px;font-weight:700;margin-bottom:14px;line-height:1.15;color:#111}
+p.d{font-size:15px;color:#666;line-height:1.6;margin-bottom:20px}
+.btn{padding:17px 16px;width:100%;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;transition:.2s;margin-top:auto;text-align:center}
+.btn-dark{background:#1a1a1a;color:white;border:none}.btn-light{background:transparent;color:#333;border:1.5px solid #e0e0e0}
+.btn-small{width:auto;padding:12px 24px;display:inline-block;font-size:14px;margin-top:8px}
+.card{padding:18px;background:#fafafa;border-radius:12px;cursor:pointer;margin-bottom:14px;transition:.2s}.card:hover{background:#f3f3f3}
+.progress-bg{height:10px;background:#f0f0f0;border-radius:20px;overflow:hidden;margin:14px 0;display:flex}
+.progress-fill2{height:100%;background:#333}.progress-bar2{flex:1;height:100%;background:#e8e8e8;border-left:1.5px solid white}
+.hm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;height:70px;border-radius:6px;overflow:hidden;opacity:.55;margin-top:14px}
+.hm-block2{height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:white}
+.hm-1{background:#f8b195}.hm-2{background:#a1c4fd}.hm-3{background:#c2e9a0;color:#3d5c34}
+.hm-full-grid{display:grid;grid-template-columns:3fr 1.2fr;grid-template-rows:1fr 1fr;gap:6px;height:150px;border-radius:10px;overflow:hidden;flex-shrink:0}
+.hf-b{min-height:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;font-size:13px;color:white;font-weight:600;border-radius:4px;padding:10px;position:relative;overflow:hidden;line-height:1.25}
+.hf-b-trust{background:#f8b195;grid-row:span 2}
+.hf-b-patience{background:#a1c4fd}
+.hf-b-clarity{background:#c2e9a0;color:#3d5c34}
+.hf-b-sub{font-size:10px;font-weight:400;opacity:.85;margin-top:2px}
+.pattern-rollup .rollup-dots{gap:4px;padding-top:6px}
+.pattern-rollup .rollup-dot{width:12px;height:12px}
+.hf-b-clarity .rollup-dot{border-color:rgba(0,0,0,.12)}
+.pattern-rollup{background:#fafafa;border-radius:12px;padding:14px;margin-bottom:6px;flex-shrink:0}
+.rollup-label{font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
+.rollup-dots{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto;padding-top:8px}
+.rollup-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,.5);opacity:.9}
+.rollup-dot-trust{background:radial-gradient(circle at 30% 30%,#ffeaa7,#e17055)}
+.rollup-dot-patience{background:radial-gradient(circle at 30% 30%,#dfe6fd,#6c5ce7)}
+.rollup-dot-clarity{background:radial-gradient(circle at 30% 30%,#e8f5e9,#81c784)}
+.rollup-dot-mix{background:radial-gradient(circle at 20% 20%,#ffeaa7,#f8b195 40%,#a1c4fd 70%,#6c5ce7)}
+.rollup-connector{text-align:center;font-size:11px;color:#bbb;margin:10px 0 12px;letter-spacing:.02em}
+.entries-section{flex:1;min-height:0}
+.mode-tags{display:flex;gap:10px;margin-top:12px}.mode-tag{padding:8px 18px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer}
+.past-entry{background:#f9f9f9;padding:16px;border-radius:10px;margin-bottom:12px;line-height:1.5;font-size:14px;color:#555}
+.entry-list{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.entry-row{display:flex;gap:12px;align-items:flex-start;background:#f9f9f9;padding:12px 14px;border-radius:10px}
+.entry-dot{width:28px;height:28px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.entry-dot-trust{background:radial-gradient(circle at 30% 30%,#ffeaa7,#f8b195 55%,#e17055)}
+.entry-dot-patience{background:radial-gradient(circle at 30% 30%,#dfe6fd,#a1c4fd 55%,#6c5ce7)}
+.entry-dot-clarity{background:radial-gradient(circle at 30% 30%,#e8f5e9,#c2e9a0 55%,#81c784)}
+.entry-dot-mix{background:radial-gradient(circle at 20% 20%,#ffeaa7,#f8b195 40%,#a1c4fd 70%,#6c5ce7)}
+.entry-body{flex:1;min-width:0}
+.entry-date{font-size:11px;color:#aaa;margin-bottom:4px}
+.entry-snippet{font-size:13px;line-height:1.45;color:#555;margin-bottom:6px}
+.entry-tags{display:flex;flex-wrap:wrap;gap:6px}
+.entry-tag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;color:#555;background:#eee}
+.entry-tag-trust{background:#fde8df;color:#b85c38}
+.entry-tag-patience{background:#e3ebfd;color:#4a6fa5}
+.entry-tag-clarity{background:#e5f2dc;color:#5a7a42}
+.pattern-legend{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 14px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#888}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+</style></head><body>
+<div class="prototype-shell">
+<div class="flow-switcher">
+	<a href="flow1.html" class="flow-btn">Flow 1 · Onboarding</a>
+	<a href="flow2.html" class="flow-btn active">Flow 2 · Returning</a>
+	<a href="flow3_facilitator_guide.html" class="flow-btn">Flow 3 · Guide</a>
+</div>
+<div class="prototype-nav">
+<button class="slide-arrow slide-prev" onclick="navPrev()" aria-label="Previous screen">←</button>
+<div class="phone-frame">
+<span class="slide-counter" id="slide-counter"></span>
+
+<!-- H2-1 Home (Returner) -->
+<div id="h2-1" class="screen active has-app-nav">
+	<h1>Welcome Back,</h1><p>Emma 👋</p><br>
+	<h3>Your Next Gathering</h3>
+	<p class="d" style="font-size:12px;color:#999;margin-bottom:8px">You have one step left to be fully prepped!</p>
+	<div class="card">
+		<div style="display:flex;justify-content:space-between;margin-bottom:8px"><b style="font-size:18px">Session 3</b></div>
+		<div class="progress-bg"><div class="progress-fill2" style="width:60%"></div></div>
+		<button class="btn btn-dark btn-small">Finish Pre-Work</button>
+	</div>
+	<div class="card">
+		<b style="font-size:17px;margin-bottom:4px;display:block">Your Patterns</b>
+		<p class="d" style="font-size:13px;margin-bottom:6px">Trust has shown up most over the last 30 days.</p>
+		<div class="hm-grid"><div class="hm-block2 hm-1">Tru</div><div class="hm-block2 hm-2">Pat</div><div class="hm-block2 hm-3">Cla</div></div>
+		<button onclick="show('h2-2')" class="btn btn-light btn-small" style="margin-top:8px">View Full Map →</button>
+	</div>
+</div>
+
+<!-- H2-2 Full Heat Map -->
+<div id="h2-2" class="screen">
+	<button onclick="show('h2-1')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Home</button>
+	<h1>Your Patterns.</h1><p class="d" style="font-size:13px;margin-bottom:14px">Themes emerging from all your past KRL exercises over the last 30 days.</p>
+	<div style="display:flex;gap:8px;margin-bottom:14px"><input type="text" value="Last 30 Days" style="flex:1;padding:10px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;background:white"></div>
+	<div class="pattern-rollup">
+		<div class="rollup-label">Pattern map — entries roll up here</div>
+		<div class="hm-full-grid">
+			<div class="hf-b hf-b-trust">
+				<span style="font-size:15px;line-height:1.3">Trust & Surrender</span>
+				<span class="hf-b-sub">7 entries</span>
+				<div class="rollup-dots">
+					<span class="rollup-dot rollup-dot-trust"></span><span class="rollup-dot rollup-dot-trust"></span><span class="rollup-dot rollup-dot-trust"></span><span class="rollup-dot rollup-dot-mix"></span><span class="rollup-dot rollup-dot-trust"></span><span class="rollup-dot rollup-dot-trust"></span><span class="rollup-dot rollup-dot-trust"></span>
+				</div>
+			</div>
+			<div class="hf-b hf-b-patience">
+				<span>Patience</span>
+				<span class="hf-b-sub">2 entries</span>
+				<div class="rollup-dots"><span class="rollup-dot rollup-dot-patience"></span><span class="rollup-dot rollup-dot-patience"></span></div>
+			</div>
+			<div class="hf-b hf-b-clarity">
+				<span>Clarity</span>
+				<span class="hf-b-sub">2 entries</span>
+				<div class="rollup-dots"><span class="rollup-dot rollup-dot-clarity"></span><span class="rollup-dot rollup-dot-clarity"></span></div>
+			</div>
+		</div>
+		<div class="pattern-legend">
+			<span class="legend-item"><span class="legend-dot" style="background:#f8b195"></span>Trust</span>
+			<span class="legend-item"><span class="legend-dot" style="background:#a1c4fd"></span>Patience</span>
+			<span class="legend-item"><span class="legend-dot" style="background:#c2e9a0"></span>Clarity</span>
+		</div>
+	</div>
+	<div class="rollup-connector">↑ each entry below adds to the map</div>
+	<div class="entries-section">
+	<b style="font-size:15px;margin-bottom:10px;display:block">Recent entries</b>
+	<div class="entry-list">
+		<div class="entry-row">
+			<div class="entry-dot entry-dot-trust"></div>
+			<div class="entry-body">
+				<div class="entry-date">Oct 24</div>
+				<div class="entry-snippet">"I noticed my instinct was to rush… something shifted when I stopped."</div>
+				<div class="entry-tags"><span class="entry-tag entry-tag-trust">Trust ×3</span><span class="entry-tag entry-tag-patience">Patience ×1</span></div>
+			</div>
+		</div>
+		<div class="entry-row">
+			<div class="entry-dot entry-dot-patience"></div>
+			<div class="entry-body">
+				<div class="entry-date">Oct 18</div>
+				<div class="entry-snippet">"Waiting felt uncomfortable… but I stayed with it."</div>
+				<div class="entry-tags"><span class="entry-tag entry-tag-patience">Patience ×2</span></div>
+			</div>
+		</div>
+		<div class="entry-row">
+			<div class="entry-dot entry-dot-mix"></div>
+			<div class="entry-body">
+				<div class="entry-date">Oct 12</div>
+				<div class="entry-snippet">"Stepping back, the situation looked different."</div>
+				<div class="entry-tags"><span class="entry-tag entry-tag-trust">Trust ×2</span><span class="entry-tag entry-tag-clarity">Clarity ×1</span></div>
+			</div>
+		</div>
+		<div class="entry-row">
+			<div class="entry-dot entry-dot-clarity"></div>
+			<div class="entry-body">
+				<div class="entry-date">Oct 5</div>
+				<div class="entry-snippet">"Lorem ipsum — vague entry snippet for wireframe."</div>
+				<div class="entry-tags"><span class="entry-tag entry-tag-clarity">Clarity ×2</span></div>
+			</div>
+		</div>
+	</div>
+	<button class="btn btn-dark" style="margin-top:16px;flex-shrink:0">Do Another KRL →</button>
+	<div style="height:20px"></div>
+	</div>
+</div>
+
+<nav class="app-nav">
+	<button class="app-nav-item active" data-tab="today" onclick="appTab('today')"><span class="app-nav-icon">⌂</span>Today</button>
+	<button class="app-nav-item" data-tab="practice" onclick="appTab('practice')"><span class="app-nav-icon">◎</span>Practice</button>
+	<button class="app-nav-item" data-tab="patterns" onclick="appTab('patterns')"><span class="app-nav-icon">▦</span>Patterns</button>
+	<button class="app-nav-item" data-tab="guide" onclick="appTab('guide')"><span class="app-nav-icon">☰</span>Guide</button>
+</nav>
+
+</div>
+
+<button class="slide-arrow slide-next" onclick="navNext()" aria-label="Next screen">→</button>
+</div>
+</div>
+<script>
+const screens=['h2-1','h2-2'];
+let current=0;
+
+function setAppNavActive(tab){
+	document.querySelectorAll('.app-nav-item').forEach(item=>{
+		item.classList.toggle('active',item.dataset.tab===tab);
+	});
+}
+
+function show(id){
+	document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+	document.getElementById(id).classList.add('active');
+	const idx=screens.indexOf(id);
+	if(idx!==-1)current=idx;
+	if(id==='h2-1')setAppNavActive('today');
+	else if(id==='h2-2')setAppNavActive('patterns');
+	updateNav();
+}
+function appTab(tab){
+	if(tab==='today')show('h2-1');
+	else if(tab==='practice')window.location.href='flow1.html';
+	else if(tab==='patterns')show('h2-2');
+	else if(tab==='guide')window.location.href='flow3_facilitator_guide.html';
+}
+function navNext(){if(current<screens.length-1)show(screens[current+1]);}
+function navPrev(){if(current>0)show(screens[current-1]);}
+function updateNav(){
+	document.querySelector('.slide-prev').disabled=current===0;
+	document.querySelector('.slide-next').disabled=current===screens.length-1;
+	document.getElementById('slide-counter').textContent=(current+1)+' / '+screens.length;
+}
+document.addEventListener('keydown',e=>{
+	if(e.key==='ArrowRight')navNext();
+	if(e.key==='ArrowLeft')navPrev();
+});
+setAppNavActive('today');
+updateNav();
+</script>
+</body></html>
