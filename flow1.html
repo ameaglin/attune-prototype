@@ -151,23 +151,115 @@ p.desc { font-size: 15px; color: #666; line-height: 1.55; margin-bottom: 22px; }
 	<button onclick="show('s5')" class="btn btn-dark">Create Account</button>
 <div style="height:40px"></div></div>
 
-<!-- S5 Home -->
+<!-- S5 Free Home (no Circle yet) -->
 <div id="s5" class="screen has-app-nav">
+	<h1>Welcome 👋</h1>
+	<p class="desc" style="margin-bottom:18px;">Start with a personal practice anytime — or explore the Circle Experience when you're ready.</p>
+
+	<div class="card" onclick="startPersonalPractice()">
+		<b style="font-size:17px;display:block;margin-bottom:6px;">Personal Practice</b>
+		<p class="desc" style="font-size:13px;margin-bottom:10px;">A short warm-up and Attunement Exercise you can do on your own.</p>
+		<button onclick="event.stopPropagation();startPersonalPractice()" class="btn btn-dark btn-small">Begin Practice</button>
+	</div>
+
+	<div class="card" onclick="show('s5c')">
+		<b style="font-size:17px;display:block;margin-bottom:6px;">What is the Circle Experience?</b>
+		<p class="desc" style="font-size:13px;margin-bottom:10px;">See how Circles work — shared learning, live gatherings, and growing together.</p>
+		<button onclick="event.stopPropagation();show('s5c')" class="btn btn-light btn-small">Learn More</button>
+	</div>
+
+	<div class="card" onclick="show('s5p')" style="border:1.5px solid #ddd;">
+		<b style="font-size:17px;display:block;margin-bottom:6px;">Get the Circle Experience</b>
+		<p class="desc" style="font-size:13px;margin-bottom:10px;">Like a workbook for your group — unlock prep, gatherings, and the Facilitator Guide.</p>
+		<button onclick="event.stopPropagation();show('s5p')" class="btn btn-dark btn-small">Purchase Circle</button>
+	</div>
+
+	<div class="card" style="opacity:0.5;cursor:default;">
+		<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+			<h3 style="font-size:16px;margin:0">Your Growth Map</h3>
+			<span style="font-size:11px;font-weight:600;color:#888;background:#eee;padding:3px 8px;border-radius:20px;">Circle</span>
+		</div>
+		<p class="desc" style="font-size:13px;margin-bottom:0">Part of the Circle Experience — unlocks with purchase, then fills in as you reflect.</p>
+	</div>
+</div>
+
+<!-- S5C Circle Explainer (classroom-style) -->
+<div id="s5c" class="screen has-app-nav">
+	<button onclick="show('s5')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Home</button>
+	<h1>The Circle Experience</h1>
+	<p class="desc">A guided small-group journey — think of it like a workbook you work through together.</p>
+	<p class="classroom-progress-text" id="circle-explainer-progress"></p>
+	<div id="circle-explainer-list"></div>
+	<button onclick="show('s5p')" class="btn btn-dark" style="margin-top:auto;">Get the Circle Experience →</button>
+	<div style="height:20px"></div>
+</div>
+
+<!-- S5Cv Circle Explainer Video (full-screen) -->
+<div id="s5cv" class="screen" style="background:#111;padding:0;">
+	<div style="display:flex;justify-content:flex-end;padding:16px;flex-shrink:0;">
+		<button onclick="closeCircleExplainerVideo()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:36px;height:36px;border-radius:50%;font-size:15px;cursor:pointer;">✕</button>
+	</div>
+	<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#666;font-size:14px;text-align:center;padding:0 20px;">[ Video Playing · <span id="circle-video-duration"></span> ]</div>
+	<div style="padding:20px 24px 32px;flex-shrink:0;">
+		<h3 id="circle-video-title" style="color:white;font-size:18px;margin-bottom:6px;"></h3>
+		<p id="circle-video-desc" style="color:#999;font-size:13px;line-height:1.55;"></p>
+	</div>
+</div>
+
+<!-- S5P Purchase Circle -->
+<div id="s5p" class="screen has-app-nav">
+	<button onclick="show('s5')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Home</button>
+	<h1>Get Circle</h1>
+	<p class="desc">Purchase the Circle Experience for your group — like picking up a workbook you'll move through together over 4 sessions.</p>
+	<div class="card" style="cursor:default;margin-bottom:16px;">
+		<b style="font-size:18px;display:block;margin-bottom:8px;">Circle Experience</b>
+		<p class="desc" style="font-size:13px;margin-bottom:12px;">Includes session prep, classroom teaching, live gathering materials, and the Facilitator Guide.</p>
+		<ul style="font-size:13px;color:#555;line-height:1.7;padding-left:18px;margin-bottom:0;">
+			<li>4 guided sessions</li>
+			<li>Prep for each live gathering</li>
+			<li>Facilitator Guide for whoever leads</li>
+		</ul>
+	</div>
+	<button onclick="purchaseCircle()" class="btn btn-dark">Purchase Circle</button>
+	<div style="height:20px"></div>
+</div>
+
+<!-- S5G Guide Locked -->
+<div id="s5g" class="screen has-app-nav">
+	<button onclick="goHome()" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Home</button>
+	<div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+		<div style="width:64px;height:64px;border-radius:50%;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:24px;color:#aaa;margin-bottom:20px;">☰</div>
+		<h1 style="font-size:26px;">Facilitator Guide</h1>
+		<p class="desc">The Facilitator Guide is part of the Circle Experience. Purchase Circle to unlock tools for leading your live gathering.</p>
+		<button onclick="show('s5p')" class="btn btn-dark">Purchase Circle</button>
+		<button onclick="goHome()" class="btn btn-light" style="margin-top:10px;">Not now</button>
+	</div>
+	<div style="height:20px"></div>
+</div>
+
+<!-- S5B Paid Home (unprepped) -->
+<div id="s5b" class="screen has-app-nav">
 	<h1>Welcome 👋</h1><br>
-	<h3>Your Next Gathering</h3><p class="desc" style="font-size:12px;color:#999;margin-bottom:8px;">Get ready for Session 1.</p>
-	<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b style="font-size:18px">Session 1</b></div>
-	<div class="progress-bg"><div class="progress-fill" style="width:15%"></div></div>
-	<button onclick="show('s6')" class="btn btn-dark btn-small">Let's Get Prepped</button></div>
-	<div class="card" style="opacity:0.5"><h3 style="font-size:16px">Your Growth Map</h3><p class="desc" style="font-size:13px;margin-bottom:0">It will appear after your first few reflections.</p></div>
-	<button onclick="show('s8w')" class="btn btn-light" style="margin-top:16px;">Or jump to Personal Practice →</button>
+	<h3>Prep for Your Live Gathering</h3>
+	<p class="desc" style="font-size:12px;color:#999;margin-bottom:8px;">Get ready for Session 1.</p>
+	<div class="card">
+		<div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b style="font-size:18px">Session 1</b></div>
+		<div class="progress-bg"><div class="progress-fill" style="width:15%"></div></div>
+		<button onclick="show('s6')" class="btn btn-dark btn-small">Let's Get Prepped</button>
+	</div>
+	<div class="card" style="opacity:0.5;cursor:default;">
+		<h3 style="font-size:16px">Your Growth Map</h3>
+		<p class="desc" style="font-size:13px;margin-bottom:0">It will appear after your first few reflections.</p>
+	</div>
+	<button onclick="startPersonalPractice()" class="btn btn-light" style="margin-top:16px;">Or jump to Personal Practice →</button>
 </div>
 
 <!-- S6 Prep Checklist -->
 <div id="s6" class="screen has-app-nav">
-	<button onclick="show('s5')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Home</button>
+	<button onclick="show('s5b')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Home</button>
 	<h1>Your Prep Checklist</h1><p class="desc" style="font-size:13px;margin-bottom:18px;">Complete these three steps to be ready for the gathering.</p>
 	<div class="card chk-item" onclick="show('s7')"><div class="chk-circle"></div><div><b style="font-size:17px">Classroom</b><p class="desc" style="font-size:12px;margin:0">Bite-sized learning chunk.</p></div></div>
-	<div class="card chk-item" onclick="show('s8w')"><div class="chk-circle"></div><div><b style="font-size:17px">Attunement Exercise</b><p class="desc" style="font-size:12px;margin:0">Complete your Attunement Exercise.</p></div></div>
+	<div class="card chk-item" onclick="startPrepExercise()"><div class="chk-circle"></div><div><b style="font-size:17px">Attunement Exercise</b><p class="desc" style="font-size:12px;margin:0">Complete your Attunement Exercise.</p></div></div>
 	<div class="card chk-item" onclick="show('s9')"><div class="chk-circle"></div><div><b style="font-size:17px">Reflect & Prepare</b><p class="desc" style="font-size:12px;margin:0">Take a moment to reflect on what you learned.</p></div></div>
 	<div style="height:40px"></div></div>
 
@@ -177,7 +269,7 @@ p.desc { font-size: 15px; color: #666; line-height: 1.55; margin-bottom: 22px; }
 	<h1>Classroom</h1><p class="desc">This week's teaching, in a few short videos.</p>
 	<p class="classroom-progress-text" id="classroom-progress"></p>
 	<div id="classroom-list"></div>
-	<button onclick="show('s8w')" class="btn btn-dark" style="margin-top:auto;">Continue to Attunement Exercise →</button>
+	<button onclick="startPrepExercise()" class="btn btn-dark" style="margin-top:auto;">Continue to Attunement Exercise →</button>
 	<div style="height:20px"></div></div>
 
 <!-- S7 Classroom Video (full-screen) -->
@@ -194,7 +286,7 @@ p.desc { font-size: 15px; color: #666; line-height: 1.55; margin-bottom: 22px; }
 
 <!-- S8 Warm-Up -->
 <div id="s8w" class="screen has-app-nav">
-	<button onclick="show('s7')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Prep</button>
+	<button id="warmup-back" onclick="backFromWarmup()" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back</button>
 	<h1>Warm-Up</h1><p class="desc" style="font-size:13px;">A short warm-up before your Attunement Exercise. Just listen or read — no need to respond.</p>
 	<div class="seg-toggle">
 		<button class="seg-toggle-btn active" onclick="switchWarmupMode(this,'audio')">Listen</button>
@@ -217,7 +309,7 @@ p.desc { font-size: 15px; color: #666; line-height: 1.55; margin-bottom: 22px; }
 
 <!-- S8 Attunement Exercise -->
 <div id="s8" class="screen has-app-nav">
-	<button onclick="show('s8w')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Prep</button>
+	<button onclick="show('s8w')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;margin-bottom:20px;text-align:left;">← Back to Warm-Up</button>
 	<h1>Attunement Exercise</h1>
 	<div class="seg-toggle">
 		<button class="seg-toggle-btn" onclick="setExerciseMode(this,'practice')">Practice</button>
@@ -229,7 +321,7 @@ p.desc { font-size: 15px; color: #666; line-height: 1.55; margin-bottom: 22px; }
 	</div>
 	<div class="card" style="padding:22px;border-left:4px solid #333"><p class="desc" style="font-size:17px;line-height:1.5;margin-bottom:0;font-weight:600">"What do you notice when you step back and look at this situation from a distance?"</p></div>
 	<div style="border-top:1px solid #eee;margin-top:18px;padding-top:14px;display:flex;gap:9px;"><button onclick="show('s8r')" class="btn btn-dark" style="width:auto;padding:13px 20px;">Record</button><button class="btn btn-light">Write ✍️</button></div>
-	<button onclick="show('s9')" class="btn btn-dark" style="margin-top:auto;">Save & Continue →</button>
+	<button id="exercise-continue" onclick="continueFromExercise()" class="btn btn-dark" style="margin-top:auto;">Save & Continue →</button>
 	<div style="height:20px"></div></div>
 
 <!-- S8 Record (voice to text) -->
@@ -270,7 +362,7 @@ p.desc { font-size: 15px; color: #666; line-height: 1.55; margin-bottom: 22px; }
 		<p class="desc" style="font-size:12px;margin:12px 0 0;color:#666;">All prep steps complete. You're ready for the gathering.</p>
 	</div>
 	<div class="card" style="opacity:0.5"><h3 style="font-size:16px">Your Growth Map</h3><p class="desc" style="font-size:13px;margin-bottom:0">It will appear after your first few reflections.</p></div>
-	<button onclick="show('s8w')" class="btn btn-light" style="margin-top:16px;">Jump to Personal Practice →</button>
+	<button onclick="startPersonalPractice()" class="btn btn-light" style="margin-top:16px;">Jump to Personal Practice →</button>
 </div>
 
 <nav class="app-nav">
@@ -287,8 +379,11 @@ p.desc { font-size: 15px; color: #666; line-height: 1.55; margin-bottom: 22px; }
 </div>
 
 <script>
-const screens = ['s1','s2','s3','s4','s5','s6','s7','s8w','s8','s8r','s9','s10','s11'];
+const screens = ['s1','s2','s3','s4','s5','s5c','s5p','s5b','s6','s7','s8w','s8','s8r','s9','s10','s11'];
 let current = 0;
+let hasCircle = false;
+let practiceOnly = false;
+let prepDone = false;
 
 const classroomChunks = [
 	{ title: "What Is Attunement?", duration: "2 min", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent blandit." },
@@ -298,6 +393,15 @@ const classroomChunks = [
 ];
 let classroomWatched = new Set();
 let activeClassroomIdx = null;
+
+const circleExplainerChunks = [
+	{ title: "What is a Circle?", duration: "2 min", desc: "A small group that moves through four guided sessions together — like a workbook you share." },
+	{ title: "Personal Prep + Live Gathering", duration: "2 min", desc: "Between gatherings you prep on your own. Then you meet in person for a 60-minute facilitated session." },
+	{ title: "Who Facilitates?", duration: "1.5 min", desc: "Anyone in the group can lead using the Facilitator Guide — rotating leadership is part of the design." },
+	{ title: "Is Circle right for you?", duration: "1.5 min", desc: "If you want shared reflection beyond solo practice, Circle is the next step — purchase unlocks prep and gathering tools." }
+];
+let circleExplainerWatched = new Set();
+let activeCircleExplainerIdx = null;
 
 function renderClassroomList() {
 	const el = document.getElementById('classroom-list');
@@ -315,6 +419,34 @@ function renderClassroomList() {
 	document.getElementById('classroom-progress').textContent = `${classroomWatched.size} of ${classroomChunks.length} watched`;
 }
 
+function renderCircleExplainerList() {
+	const el = document.getElementById('circle-explainer-list');
+	el.innerHTML = circleExplainerChunks.map((c, i) => {
+		const isWatched = circleExplainerWatched.has(i);
+		return `
+		<div class="classroom-item${isWatched ? ' watched' : ''}" onclick="openCircleExplainerVideo(${i})">
+			<div class="classroom-play">${isWatched ? '✓' : '▶'}</div>
+			<div style="flex:1;">
+				<b style="font-size:15px;display:block;">${c.title}</b>
+				<span class="classroom-sub">${isWatched ? 'Watched' : c.duration}</span>
+			</div>
+		</div>`;
+	}).join('');
+	document.getElementById('circle-explainer-progress').textContent = `${circleExplainerWatched.size} of ${circleExplainerChunks.length} watched`;
+}
+
+function hideChrome() {
+	document.querySelectorAll('.slide-arrow').forEach(a => a.style.visibility = 'hidden');
+	document.getElementById('slide-counter').style.visibility = 'hidden';
+	document.querySelector('.app-nav').style.display = 'none';
+}
+
+function showChrome() {
+	document.querySelectorAll('.slide-arrow').forEach(a => a.style.visibility = 'visible');
+	document.getElementById('slide-counter').style.visibility = 'visible';
+	document.querySelector('.app-nav').style.display = '';
+}
+
 function openClassroomVideo(idx) {
 	activeClassroomIdx = idx;
 	const c = classroomChunks[idx];
@@ -322,9 +454,7 @@ function openClassroomVideo(idx) {
 	document.getElementById('classroom-video-desc').textContent = c.desc;
 	document.getElementById('classroom-video-duration').textContent = c.duration;
 	show('s7v');
-	document.querySelectorAll('.slide-arrow').forEach(a => a.style.visibility = 'hidden');
-	document.getElementById('slide-counter').style.visibility = 'hidden';
-	document.querySelector('.app-nav').style.display = 'none';
+	hideChrome();
 }
 
 function closeClassroomVideo() {
@@ -334,9 +464,74 @@ function closeClassroomVideo() {
 	}
 	renderClassroomList();
 	show('s7');
-	document.querySelectorAll('.slide-arrow').forEach(a => a.style.visibility = 'visible');
-	document.getElementById('slide-counter').style.visibility = 'visible';
-	document.querySelector('.app-nav').style.display = '';
+	showChrome();
+}
+
+function openCircleExplainerVideo(idx) {
+	activeCircleExplainerIdx = idx;
+	const c = circleExplainerChunks[idx];
+	document.getElementById('circle-video-title').textContent = c.title;
+	document.getElementById('circle-video-desc').textContent = c.desc;
+	document.getElementById('circle-video-duration').textContent = c.duration;
+	show('s5cv');
+	hideChrome();
+}
+
+function closeCircleExplainerVideo() {
+	if (activeCircleExplainerIdx !== null) {
+		circleExplainerWatched.add(activeCircleExplainerIdx);
+		activeCircleExplainerIdx = null;
+	}
+	renderCircleExplainerList();
+	show('s5c');
+	showChrome();
+}
+
+function updateWarmupBackLabel() {
+	const btn = document.getElementById('warmup-back');
+	if (!btn) return;
+	btn.textContent = practiceOnly ? '← Back to Home' : '← Back to Prep';
+}
+
+function updateExerciseContinueLabel() {
+	const btn = document.getElementById('exercise-continue');
+	if (!btn) return;
+	btn.textContent = practiceOnly ? 'Save & Finish →' : 'Save & Continue →';
+}
+
+function startPersonalPractice() {
+	practiceOnly = true;
+	updateWarmupBackLabel();
+	updateExerciseContinueLabel();
+	show('s8w');
+}
+
+function startPrepExercise() {
+	practiceOnly = false;
+	updateWarmupBackLabel();
+	updateExerciseContinueLabel();
+	show('s8w');
+}
+
+function backFromWarmup() {
+	if (practiceOnly) goHome();
+	else show('s6');
+}
+
+function continueFromExercise() {
+	if (practiceOnly) goHome();
+	else show('s9');
+}
+
+function goHome() {
+	if (!hasCircle) show('s5');
+	else if (prepDone) show('s11');
+	else show('s5b');
+}
+
+function purchaseCircle() {
+	hasCircle = true;
+	show('s5b');
 }
 
 function switchWarmupMode(btn, mode) {
@@ -366,19 +561,44 @@ function show(id) {
 	document.getElementById(id).classList.add('active');
 	const idx = screens.indexOf(id);
 	if (idx !== -1) current = idx;
-	if (id === 's5' || id === 's11') setAppNavActive('today');
+
+	if (id === 's5b' || id === 's6' || id === 's7' || id === 's9' || id === 's10' || id === 's11') {
+		hasCircle = true;
+	}
+	if (id === 's11' || id === 's10') prepDone = true;
+	if (id === 's5') {
+		hasCircle = false;
+		prepDone = false;
+	}
+
+	if (id === 's5g') setAppNavActive('guide');
+	else if (id === 's5' || id === 's5b' || id === 's5c' || id === 's5p' || id === 's11') setAppNavActive('today');
 	else if (id === 's8w' || id === 's8' || id === 's8r') setAppNavActive('practice');
+
+	if (id === 's8w') {
+		updateWarmupBackLabel();
+		updateExerciseContinueLabel();
+	}
 	updateNav();
 }
 
 function appTab(tab) {
-	if (tab === 'today') show('s5');
-	else if (tab === 'practice') show('s8w');
+	if (tab === 'today') goHome();
+	else if (tab === 'practice') startPersonalPractice();
 	else if (tab === 'patterns') window.location.href = 'flow2.html';
-	else if (tab === 'guide') window.location.href = 'flow3_facilitator_guide.html';
+	else if (tab === 'guide') {
+		if (hasCircle) window.location.href = 'flow3_facilitator_guide.html';
+		else show('s5g');
+	}
 }
 
-function navNext() { if (current < screens.length - 1) show(screens[current + 1]); }
+function navNext() {
+	if (current >= screens.length - 1) return;
+	const nextId = screens[current + 1];
+	if (nextId === 's8w' && screens[current] === 's7') practiceOnly = false;
+	if (nextId === 's5b') hasCircle = true;
+	show(nextId);
+}
 function navPrev() { if (current > 0) show(screens[current - 1]); }
 
 function updateNav() {
@@ -394,6 +614,7 @@ document.addEventListener('keydown', e => {
 
 setAppNavActive('today');
 renderClassroomList();
+renderCircleExplainerList();
 updateNav();
 </script>
 </body>
