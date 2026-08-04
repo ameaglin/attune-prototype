@@ -34,7 +34,6 @@
 .app-nav-item.active { color: #111; font-weight: 600; }
 .app-nav-icon { font-size: 17px; line-height: 1; }
 .screen.has-app-nav { padding-bottom: 60px; }
-#guide-agenda, #guide-detail { padding: 0; }
 
 /* Facilitator guide */
 .guide-header { padding: 50px 20px 12px; background: white; border-bottom: 1px solid #e8e8e8; flex-shrink: 0; }
@@ -66,4 +65,57 @@
 .guide-section-nav { padding: 12px 20px; border-top: 1px solid #eee; display: flex; gap: 10px; flex-shrink: 0; background: white; }
 .guide-sec-btn { flex: 1; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; border: none; font-family: inherit; }
 .guide-sec-btn.gray { background: #f4f4f5; color: #8e8e93; }
+.guide-sec-btn.gray:disabled { opacity: 0.4; cursor: default; }
 .guide-sec-btn.dark { background: #333; color: white; }
+
+/* Facilitator guide v2: session picker, tabbed pieces, live mode */
+.guide-scroll { padding: 8px 16px 16px; flex: 1; overflow-y: auto; }
+.guide-mode.compact { margin: 0 0 10px; }
+
+.fac-note { background: #fdf6e8; border: 1px solid #f0e1b8; border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+.fac-note-header { display: flex; align-items: center; gap: 8px; padding: 12px 14px; cursor: pointer; }
+.fac-note-icon { font-size: 15px; }
+.fac-note-title { flex: 1; font-size: 13px; font-weight: 700; color: #8a6d20; }
+.fac-note-chevron { font-size: 11px; color: #b0954a; transition: transform 0.2s; display: inline-block; }
+.fac-note.collapsed .fac-note-chevron { transform: rotate(-90deg); }
+.fac-note.collapsed .fac-note-body { display: none; }
+.fac-note-body { padding: 0 14px 14px; font-size: 13px; line-height: 1.6; color: #7a6420; }
+.fac-note-body ul { padding-left: 18px; margin: 6px 0; }
+.fac-note-body li { margin-bottom: 4px; }
+
+.start-live-btn { display: block; width: 100%; background: #2f8f4e; color: white; border: none; border-radius: 10px; padding: 15px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 20px; font-family: inherit; }
+.start-live-btn:hover { background: #267a41; }
+
+.section-group { margin-bottom: 16px; }
+.section-group-title { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #999; padding: 0 12px 6px; }
+.section-group-range { font-weight: 600; color: #b3b3b8; text-transform: none; letter-spacing: 0; }
+
+.tab-card { background: #f9f9fb; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.tab-card-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: #222; }
+.key-points-list { padding-left: 18px; font-size: 14px; line-height: 1.7; color: #444; }
+.key-points-list li { margin-bottom: 5px; }
+.read-aloud-tag { font-style: italic; font-size: 12px; color: #8e8e93; margin-bottom: 8px; display: block; }
+.script-text { font-size: 14px; line-height: 1.7; color: #333; }
+
+.live-top { display: flex; justify-content: space-between; align-items: flex-start; padding: 50px 18px 12px; background: white; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.live-session-label { font-size: 13px; font-weight: 700; color: #333; }
+.live-timer { font-size: 12px; color: #999; margin-top: 3px; }
+.live-exit-btn { background: #f4f4f5; border: none; border-radius: 8px; padding: 8px 12px; font-size: 12px; font-weight: 600; color: #666; cursor: pointer; font-family: inherit; }
+
+.live-progress { padding: 14px 18px 0; flex-shrink: 0; background: white; }
+.live-progress-bar { display: flex; gap: 3px; height: 8px; border-radius: 5px; overflow: hidden; }
+.live-seg { background: #e5e5ea; cursor: pointer; }
+.live-seg.done { background: #6fcf7e; }
+.live-seg.current { background: #4a90e2; }
+.live-progress-labels { display: flex; gap: 3px; margin-top: 4px; }
+.live-seg-label { font-size: 10px; color: #b3b3b8; }
+.live-seg-label.done { color: #4d9d5c; font-weight: 600; }
+.live-seg-label.current { color: #4a90e2; font-weight: 700; }
+
+.live-current-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: white; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.live-current-name { font-size: 19px; font-weight: 700; }
+.live-current-meta { font-size: 12px; color: #999; margin-top: 2px; }
+.live-nav { display: flex; gap: 8px; }
+.live-nav-btn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #ddd; background: white; font-size: 17px; color: #333; cursor: pointer; }
+.live-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.live-body { flex: 1; overflow-y: auto; padding: 14px 16px 30px; }

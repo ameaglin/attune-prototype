@@ -30,59 +30,81 @@ body { background: #f5f5f7; display: flex; justify-content: center; align-items:
 <div class="phone-frame">
 <span class="slide-counter" id="slide-counter"></span>
 
-<!-- Guide Agenda -->
-<div id="guide-agenda" class="screen active has-app-nav">
- <div class="guide-header">
-  <h3>Facilitator Guide</h3>
-  <p>Live Gathering · Available to everyone — encourage others to lead.</p>
- </div>
- <div class="guide-agenda" id="guide-agenda-list"></div>
- <div class="guide-section-nav">
-  <button class="guide-sec-btn gray" disabled>Previous</button>
-  <button class="guide-sec-btn dark" onclick="openGuideSection(0)">Start Section →</button>
- </div>
+<!-- Session Picker -->
+<div id="guide-sessions" class="screen active has-app-nav">
+	<div class="guide-header">
+		<h3>Facilitator Guide</h3>
+		<p>Choose a session to view its Live Gathering guide.</p>
+	</div>
+	<div class="guide-scroll" id="session-list"></div>
 </div>
 
-<!-- Guide Detail -->
+<!-- Session Agenda -->
+<div id="guide-agenda" class="screen has-app-nav">
+	<div class="guide-detail-header">
+		<button class="guide-back" onclick="goSessionList()">←</button>
+		<div class="guide-detail-title" id="agenda-session-title"></div>
+	</div>
+	<div class="guide-scroll">
+		<div class="fac-note" id="fac-note">
+			<div class="fac-note-header" onclick="toggleFacNote()">
+				<span class="fac-note-icon">💡</span>
+				<span class="fac-note-title" id="fac-note-title-text"></span>
+				<span class="fac-note-chevron">▾</span>
+			</div>
+			<div class="fac-note-body" id="fac-note-body"></div>
+		</div>
+		<button class="start-live-btn" onclick="startLiveGathering()">▶ Start Live Gathering</button>
+		<div id="agenda-pieces"></div>
+	</div>
+</div>
+
+<!-- Piece Detail -->
 <div id="guide-detail" class="screen has-app-nav">
- <div class="guide-detail-header">
-  <button class="guide-back" onclick="goGuideAgenda()">←</button>
-  <div class="guide-badge" id="guide-num">1</div>
-  <div class="guide-detail-title" id="guide-title"></div>
- </div>
- <p style="font-size:13px;color:#999;padding:12px 20px 0;" id="guide-subtitle"></p>
- <div class="guide-mode">
-  <button class="guide-mode-btn active" onclick="switchGuideMode(this,'text')">Text</button>
-  <button class="guide-mode-btn" onclick="switchGuideMode(this,'audio')">Audio</button>
- </div>
- <div class="guide-body" id="guide-text"></div>
- <div class="guide-body" id="guide-audio" style="display:none;">
-  <div class="guide-block"><div class="label">Audio Guide</div>
-  <p>Listen along as you facilitate this section. Tap play when ready.</p></div>
-  <div class="guide-audio-box">
-   <div class="guide-audio-bars">
-    <div class="guide-audio-bar" style="height:12px;animation-delay:0s"></div>
-    <div class="guide-audio-bar" style="height:22px;animation-delay:0.2s"></div>
-    <div class="guide-audio-bar" style="height:16px;animation-delay:0.4s"></div>
-    <div class="guide-audio-bar" style="height:28px;animation-delay:0.6s"></div>
-    <div class="guide-audio-bar" style="height:18px;animation-delay:0.1s"></div>
-   </div>
-   <p>[ Tap to play facilitator audio ]</p>
-  </div>
-  <div class="guide-block" style="margin-top:12px;"><div class="label">While You Listen</div>
-  <p>Glance at key prompts on screen, or switch to Text for the full script.</p></div>
- </div>
- <div class="guide-section-nav">
-  <button class="guide-sec-btn gray" onclick="guidePrevSection()">← Previous</button>
-  <button class="guide-sec-btn dark" onclick="guideNextSection()">Next →</button>
- </div>
+	<div class="guide-detail-header">
+		<button class="guide-back" onclick="goGuideAgenda()">←</button>
+		<div class="guide-badge" id="guide-num">1</div>
+		<div class="guide-detail-title" id="guide-title"></div>
+	</div>
+	<p style="font-size:13px;color:#999;padding:12px 20px 0;" id="guide-subtitle"></p>
+	<div class="guide-scroll" id="guide-detail-body"></div>
+	<div class="guide-section-nav">
+		<button class="guide-sec-btn gray" onclick="detailPrev()">← Previous</button>
+		<button class="guide-sec-btn dark" onclick="detailNext()">Next →</button>
+	</div>
+</div>
+
+<!-- Live Facilitator Mode -->
+<div id="guide-live" class="screen">
+	<div class="live-top">
+		<div>
+			<div class="live-session-label" id="live-session-label"></div>
+			<div class="live-timer" id="live-timer">0:00 elapsed</div>
+		</div>
+		<button class="live-exit-btn" onclick="exitLiveGathering()">✕ Exit</button>
+	</div>
+	<div class="live-progress">
+		<div class="live-progress-bar" id="live-progress-bar"></div>
+		<div class="live-progress-labels" id="live-progress-labels"></div>
+	</div>
+	<div class="live-current-row">
+		<div>
+			<div class="live-current-name" id="live-current-name"></div>
+			<div class="live-current-meta" id="live-current-meta"></div>
+		</div>
+		<div class="live-nav">
+			<button class="live-nav-btn live-prev" onclick="livePrevSection()" aria-label="Previous section">‹</button>
+			<button class="live-nav-btn live-next" onclick="liveNextSection()" aria-label="Next section">›</button>
+		</div>
+	</div>
+	<div class="live-body" id="live-cards"></div>
 </div>
 
 <nav class="app-nav">
- <button class="app-nav-item" data-tab="today" onclick="appTab('today')"><span class="app-nav-icon">⌂</span>Today</button>
- <button class="app-nav-item" data-tab="practice" onclick="appTab('practice')"><span class="app-nav-icon">◎</span>Practice</button>
- <button class="app-nav-item" data-tab="patterns" onclick="appTab('patterns')"><span class="app-nav-icon">▦</span>Patterns</button>
- <button class="app-nav-item active" data-tab="guide" onclick="appTab('guide')"><span class="app-nav-icon">☰</span>Guide</button>
+	<button class="app-nav-item" data-tab="today" onclick="appTab('today')"><span class="app-nav-icon">⌂</span>Today</button>
+	<button class="app-nav-item" data-tab="practice" onclick="appTab('practice')"><span class="app-nav-icon">◎</span>Practice</button>
+	<button class="app-nav-item" data-tab="patterns" onclick="appTab('patterns')"><span class="app-nav-icon">▦</span>Patterns</button>
+	<button class="app-nav-item active" data-tab="guide" onclick="appTab('guide')"><span class="app-nav-icon">☰</span>Guide</button>
 </nav>
 
 </div>
@@ -92,33 +114,80 @@ body { background: #f5f5f7; display: flex; justify-content: center; align-items:
 
 <script src="shared-facilitator.js"></script>
 <script>
-const appScreens = ['guide-agenda'];
-const slideNav = createSlideNav(appScreens);
+const TOP_SLIDE_COUNT = sessions.length + 1; // session list + one agenda per session
+let topCurrent = 0;
+
+window.onTopSlide = function(idx) { topCurrent = idx; };
 
 function show(id) {
- document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
- document.getElementById(id).classList.add('active');
- setAppNavActive('guide');
- slideNav.syncFromShow(id);
+	document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+	document.getElementById(id).classList.add('active');
+	setAppNavActive('guide');
+	const immersive = id === 'guide-live';
+	document.querySelectorAll('.slide-arrow').forEach(a => a.style.visibility = (immersive || id === 'guide-detail') ? 'hidden' : 'visible');
+	document.getElementById('slide-counter').style.visibility = (immersive || id === 'guide-detail') ? 'hidden' : 'visible';
+	document.querySelector('.app-nav').style.display = immersive ? 'none' : '';
+	updateTopNav();
 }
 
 function appTab(tab) {
- if (tab === 'guide') goGuideAgenda();
- else if (tab === 'today') window.location.href = 'flow1.html';
- else if (tab === 'practice') window.location.href = 'flow1.html';
- else if (tab === 'patterns') window.location.href = 'flow2.html';
+	if (tab === 'guide') goSessionList();
+	else if (tab === 'today') window.location.href = 'flow1.html';
+	else if (tab === 'practice') window.location.href = 'flow1.html';
+	else if (tab === 'patterns') window.location.href = 'flow2.html';
 }
 
-function navNext() { slideNav.navNext(); }
-function navPrev() { slideNav.navPrev(); }
+function navNext() {
+	const active = document.querySelector('.screen.active').id;
+	if (active === 'guide-live') return liveNextSection();
+	if (active === 'guide-detail') return detailNext();
+	if (topCurrent < TOP_SLIDE_COUNT - 1) goToTopSlide(topCurrent + 1);
+}
+
+function navPrev() {
+	const active = document.querySelector('.screen.active').id;
+	if (active === 'guide-live') return livePrevSection();
+	if (active === 'guide-detail') return detailPrev();
+	if (topCurrent > 0) goToTopSlide(topCurrent - 1);
+}
+
+function goToTopSlide(idx) {
+	if (idx === 0) goSessionList();
+	else openSession(idx - 1);
+}
+
+function updateTopNav() {
+	const active = document.querySelector('.screen.active').id;
+	const prevBtn = document.querySelector('.slide-prev');
+	const nextBtn = document.querySelector('.slide-next');
+	const counter = document.getElementById('slide-counter');
+	if (active === 'guide-sessions' || active === 'guide-agenda') {
+		counter.textContent = (topCurrent + 1) + ' / ' + TOP_SLIDE_COUNT;
+		prevBtn.disabled = topCurrent === 0;
+		nextBtn.disabled = topCurrent === TOP_SLIDE_COUNT - 1;
+	} else {
+		prevBtn.disabled = false;
+		nextBtn.disabled = false;
+	}
+}
 
 document.addEventListener('keydown', e => {
- if (e.key === 'ArrowRight') navNext();
- if (e.key === 'ArrowLeft') navPrev();
+	if (e.key === 'ArrowRight') navNext();
+	if (e.key === 'ArrowLeft') navPrev();
+});
+
+let touchStartX = null;
+const liveScreen = document.getElementById('guide-live');
+liveScreen.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; });
+liveScreen.addEventListener('touchend', e => {
+	if (touchStartX === null) return;
+	const dx = e.changedTouches[0].clientX - touchStartX;
+	if (Math.abs(dx) > 50) { dx < 0 ? liveNextSection() : livePrevSection(); }
+	touchStartX = null;
 });
 
 initAppNav('guide');
-slideNav.updateSlideNav();
+updateTopNav();
 </script>
 </body>
 </html>
