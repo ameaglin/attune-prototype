@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attune — Round 2 Prototype</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+body { justify-content: center; }
+.landing { max-width: 420px; width: 100%; text-align: center; padding-top: 12px; }
+.landing p { margin-bottom: 28px; }
+.flow-list { display: flex; flex-direction: column; gap: 12px; }
+.flow-link { display: block; padding: 18px 20px; background: var(--surface); border: 1.5px solid var(--line-strong); border-radius: var(--r-card); text-decoration: none; color: var(--ink); text-align: left; transition: 0.15s; }
+.flow-link:hover { border-color: var(--faint); background: var(--surface-2); }
+.flow-link strong { display: block; font-size: 16px; margin-bottom: 4px; }
+.flow-link span { font-size: 13px; color: var(--muted); }
+.hint { margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="landing">
+	<h1 class="h1" style="margin-bottom:8px;">Attune Prototype — Round 2</h1>
+	<p class="body-text">Two full journeys through the new Home / Exercise / Explore / Connect navigation. Click a persona to explore — no login required.</p>
+	<div class="flow-list">
+		<a href="paid-circle.html" class="flow-link">
+			<strong>&#9733; Paid &amp; Circle member</strong>
+			<span>Session 1 prep, the full Attunement Exercise + Patterns, Classroom, and the Facilitator Guide.</span>
+		</a>
+		<a href="free.html" class="flow-link">
+			<strong>&#9829; Not paid &amp; not in a Circle</strong>
+			<span>The full Attunement Exercise on its own, with locked previews of Patterns, Explore, and Connect.</span>
+		</a>
+	</div>
+	<p class="caption hint">Wireframe only — grayscale design system, placeholder copy. <a href="../index.html" style="color:var(--muted);">&larr; Round 1 archive</a></p>
+</div>
+</body>
+</html>

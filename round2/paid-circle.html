@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attune Round 2 — Paid &amp; Circle</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div class="prototype-shell">
+<div class="round2-switcher">
+	<a href="index.html" class="round2-btn">&larr; Round 2 Home</a>
+	<a href="paid-circle.html" class="round2-btn active">&#9733; Paid &amp; Circle</a>
+	<a href="free.html" class="round2-btn">&#9829; Free</a>
+</div>
+
+<div class="phone-frame">
+
+<!-- ============================= ONBOARDING ============================= -->
+
+<div id="ob-gate" class="screen active">
+	<div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;">
+		<div class="h1" style="font-size:28px;margin-bottom:14px;">Welcome to Attune</div>
+		<p class="body-text" style="margin-bottom:30px;">A tool for personal and group discernment.</p>
+		<button class="btn btn-dark" style="margin-bottom:10px;" onclick="showScreen('ob-intro-1')">I'm new here</button>
+		<button class="btn btn-light" onclick="showScreen('ob-login')">I've used Attune before</button>
+	</div>
+</div>
+
+<div id="ob-login" class="screen">
+	<button class="btn-ghost back-link" onclick="showScreen('ob-gate')">&larr; Back</button>
+	<div class="h1" style="font-size:28px;">Log in</div>
+	<p class="body-text" style="margin-bottom:20px;">Welcome back — pick up where you left off.</p>
+	<input type="text" placeholder="Username" class="input-box">
+	<input type="password" placeholder="Password" class="input-box">
+	<button class="btn btn-dark btn-block-mt" onclick="finishOnboarding()">Log In</button>
+	<div style="height:16px"></div>
+</div>
+
+<div id="ob-intro-1" class="screen">
+	<div class="swiper-box">
+		<div class="swiper-icon">&#123;&nbsp;&#125;</div>
+		<div class="h2" style="margin-bottom:14px;">What is Attunement?</div>
+		<p class="body-text" style="margin-bottom:28px;">Attunement is the practice of noticing what's stirring in you — and learning to recognize God's voice within it. Attune is a tool to help facilitate discernment, in partnership with the Holy Spirit — not a replacement for it.</p>
+		<button class="btn btn-dark btn-small" onclick="showScreen('ob-intro-2')">Next</button>
+	</div>
+	<div class="swiper-dots"><span class="dot-ctr on"></span><span class="dot-ctr" onclick="showScreen('ob-intro-2')"></span><span class="dot-ctr" onclick="showScreen('ob-intro-3')"></span></div>
+</div>
+
+<div id="ob-intro-2" class="screen">
+	<div class="swiper-box">
+		<div class="swiper-icon">&#8593;</div>
+		<div class="h2" style="margin-bottom:14px;">What is Attune?</div>
+		<p class="body-text" style="margin-bottom:28px;">The app guides you through short reflection exercises, so you can notice patterns over time. Your reflections are personal to you — nothing is shared unless you choose to share it.</p>
+		<button class="btn btn-dark btn-small" onclick="showScreen('ob-intro-3')">Next</button>
+	</div>
+	<div class="swiper-dots"><span class="dot-ctr" onclick="showScreen('ob-intro-1')"></span><span class="dot-ctr on"></span><span class="dot-ctr" onclick="showScreen('ob-intro-3')"></span></div>
+</div>
+
+<div id="ob-intro-3" class="screen">
+	<div class="swiper-box">
+		<div class="swiper-icon">&#8635;</div>
+		<div class="h2" style="margin-bottom:14px;">What is a Circle?</div>
+		<p class="body-text" style="margin-bottom:28px;">A Circle is a small group that moves through a shared season of attunement together. The app helps you prepare on your own; the Circle is where you connect. AI helps surface patterns across your own exercises — nothing ever leaves your device to train on or share with anyone else.</p>
+		<button class="btn btn-dark btn-small" onclick="showScreen('ob-account')">Begin</button>
+	</div>
+	<div class="swiper-dots"><span class="dot-ctr" onclick="showScreen('ob-intro-1')"></span><span class="dot-ctr" onclick="showScreen('ob-intro-2')"></span><span class="dot-ctr on"></span></div>
+</div>
+
+<div id="ob-account" class="screen">
+	<button class="btn-ghost back-link" onclick="showScreen('ob-intro-3')">&larr; Back</button>
+	<div class="h1" style="font-size:28px;">Create your account</div>
+	<p class="body-text" style="margin-bottom:20px;">Needed to save your reflections and come back later.</p>
+	<input type="text" placeholder="Username" class="input-box">
+	<input type="password" placeholder="Password" class="input-box">
+	<button class="btn btn-dark btn-block-mt" onclick="showScreen('ob-name')">Create Account</button>
+	<div style="height:16px"></div>
+</div>
+
+<div id="ob-name" class="screen">
+	<button class="btn-ghost back-link" onclick="showScreen('ob-account')">&larr; Back</button>
+	<div class="h1" style="font-size:28px;">What should we call you?</div>
+	<p class="body-text" style="margin-bottom:20px;">First and last name — editable later in Settings.</p>
+	<input type="text" id="ob-first-name" placeholder="First name" class="input-box" value="Sam">
+	<input type="text" placeholder="Last name" class="input-box" value="Rivera">
+	<button class="btn btn-dark btn-block-mt" onclick="showScreen('ob-code')">Continue</button>
+	<div style="height:16px"></div>
+</div>
+
+<div id="ob-code" class="screen">
+	<button class="btn-ghost back-link" onclick="showScreen('ob-name')">&larr; Back</button>
+	<div class="h1" style="font-size:28px;">Have a code?</div>
+	<p class="body-text" style="margin-bottom:20px;">If your organizer or pastor gave you a code for your Circle, enter it here to unlock everything for your group.</p>
+	<input type="text" placeholder="Enter your code" class="input-box" value="CIRCLE-2026">
+	<button class="btn btn-dark btn-block-mt" onclick="finishOnboarding()">Continue with code &rarr;</button>
+	<div style="height:16px"></div>
+</div>
+
+<!-- ============================== HOME TAB =============================== -->
+
+<div id="home" class="screen has-tab-bar">
+	<div class="app-header">
+		<div>
+			<div class="caption">Good evening</div>
+			<div class="h2">Welcome back, <span id="home-name">Sam</span></div>
+		</div>
+		<div class="tier-badge" title="Paid + Circle">&#9733;</div>
+	</div>
+	<div class="streak-row" id="streak-row"></div>
+
+	<div id="home-prep-card-slot"></div>
+
+	<div class="hero-card" onclick="startExercise({returnTab:'home'})">
+		<div class="h3">Featured Exercise</div>
+		<p class="caption" style="margin:6px 0 16px;">Today's Key Relationship Lens exercise — about 10–15 min.</p>
+		<button class="btn btn-dark btn-small" onclick="event.stopPropagation();startExercise({returnTab:'home'})">Begin Exercise</button>
+	</div>
+
+	<div class="card outlined" onclick="goTab('explore')">
+		<b style="font-size:16px;display:block;margin-bottom:4px;">Show a class</b>
+		<p class="caption" style="margin:0;">Browse this week's Classroom teaching.</p>
+	</div>
+</div>
+
+<!-- ============================ EXERCISE TAB ============================= -->
+
+<div id="exercise" class="screen has-tab-bar">
+	<div class="app-header">
+		<div class="h2">Exercise</div>
+		<div class="tier-badge" title="Paid + Circle">&#9733;</div>
+	</div>
+
+	<div class="hero-card" onclick="startExercise({returnTab:'exercise'})">
+		<div class="h3">An Exercise</div>
+		<p class="caption" style="margin:6px 0 16px;">A guided Attunement Exercise — warm up, reflect, review.</p>
+		<button class="btn btn-dark btn-small" onclick="event.stopPropagation();startExercise({returnTab:'exercise'})">Start</button>
+	</div>
+
+	<div class="h3" style="margin-bottom:10px;">Patterns</div>
+	<div id="exercise-patterns-slot" style="margin-bottom:24px;"></div>
+
+	<div class="h3" style="margin-bottom:10px;">Past Exercises</div>
+	<div id="exercise-past-list"></div>
+	<div style="height:8px"></div>
+</div>
+
+<!-- ============================= EXPLORE TAB ============================= -->
+
+<div id="explore" class="screen has-tab-bar">
+	<div class="app-header">
+		<div class="h2">Explore</div>
+		<div class="tier-badge" title="Paid + Circle">&#9733;</div>
+	</div>
+	<p class="classroom-progress-text" id="explore-classroom-progress"></p>
+	<div id="explore-classroom-list"></div>
+	<button class="btn btn-light" onclick="showScreen('explore-completed'); renderCompletedClasses();">See completed</button>
+	<div style="height:16px"></div>
+</div>
+
+<div id="explore-completed" class="screen has-tab-bar">
+	<button class="btn-ghost back-link" onclick="goTab('explore')">&larr; Back to Explore</button>
+	<div class="h2" style="margin-bottom:14px;">Completed Classes</div>
+	<div id="completed-list"></div>
+</div>
+
+<!-- ============================= CONNECT TAB ============================= -->
+
+<div id="connect" class="screen has-tab-bar">
+	<div class="app-header">
+		<div class="h2">Connect</div>
+		<div class="tier-badge" title="Paid + Circle">&#9733;</div>
+	</div>
+	<div id="connect-prep-card-slot"></div>
+	<div class="h3" style="margin-bottom:10px;">Session 1 Agenda</div>
+	<div id="connect-agenda"></div>
+	<div style="height:8px"></div>
+</div>
+
+<!-- ================================ OVERLAYS ============================== -->
+
+<!-- Exercise Experience (captive — tab bar hidden) -->
+<div id="exercise-overlay" class="screen exercise-overlay">
+	<div id="exercise-overlay-body"></div>
+</div>
+
+<!-- Classroom video (full-screen, captive) -->
+<div id="video-overlay" class="screen no-pad video-fullscreen">
+	<div style="display:flex;justify-content:flex-end;padding:16px;flex-shrink:0;">
+		<button onclick="closeClassroomVideo()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:36px;height:36px;border-radius:50%;font-size:15px;cursor:pointer;">&#10005;</button>
+	</div>
+	<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#888;font-size:14px;text-align:center;padding:0 20px;">[ Video Playing &middot; <span id="video-duration"></span> ]</div>
+	<div style="padding:20px 24px 32px;flex-shrink:0;">
+		<h3 id="video-title" style="color:white;font-size:18px;margin-bottom:6px;"></h3>
+		<p id="video-desc" style="color:#999;font-size:13px;line-height:1.55;"></p>
+	</div>
+</div>
+
+<!-- Session 1 Prep container (intro / checklist / classroom set / reflect) -->
+<div id="prep-overlay" class="screen has-tab-bar">
+	<div id="prep-overlay-body"></div>
+</div>
+
+<!-- Facilitator Guide piece detail -->
+<div id="guide-piece-overlay" class="screen has-tab-bar">
+	<div id="guide-piece-body"></div>
+</div>
+
+<!-- Facilitator live mode (captive) -->
+<div id="guide-live-overlay" class="screen">
+	<div class="live-top">
+		<div>
+			<div class="live-session-label" id="live-session-label"></div>
+			<div class="live-timer" id="live-timer">0:00 elapsed</div>
+		</div>
+		<button class="live-exit-btn" onclick="exitFacilitatorMode()">&#10005; Exit</button>
+	</div>
+	<div class="live-progress">
+		<div class="live-progress-bar" id="live-progress-bar"></div>
+		<div class="live-progress-labels" id="live-progress-labels"></div>
+	</div>
+	<div class="live-current-row">
+		<div>
+			<div class="live-current-name" id="live-current-name"></div>
+			<div class="live-current-meta" id="live-current-meta"></div>
+		</div>
+		<div class="live-nav">
+			<button class="live-nav-btn live-prev" onclick="livePrevSection()" aria-label="Previous section">&#8249;</button>
+			<button class="live-nav-btn live-next" onclick="liveNextSection()" aria-label="Next section">&#8250;</button>
+		</div>
+	</div>
+	<div class="live-body" id="live-cards"></div>
+</div>
+
+<!-- Generic stub for dead-end CTAs (Discernment of Growth Edges, etc.) -->
+<div id="stub-overlay" class="screen has-tab-bar">
+	<div id="stub-overlay-body"></div>
+</div>
+
+<!-- ================================ TAB BAR ================================ -->
+<nav class="tab-bar">
+	<button class="tab-item active" data-tab="home" onclick="goTab('home')"><span class="tab-icon">&#8962;</span>Home</button>
+	<button class="tab-item" data-tab="exercise" onclick="goTab('exercise')"><span class="tab-icon">&#9678;</span>Exercise</button>
+	<button class="tab-item" data-tab="explore" onclick="goTab('explore')"><span class="tab-icon">&#9638;</span>Explore</button>
+	<button class="tab-item" data-tab="connect" onclick="goTab('connect')"><span class="tab-icon">&#9901;</span>Connect</button>
+</nav>
+
+</div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+/* -------------------------------------------------------------------------
+   Persona config: paid + Circle (star tier)
+   ------------------------------------------------------------------------- */
+App.tier = 'circle';
+App.firstName = 'Sam';
+
+/* Demo seed: 2 past exercises already logged, so completing one live
+   during a walkthrough crosses the 3-exercise threshold live. */
+App.exercises = [
+	{ id: 1, date: 'Session prep \u00b7 12 days ago', situation: 'Feeling behind at work heading into a big deadline.',
+		quotes: [
+			{ theme: 'trust', text: "I noticed my instinct was to rush \u2014 something shifted when I stopped.", date: 'Aug 5' },
+			{ theme: 'clarity', text: "Stepping back, the situation looked different than I expected.", date: 'Aug 5' }
+		] },
+	{ id: 2, date: '6 days ago', situation: 'Some tension with a close friend I hadn\u2019t named out loud yet.',
+		quotes: [
+			{ theme: 'patience', text: "Waiting felt uncomfortable, but I stayed with it longer than I usually do.", date: 'Aug 11' },
+			{ theme: 'trust', text: "Letting go of needing to fix it right away felt like a small risk worth taking.", date: 'Aug 11' }
+		] }
+];
+
+function finishOnboarding() {
+	const nameInput = document.getElementById('ob-first-name');
+	if (nameInput && nameInput.value.trim()) App.firstName = nameInput.value.trim();
+	document.getElementById('home-name').textContent = App.firstName;
+	App.init();
+	goTab('home');
+}
+
+/* -------------------------------------------------------------------------
+   Home tab
+   ------------------------------------------------------------------------- */
+function renderHomePrepCard() {
+	const el = document.getElementById('home-prep-card-slot');
+	if (App.prep.dismissed) { el.innerHTML = ''; return; }
+	const doneCount = prepDoneCount();
+	const allDone = doneCount === 3;
+	el.innerHTML = `
+	<div class="card outlined" onclick="startPrepFlow()" style="margin-bottom:16px;">
+		<b style="font-size:16px;display:block;margin-bottom:4px;">${allDone ? "You're ready for Session 1" : 'Prep for your upcoming Session 1'}</b>
+		<p class="caption" style="margin-bottom:10px;">Classroom &middot; Exercise &middot; Reflect &amp; Prep</p>
+		<div class="progress-bg"><div class="progress-fill" style="width:${(doneCount / 3 * 100).toFixed(0)}%"></div></div>
+		<button class="btn btn-dark btn-small" style="margin-top:10px;" onclick="event.stopPropagation();startPrepFlow()">${allDone ? 'Review & Finish' : doneCount > 0 ? 'Continue Prep' : "Let's Get Prepped"}</button>
+	</div>`;
+}
+
+function renderCompletedClasses() {
+	const watchedIdx = CLASSROOM_CHUNKS.map((_, i) => i).filter(i => App.classroomWatched.has(i));
+	const el = document.getElementById('completed-list');
+	if (!watchedIdx.length) { el.innerHTML = `<div class="empty-state">No completed classes yet.</div>`; return; }
+	el.innerHTML = watchedIdx.map(i => {
+		const c = CLASSROOM_CHUNKS[i];
+		return `<div class="card outlined" style="cursor:default;"><b style="font-size:14px;display:block;">${c.title}</b><span class="caption">${c.duration}</span></div>`;
+	}).join('');
+}
+
+App.renderers = {
+	home: () => { renderHomePrepCard(); },
+	exercise: () => { renderPatterns('exercise-patterns-slot'); renderPastExercises('exercise-past-list'); },
+	explore: () => { renderClassroomList('explore-classroom-list', 'explore-classroom-progress', false); },
+	connect: () => {
+		renderConnectAgenda('connect-agenda');
+		const slot = document.getElementById('connect-prep-card-slot');
+		if (App.prep.dismissed) { slot.innerHTML = ''; return; }
+		const doneCount = prepDoneCount();
+		slot.innerHTML = `
+		<div class="card outlined" onclick="startPrepFlow()">
+			<b style="font-size:15px;display:block;margin-bottom:4px;">Prep for your upcoming Session 1</b>
+			<p class="caption" style="margin:0;">Classroom &middot; Exercise &middot; Reflect &amp; Prep &middot; ${doneCount} of 3 done</p>
+		</div>`;
+	}
+};
+
+App.init();
+</script>
+</body>
+</html>
