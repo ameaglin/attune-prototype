@@ -38,7 +38,7 @@
 		<p class="body-text" style="margin-bottom:28px;">The app guides you through short reflection exercises, so you can notice patterns over time. Your reflections are personal to you — nothing is shared unless you choose to share it.</p>
 		<button class="btn btn-dark btn-small" onclick="showScreen('ob-intro-3')">Next</button>
 	</div>
-	<div class="swiper-dots"><span class="dot-ctr" onclick="showScreen('ob-intro-1')"></span><span class="dot-ctr on"></span><span class="dot-ctr" onclick="showScreen('ob-intro-3')"></span></div>
+	<div class="swiper-dots"><span class="dot-ctr" onclick="showScreen('ob-intro-1')"></span><span class="dot-ctr on"></span><span class="dot-ctr" onclick="showScreen('ob-intro-3')"></span><span class="dot-ctr" onclick="showScreen('ob-intro-ai')"></span></div>
 </div>
 
 <div id="ob-intro-3" class="screen">
@@ -46,15 +46,27 @@
 	<div class="swiper-box">
 		<div class="swiper-icon">&#8635;</div>
 		<div class="h2" style="margin-bottom:14px;">What is a Circle Community?</div>
-		<p class="body-text" style="margin-bottom:28px;">A Circle Community is a small group that moves through a shared season of attunement together. The app helps you prepare on your own; the Circle Community is where you gather. AI helps surface patterns across your own exercises — nothing ever leaves your device to train on or share with anyone else.</p>
+		<p class="body-text" style="margin-bottom:28px;">A Circle Community is a small group that moves through a shared season of attunement together. The app helps you prepare on your own; the Circle Community is where you gather.</p>
+		<button class="btn btn-dark btn-small" onclick="showScreen('ob-intro-ai')">Next</button>
+	</div>
+	<div class="swiper-dots"><span class="dot-ctr" onclick="showScreen('ob-intro-1')"></span><span class="dot-ctr" onclick="showScreen('ob-intro-2')"></span><span class="dot-ctr on"></span><span class="dot-ctr" onclick="showScreen('ob-intro-ai')"></span></div>
+</div>
+
+<div id="ob-intro-ai" class="screen">
+	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
+	<div class="swiper-box">
+		<div class="swiper-icon">&#129517;</div>
+		<div class="h2" style="margin-bottom:14px;">How Does Attune Use AI?</div>
+		<p class="body-text" style="margin-bottom:14px;">AI is a focused pattern tool here, not a source of guidance. We use it to help roll up and name themes across your own exercises over time — a mirror for your own words, not an authority on them.</p>
+		<p class="body-text" style="margin-bottom:28px;">It only reads what you write in your own exercises. No content is saved to train a model or shared with anyone else — including your facilitator or group.</p>
 		<button class="btn btn-dark btn-small" onclick="showScreen('ob-account')">Begin</button>
 	</div>
-	<div class="swiper-dots"><span class="dot-ctr" onclick="showScreen('ob-intro-1')"></span><span class="dot-ctr" onclick="showScreen('ob-intro-2')"></span><span class="dot-ctr on"></span></div>
+	<div class="swiper-dots"><span class="dot-ctr" onclick="showScreen('ob-intro-1')"></span><span class="dot-ctr" onclick="showScreen('ob-intro-2')"></span><span class="dot-ctr" onclick="showScreen('ob-intro-3')"></span><span class="dot-ctr on"></span></div>
 </div>
 
 <div id="ob-account" class="screen">
 	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
-	<button class="btn-ghost back-link" onclick="showScreen('ob-intro-3')">&larr; Back</button>
+	<button class="btn-ghost back-link" onclick="showScreen('ob-intro-ai')">&larr; Back</button>
 	<div class="h1" style="font-size:28px;">Create your account</div>
 	<p class="body-text" style="margin-bottom:20px;">Needed to save your reflections and come back later.</p>
 	<input type="text" placeholder="Username" class="input-box">

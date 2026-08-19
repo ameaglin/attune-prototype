@@ -193,7 +193,8 @@ function renderExercisePrivacy() {
 		<div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;">
 			<div class="privacy-icon">&#128274;</div>
 			<div class="h2" style="margin-bottom:12px;">Before you begin</div>
-			<p class="body-text" style="margin-bottom:28px;">What you share here is private. It's not shared with a facilitator or your group unless you choose to share it.</p>
+			<p class="body-text" style="margin-bottom:10px;">What you share here is private. It's not shared with a facilitator or your group unless you choose to share it.</p>
+			<p class="caption" style="margin-bottom:28px;"><a href="javascript:void(0)" onclick="showAIInfo('exercise-overlay', renderExercisePrivacy)" style="color:inherit;text-decoration:underline;">How is AI used?</a></p>
 			<button class="btn btn-dark" onclick="renderExerciseWarmup()">Continue</button>
 			<button class="btn btn-ghost" style="margin-top:14px;align-self:center;" onclick="renderExerciseWarmup()">Don't show me this again</button>
 		</div>`);
@@ -288,7 +289,10 @@ function renderExerciseOutput() {
 		<p class="caption" style="margin-bottom:16px;">Here's a review of what came up — this is what you'd bring to your Circle Community.</p>
 		<div style="flex:1;overflow-y:auto;">
 		<div class="output-card recap-themes">
-			<div class="output-step-label">Themes</div>
+			<div class="output-step-label" style="display:flex;justify-content:space-between;align-items:baseline;">
+				<span>Themes</span>
+				<a href="javascript:void(0)" onclick="showAIInfo('exercise-overlay', renderExerciseOutput)" style="font-weight:400;text-transform:none;letter-spacing:normal;color:var(--muted);text-decoration:underline;">How is AI used?</a>
+			</div>
 			<div class="output-tags recap-theme-tags">${themeKeys.map(t => `<span class="tag outline">${PATTERN_META[t].label}</span>`).join('')}</div>
 		</div>
 		${EXERCISE_STEPS.map((step, i) => {
@@ -716,6 +720,7 @@ function renderPatterns(containerId) {
 	const quotes = getAllQuotes();
 	const byTheme = {};
 	quotes.forEach(q => { (byTheme[q.theme] = byTheme[q.theme] || []).push(q); });
+	const aiLink = `<p class="caption" style="text-align:right;margin:-4px 0 12px;"><a href="javascript:void(0)" onclick="showAIInfo('${App.currentTab}', function(){ renderPatterns('${containerId}'); })" style="color:var(--muted);text-decoration:underline;">How is AI used?</a></p>`;
 	const cards = PATTERN_ORDER.filter(t => byTheme[t] && byTheme[t].length).map(themeKey => {
 		const qs = byTheme[themeKey];
 		const meta = PATTERN_META[themeKey];
@@ -731,7 +736,7 @@ function renderPatterns(containerId) {
 	}).join('');
 	const bridge = `
 		<button class="btn btn-light" style="margin-top:6px;" onclick="showStub('Discernment of Growth Edges', 'This deeper, pattern-guided exercise is coming soon — it isn\\'t built yet in this prototype.', 'Back to Patterns', function(){ goTab(App.currentTab); })">Start Discernment of Growth Edges</button>`;
-	el.innerHTML = renderPatternCalendar(quotes) + cards + bridge;
+	el.innerHTML = aiLink + renderPatternCalendar(quotes) + cards + bridge;
 }
 
 /* -------------------------------------------------------------------------
@@ -1182,6 +1187,18 @@ function openSettings() {
 		${circleRow}
 		<div style="height:16px"></div>`;
 	showScreen('settings');
+}
+
+function showAIInfo(returnScreenId, renderFn) {
+	showStub(
+		'How Is AI Used?',
+		"AI is a focused pattern tool here, not a source of guidance. We use it to help roll up and name themes across your own exercises over time — a mirror for your own words, not an authority on them. It only reads what you write in your own exercises; no content is saved to train a model or shared with anyone else, including your facilitator or group.",
+		'Back',
+		function() {
+			showScreen(returnScreenId || App.currentTab);
+			if (renderFn) renderFn();
+		}
+	);
 }
 
 function showStub(title, body, primaryLabel, primaryAction) {
