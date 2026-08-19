@@ -10,7 +10,7 @@
 <div class="prototype-shell">
 <div class="round2-switcher">
 	<a href="index.html" class="round2-btn">&larr; Round 2 Home</a>
-	<a href="paid-circle.html" class="round2-btn">&#9733; Paid &amp; Circle</a>
+	<a href="paid-circle.html" class="round2-btn">&#9733; Paid &amp; Circle Community</a>
 	<a href="free.html" class="round2-btn active">&#9829; Free</a>
 </div>
 
@@ -18,26 +18,8 @@
 
 <!-- ============================= ONBOARDING ============================= -->
 
-<div id="ob-gate" class="screen active">
-	<div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;">
-		<div class="h1" style="font-size:28px;margin-bottom:14px;">Welcome to Attune</div>
-		<p class="body-text" style="margin-bottom:30px;">A tool for personal and group discernment.</p>
-		<button class="btn btn-dark" style="margin-bottom:10px;" onclick="showScreen('ob-intro-1')">I'm new here</button>
-		<button class="btn btn-light" onclick="showScreen('ob-login')">I've used Attune before</button>
-	</div>
-</div>
-
-<div id="ob-login" class="screen">
-	<button class="btn-ghost back-link" onclick="showScreen('ob-gate')">&larr; Back</button>
-	<div class="h1" style="font-size:28px;">Log in</div>
-	<p class="body-text" style="margin-bottom:20px;">Welcome back — pick up where you left off.</p>
-	<input type="text" placeholder="Username" class="input-box">
-	<input type="password" placeholder="Password" class="input-box">
-	<button class="btn btn-dark btn-block-mt" onclick="finishOnboarding()">Log In</button>
-	<div style="height:16px"></div>
-</div>
-
-<div id="ob-intro-1" class="screen">
+<div id="ob-intro-1" class="screen active">
+	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
 	<div class="swiper-box">
 		<div class="swiper-icon">&#123;&nbsp;&#125;</div>
 		<div class="h2" style="margin-bottom:14px;">What is Attunement?</div>
@@ -48,6 +30,7 @@
 </div>
 
 <div id="ob-intro-2" class="screen">
+	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
 	<div class="swiper-box">
 		<div class="swiper-icon">&#8593;</div>
 		<div class="h2" style="margin-bottom:14px;">What is Attune?</div>
@@ -58,16 +41,18 @@
 </div>
 
 <div id="ob-intro-3" class="screen">
+	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
 	<div class="swiper-box">
 		<div class="swiper-icon">&#8635;</div>
-		<div class="h2" style="margin-bottom:14px;">What is a Circle?</div>
-		<p class="body-text" style="margin-bottom:28px;">A Circle is a small group that moves through a shared season of attunement together. The app helps you prepare on your own; the Circle is where you connect. AI helps surface patterns across your own exercises — nothing ever leaves your device to train on or share with anyone else.</p>
+		<div class="h2" style="margin-bottom:14px;">What is a Circle Community?</div>
+		<p class="body-text" style="margin-bottom:28px;">A Circle Community is a small group that moves through a shared season of attunement together. The app helps you prepare on your own; the Circle Community is where you gather. AI helps surface patterns across your own exercises — nothing ever leaves your device to train on or share with anyone else.</p>
 		<button class="btn btn-dark btn-small" onclick="showScreen('ob-account')">Begin</button>
 	</div>
 	<div class="swiper-dots"><span class="dot-ctr" onclick="showScreen('ob-intro-1')"></span><span class="dot-ctr" onclick="showScreen('ob-intro-2')"></span><span class="dot-ctr on"></span></div>
 </div>
 
 <div id="ob-account" class="screen">
+	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
 	<button class="btn-ghost back-link" onclick="showScreen('ob-intro-3')">&larr; Back</button>
 	<div class="h1" style="font-size:28px;">Create your account</div>
 	<p class="body-text" style="margin-bottom:20px;">Needed to save your reflections and come back later.</p>
@@ -78,6 +63,7 @@
 </div>
 
 <div id="ob-name" class="screen">
+	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
 	<button class="btn-ghost back-link" onclick="showScreen('ob-account')">&larr; Back</button>
 	<div class="h1" style="font-size:28px;">What should we call you?</div>
 	<p class="body-text" style="margin-bottom:20px;">First and last name — editable later in Settings.</p>
@@ -88,58 +74,69 @@
 </div>
 
 <div id="ob-code" class="screen">
+	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
 	<button class="btn-ghost back-link" onclick="showScreen('ob-name')">&larr; Back</button>
-	<div class="h1" style="font-size:28px;">Have a code?</div>
-	<p class="body-text" style="margin-bottom:20px;">If your organizer or pastor gave you a code for your Circle, enter it here to unlock everything for your group. Otherwise, continue for free.</p>
+	<div class="h1" style="font-size:28px;">Have a Code?</div>
+	<p class="body-text" style="margin-bottom:16px;">If your organizer or pastor gave you a code for your Circle Community, enter it here to unlock everything for your group. Otherwise, continue for free.</p>
+	<div class="guidance-card" style="margin-bottom:16px;">
+		<div class="caption" style="font-weight:600;color:var(--ink);margin-bottom:6px;">Your Exercise Stays Private</div>
+		<p class="caption" style="margin:0;">Everything in this app is private. It’s meant only for you — to bring to the group in the ways you determine.</p>
+	</div>
 	<input type="text" placeholder="Enter your code (optional)" class="input-box">
-	<button class="btn btn-light" style="margin-bottom:10px;" onclick="window.location.href='paid-circle.html'">Yes, I have a code &rarr;</button>
-	<button class="btn btn-dark btn-block-mt" onclick="finishOnboarding()">No, continue for free</button>
+	<button class="btn btn-light" style="margin-bottom:10px;" onclick="window.location.href='paid-circle.html'">Yes, I Have a Code &rarr;</button>
+	<button class="btn btn-dark btn-block-mt" onclick="finishOnboarding()">No, Continue for Free</button>
 	<div style="height:16px"></div>
 </div>
 
 <!-- ============================== HOME TAB =============================== -->
 
 <div id="home" class="screen has-tab-bar">
-	<div class="app-header">
-		<div>
-			<div class="caption">Good evening</div>
-			<div class="h2">Welcome back, <span id="home-name">Jordan</span></div>
-		</div>
-		<div class="tier-badge" title="Not paid, not in a Circle">&#9829;</div>
+	<div class="home-top">
+		<img src="assets/attune-logo.png" alt="Attune" class="home-logo">
+		<button class="settings-btn" onclick="openSettings()" aria-label="Settings">&#9881;</button>
 	</div>
-	<div class="streak-row" id="streak-row"></div>
+	<div class="home-greeting">
+		<div class="caption">Good Evening</div>
+		<div class="h2">Welcome, <span id="home-name">Jordan</span></div>
+	</div>
 
-	<div class="hero-card" onclick="startExercise({returnTab:'home'})">
+	<div class="hero-card soft" onclick="startExercise({returnTab:'home'})">
+		<div class="kicker">Personal Exercise</div>
 		<div class="h3">Featured Exercise</div>
-		<p class="caption" style="margin:6px 0 16px;">Today's Key Relationship Lens exercise — about 10–15 min.</p>
-		<button class="btn btn-dark btn-small" onclick="event.stopPropagation();startExercise({returnTab:'home'})">Begin Exercise</button>
+		<p class="caption" style="margin:6px 0 16px;">Today's personal exercise — about 10–15 min, on your own, whenever you have a quiet moment.</p>
+		<button class="btn btn-dark btn-small" onclick="event.stopPropagation();startExercise({returnTab:'home'})">Begin</button>
 	</div>
 
 	<div class="card outlined" onclick="showScreen('find-a-circle')">
-		<b style="font-size:16px;display:block;margin-bottom:4px;">Find a Circle</b>
+		<b style="font-size:16px;display:block;margin-bottom:4px;">Find a Circle Community</b>
 		<p class="caption" style="margin:0;">Discover a group near you to get more out of Attune.</p>
 	</div>
+
+	<div class="home-classes-heading">
+		<b>From Explore</b>
+		<span class="caption" style="cursor:pointer;" onclick="goTab('explore')">See All &rarr;</span>
+	</div>
+	<div class="topic-rail home-explore-rail" id="home-classes-carousel"></div>
 </div>
 
 <!-- ============================ EXERCISE TAB ============================= -->
 
 <div id="exercise" class="screen has-tab-bar">
 	<div class="app-header">
-		<div class="h2">Exercise</div>
-		<div class="tier-badge" title="Not paid, not in a Circle">&#9829;</div>
+		<div class="h2">Personal Exercise</div>
 	</div>
 
 	<div class="hero-card" onclick="startExercise({returnTab:'exercise'})">
-		<div class="h3">An Exercise</div>
-		<p class="caption" style="margin:6px 0 16px;">A guided Attunement Exercise — warm up, reflect, review.</p>
+		<div class="h3">A Personal Exercise</div>
+		<p class="caption" style="margin:6px 0 16px;">A guided personal exercise — warm up, reflect, recap. Done on your own.</p>
 		<button class="btn btn-dark btn-small" onclick="event.stopPropagation();startExercise({returnTab:'exercise'})">Start</button>
 	</div>
 
-	<div class="h3" style="margin-bottom:10px;">Past Exercises</div>
-	<div id="exercise-past-list" style="margin-bottom:22px;"></div>
+	<div class="h3" style="margin-bottom:10px;">Patterns</div>
+	<div id="exercise-patterns-slot" style="margin-bottom:24px;"></div>
 
-	<div id="exercise-patterns-heading"></div>
-	<div id="exercise-patterns-slot"></div>
+	<div class="h3" style="margin-bottom:10px;">Recaps</div>
+	<div id="exercise-past-list"></div>
 	<div style="height:8px"></div>
 </div>
 
@@ -148,39 +145,32 @@
 <div id="explore" class="screen has-tab-bar">
 	<div class="app-header">
 		<div class="h2">Explore</div>
-		<div class="tier-badge" title="Not paid, not in a Circle">&#9829;</div>
 	</div>
-	<div class="lock-cta-wrap">
-		<span class="pattern-lock-icon" style="font-size:26px;">&#128274;</span>
-		<div class="h3" style="margin-bottom:8px;">Classroom is a premium feature</div>
-		<p class="body-text" style="margin-bottom:22px;">Classes aren't available on the free plan. Upgrade individually, or enter a Circle code from your organizer, to see everything Explore has to offer.</p>
-		<button class="btn btn-dark" style="margin-bottom:10px;" onclick="showStub('Upgrade to unlock Explore', 'Classroom is part of Growth Edges or Circle access. This demo doesn\'t include a working purchase flow.', 'Back', function(){ goTab('explore'); })">Sign up</button>
-		<button class="btn btn-light" onclick="showScreen('find-a-circle')">Find a Circle instead</button>
-	</div>
+	<div id="explore-topics"></div>
+	<div style="height:8px"></div>
 </div>
 
 <!-- ============================= CONNECT TAB ============================= -->
 
 <div id="connect" class="screen has-tab-bar">
 	<div class="app-header">
-		<div class="h2">Connect</div>
-		<div class="tier-badge" title="Not paid, not in a Circle">&#9829;</div>
+		<div class="h2">Community</div>
 	</div>
 	<div class="lock-cta-wrap">
 		<span class="pattern-lock-icon" style="font-size:26px;">&#9901;</span>
-		<div class="h3" style="margin-bottom:8px;">You're not in a Circle yet</div>
-		<p class="body-text" style="margin-bottom:22px;">Circle is a small group that moves through Attune together, with live gatherings and a Facilitator Guide. Find one to get more out of the app.</p>
-		<button class="btn btn-dark" onclick="showScreen('find-a-circle')">Find a Circle</button>
+		<div class="h3" style="margin-bottom:8px;">You're not in a Circle Community yet</div>
+		<p class="body-text" style="margin-bottom:22px;">A Circle Community is a small group that moves through Attune together, with gatherings and Facilitator Mode — which everyone in the group can open. Find one to get more out of the app.</p>
+		<button class="btn btn-dark" onclick="showScreen('find-a-circle')">Find a Circle Community</button>
 	</div>
 </div>
 
 <!-- Find a Circle (reachable from Home + Explore + Connect) -->
 <div id="find-a-circle" class="screen has-tab-bar">
 	<button class="btn-ghost back-link" onclick="goTab(App.currentTab)">&larr; Back</button>
-	<div class="h1" style="font-size:26px;margin-bottom:8px;">Find a Circle</div>
-	<p class="body-text" style="margin-bottom:18px;">Enter your zip code to see Circles meeting near you.</p>
+	<div class="h1" style="font-size:26px;margin-bottom:8px;">Find a Circle Community</div>
+	<p class="body-text" style="margin-bottom:18px;">Enter your zip code to see Circle Communities meeting near you.</p>
 	<input type="text" placeholder="Zip code" class="input-box">
-	<button class="btn btn-dark" onclick="showStub('Find a Circle', 'This demo doesn\'t include real Circle listings yet — in the full app, you\'d see nearby groups here.', 'Back', function(){ goTab(App.currentTab); })">Search</button>
+	<button class="btn btn-dark" onclick="showStub('Find a Circle Community', 'This demo doesn\'t include real listings yet — in the full app, you\'d see nearby groups here.', 'Back', function(){ goTab(App.currentTab); })">Search</button>
 	<div style="height:16px"></div>
 </div>
 
@@ -191,6 +181,31 @@
 	<div id="exercise-overlay-body"></div>
 </div>
 
+<!-- Classroom video feed -->
+<div id="video-overlay" class="screen no-pad video-fullscreen">
+	<button class="vfeed-close" onclick="closeClassroomVideo()">&#10005;</button>
+	<div class="vfeed-nav">
+		<button id="vfeed-prev-btn" class="vfeed-nav-btn" onclick="prevVideoSlide()" aria-label="Previous video">&#8963;</button>
+		<button id="vfeed-next-btn" class="vfeed-nav-btn" onclick="nextVideoSlide()" aria-label="Next video">&#8964;</button>
+	</div>
+	<div class="vfeed-hint" id="vfeed-hint">&#8963; Swipe Up for the Next One</div>
+	<div class="vfeed-scroll" id="vfeed-scroll"></div>
+</div>
+
+<!-- Picture + text reading -->
+<div id="reading-overlay" class="screen no-pad">
+	<div class="read-top">
+		<div class="h3" id="read-title"></div>
+		<button type="button" class="read-close" onclick="closeReading()" aria-label="Close">&#10005;</button>
+	</div>
+	<div class="read-rail" id="read-rail"></div>
+</div>
+
+<!-- Settings (top-right gear from Home) -->
+<div id="settings" class="screen has-tab-bar">
+	<div id="settings-body"></div>
+</div>
+
 <!-- Generic stub for dead-end CTAs -->
 <div id="stub-overlay" class="screen has-tab-bar">
 	<div id="stub-overlay-body"></div>
@@ -198,10 +213,10 @@
 
 <!-- ================================ TAB BAR ================================ -->
 <nav class="tab-bar">
-	<button class="tab-item active" data-tab="home" onclick="goTab('home')"><span class="tab-icon">&#8962;</span>Home</button>
-	<button class="tab-item" data-tab="exercise" onclick="goTab('exercise')"><span class="tab-icon">&#9678;</span>Exercise</button>
-	<button class="tab-item" data-tab="explore" onclick="goTab('explore')"><span class="tab-icon">&#9638;</span>Explore</button>
-	<button class="tab-item" data-tab="connect" onclick="goTab('connect')"><span class="tab-icon">&#9901;</span>Connect</button>
+	<button class="tab-item active" data-tab="home" onclick="goTab('home')">Home</button>
+	<button class="tab-item" data-tab="exercise" onclick="goTab('exercise')">Exercise</button>
+	<button class="tab-item" data-tab="explore" onclick="goTab('explore')">Explore</button>
+	<button class="tab-item" data-tab="connect" onclick="goTab('connect')">Community</button>
 </nav>
 
 </div>
@@ -224,17 +239,10 @@ function finishOnboarding() {
 	goTab('home');
 }
 
-function renderExercisePatternsSlot() {
-	const count = App.exercises.length;
-	const heading = document.getElementById('exercise-patterns-heading');
-	heading.innerHTML = count >= 3 ? '<div class="h3" style="margin-bottom:10px;">Patterns</div>' : '<div class="h3" style="margin-bottom:10px;">Patterns</div>';
-	renderPatterns('exercise-patterns-slot');
-}
-
 App.renderers = {
-	home: () => {},
-	exercise: () => { renderPastExercises('exercise-past-list'); renderExercisePatternsSlot(); },
-	explore: () => {},
+	home: () => { renderHomeClasses('home-classes-carousel'); },
+	exercise: () => { renderPatterns('exercise-patterns-slot'); renderPastExercises('exercise-past-list'); },
+	explore: () => { renderExploreLanding('explore-topics'); },
 	connect: () => {}
 };
 
