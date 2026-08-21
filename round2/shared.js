@@ -282,27 +282,58 @@ function exerciseNext(idx, isLast) {
 
 function deriveTheme(stepIdx) { return PATTERN_ORDER[stepIdx % PATTERN_ORDER.length]; }
 
-function renderExerciseOutput() {
+function recapFromLive() {
 	const themeKeys = [...new Set(EXERCISE_STEPS.map((_, i) => deriveTheme(i)))];
+	const items = EXERCISE_STEPS.map((step, i) => ({
+		label: step.label,
+		response: ex.responses[i] && ex.responses[i].length ? ex.responses[i] : '(no response captured)'
+	}));
+	return { themeKeys, items };
+}
+
+function recapFromRecord(rec) {
+	if (rec.responses && rec.responses.length) {
+		const themeKeys = [...new Set(EXERCISE_STEPS.map((_, i) => deriveTheme(i)))];
+		const items = EXERCISE_STEPS.map((step, i) => ({
+			label: step.label,
+			response: rec.responses[i] && rec.responses[i].length ? rec.responses[i] : '(no response captured)'
+		}));
+		return { themeKeys, items };
+	}
+	const themeKeys = [...new Set((rec.quotes || []).map(q => q.theme))];
+	const items = [
+		{ label: 'Situation', response: rec.situation || '(no situation captured)' },
+		...(rec.quotes || []).map(q => ({
+			label: (PATTERN_META[q.theme] && PATTERN_META[q.theme].label) || q.theme,
+			response: q.text
+		}))
+	];
+	return { themeKeys, items };
+}
+
+function recapCardsHTML(themeKeys, items, aiOnclick) {
+	return `
+		<div class="output-card recap-themes">
+			<div class="output-step-label" style="display:flex;justify-content:space-between;align-items:baseline;">
+				<span>Themes</span>
+				<a href="javascript:void(0)" onclick="${aiOnclick}" style="font-weight:400;text-transform:none;letter-spacing:normal;color:var(--muted);text-decoration:underline;">How is AI used?</a>
+			</div>
+			<div class="output-tags recap-theme-tags">${themeKeys.map(t => `<span class="tag outline">${PATTERN_META[t] ? PATTERN_META[t].label : escapeHtml(t)}</span>`).join('')}</div>
+		</div>
+		${items.map(item => `
+			<div class="output-card">
+				<div class="output-step-label">${escapeHtml(item.label)}</div>
+				<div class="output-response" style="margin-bottom:0;">${escapeHtml(item.response)}</div>
+			</div>`).join('')}`;
+}
+
+function renderExerciseOutput() {
+	const { themeKeys, items } = recapFromLive();
 	exOverlay(`
 		<div class="h1" style="font-size:26px;margin-bottom:6px;">Your Recap</div>
 		<p class="caption" style="margin-bottom:16px;">Here's a review of what came up — this is what you'd bring to your Circle Community.</p>
 		<div style="flex:1;overflow-y:auto;">
-		<div class="output-card recap-themes">
-			<div class="output-step-label" style="display:flex;justify-content:space-between;align-items:baseline;">
-				<span>Themes</span>
-				<a href="javascript:void(0)" onclick="showAIInfo('exercise-overlay', renderExerciseOutput)" style="font-weight:400;text-transform:none;letter-spacing:normal;color:var(--muted);text-decoration:underline;">How is AI used?</a>
-			</div>
-			<div class="output-tags recap-theme-tags">${themeKeys.map(t => `<span class="tag outline">${PATTERN_META[t].label}</span>`).join('')}</div>
-		</div>
-		${EXERCISE_STEPS.map((step, i) => {
-		const response = ex.responses[i] && ex.responses[i].length ? ex.responses[i] : '(no response captured)';
-		return `
-			<div class="output-card">
-				<div class="output-step-label">${escapeHtml(step.label)}</div>
-				<div class="output-response" style="margin-bottom:0;">${escapeHtml(response)}</div>
-			</div>`;
-	}).join('')}
+		${recapCardsHTML(themeKeys, items, "showAIInfo('exercise-overlay', renderExerciseOutput)")}
 		</div>
 		<button class="btn btn-dark btn-block-mt" onclick="renderExerciseRating()">Continue &rarr;</button>
 		<div style="height:16px"></div>`);
@@ -335,7 +366,7 @@ function buildExerciseRecord() {
 		const text = (ex.responses[i] && ex.responses[i].length) ? ex.responses[i] : TRIAD_TRANSCRIPTS[i % TRIAD_TRANSCRIPTS.length];
 		return { theme: deriveTheme(i), text, date: 'Today', day: quoteDayKey({ date: 'Today' }) };
 	});
-	return { id: num, date: 'Today', situation, quotes };
+	return { id: num, date: 'Today', situation, quotes, responses: ex.responses.slice() };
 }
 
 function cancelExercise() {
@@ -460,8 +491,13 @@ function exploreCardHTML(topicIdx, itemIdx, returnScreenId) {
 
 function renderHomeClasses(containerId) {
 	const el = document.getElementById(containerId);
-	if (!el) return;
-	el.innerHTML = EXPLORE_TOPICS[0].items.map((_, i) => exploreCardHTML(0, i, 'home')).join('');
+	if (el) el.innerHTML = EXPLORE_TOPICS[0].items.map((_, i) => exploreCardHTML(0, i, 'home')).join('');
+	const row2 = document.getElementById('home-explore-row-2');
+	const title2 = document.getElementById('home-explore-row-2-title');
+	if (row2 && EXPLORE_TOPICS[1]) {
+		row2.innerHTML = EXPLORE_TOPICS[1].items.map((_, i) => exploreCardHTML(1, i, 'home')).join('');
+		if (title2) title2.textContent = EXPLORE_TOPICS[1].title;
+	}
 }
 
 function renderExploreLanding(containerId) {
@@ -545,7 +581,7 @@ function openClassroomVideo(idx, returnScreenId, listIndices) {
 	const indices = (listIndices && listIndices.length) ? listIndices : CLASSROOM_CHUNKS.map((_, i) => i);
 	const items = indices.map(i => {
 		const c = CLASSROOM_CHUNKS[i];
-		return { key: 'c' + i, title: c.title, duration: c.duration, desc: c.desc, badge: c.session1 ? 'Session 1' : 'Classroom' };
+		return { key: 'c' + i, title: c.title, duration: c.duration, desc: c.desc, badge: c.session1 ? 'Session 1' : 'Learning' };
 	});
 	openMediaFeed(items, Math.max(0, indices.indexOf(idx)), returnScreenId || App.currentTab);
 }
@@ -753,12 +789,33 @@ function renderPastExercises(containerId) {
 	el.innerHTML = items.map(rec => {
 		const tags = [...new Set(rec.quotes.map(q => q.theme))].map(t => `<span class="tag outline">${PATTERN_META[t].label}</span>`).join(' ');
 		return `
-		<div class="card outlined" style="cursor:default;">
+		<div class="card outlined" onclick="openPastRecap(${rec.id})">
 			<div class="caption" style="margin-bottom:4px;">${escapeHtml(rec.date)}</div>
 			<div class="body-text" style="font-size:14px;margin-bottom:8px;">${escapeHtml(rec.situation)}</div>
 			<div class="output-tags">${tags}</div>
 		</div>`;
 	}).join('');
+}
+
+function openPastRecap(id) {
+	const rec = App.exercises.find(e => e.id === id);
+	if (!rec) return;
+	const { themeKeys, items } = recapFromRecord(rec);
+	hideTabBar();
+	showScreen('exercise-overlay');
+	exOverlay(`
+		<button class="btn-ghost back-link" onclick="closePastRecap()">&larr; Back</button>
+		<div class="h1" style="font-size:26px;margin-bottom:6px;">Your Recap</div>
+		<p class="caption" style="margin-bottom:16px;">Here's a review of what came up — this is what you'd bring to your Circle Community.</p>
+		<div style="flex:1;overflow-y:auto;">
+		${recapCardsHTML(themeKeys, items, `showAIInfo('exercise-overlay', function(){ openPastRecap(${id}); })`)}
+		</div>
+		<div style="height:16px"></div>`);
+}
+
+function closePastRecap() {
+	showTabBar();
+	goTab('exercise');
 }
 
 /* ==========================================================================
@@ -803,7 +860,7 @@ function prepShowIntro() {
 	prepOverlay(`
 		<button class="btn-ghost back-link" onclick="closePrepOverlay()">&larr; Back</button>
 		<div class="h1" style="font-size:26px;margin-bottom:12px;">Getting ready for the Circle Community</div>
-		<p class="body-text" style="margin-bottom:20px;">Session 1 is coming up. Whenever it feels right before then, spend a few unhurried minutes on your own — a short class, a personal exercise, and Reflect &amp; Prep for what you'll bring to the room. No need to do it all at once.</p>
+		<p class="body-text" style="margin-bottom:20px;">Session 1 is coming up. Whenever it feels right before then, spend a few unhurried minutes on your own — a short Learning piece, a personal exercise, and Reflect &amp; Prep for what you'll bring to the room. No need to do it all at once.</p>
 		<button class="btn btn-dark btn-block-mt" onclick="prepShowChecklist()">Let's Get Prepped &rarr;</button>
 		<div style="height:16px"></div>`);
 }
@@ -818,7 +875,7 @@ function prepShowChecklist() {
 		<p class="prep-progress-caption">${doneCount} of 3 complete</p>
 		<div class="card outlined prep-checklist-item" onclick="prepShowClassroom()">
 			<div class="chk-circle${App.prep.classroom ? ' done' : ''}">${App.prep.classroom ? '&#10003;' : ''}</div>
-			<div><b style="font-size:16px;">Classroom</b><p class="caption" style="margin:0;">A few short classes for this session.</p></div>
+			<div><b style="font-size:16px;">Learning</b><p class="caption" style="margin:0;">A few short pieces for this session.</p></div>
 		</div>
 		<div class="card outlined prep-checklist-item" onclick="prepGoExercise()">
 			<div class="chk-circle${App.prep.exercise ? ' done' : ''}">${App.prep.exercise ? '&#10003;' : ''}</div>
@@ -835,8 +892,8 @@ function prepShowChecklist() {
 function prepShowClassroom() {
 	prepOverlay(`
 		<button class="btn-ghost back-link" onclick="prepShowChecklist()">&larr; Back to Prep</button>
-		<div class="h1" style="font-size:26px;margin-bottom:6px;">Classroom</div>
-		<p class="caption" style="margin-bottom:4px;">A short set of classes bundled for Session 1.</p>
+		<div class="h1" style="font-size:26px;margin-bottom:6px;">Learning</div>
+		<p class="caption" style="margin-bottom:4px;">A short set of pieces bundled for Session 1.</p>
 		<p class="classroom-progress-text" id="prep-classroom-progress"></p>
 		<div id="prep-classroom-list"></div>
 		<button class="btn btn-dark btn-block-mt" onclick="prepShowChecklist()">Back to Prep &rarr;</button>
@@ -1038,33 +1095,47 @@ function openConnectSession(idx) {
 	document.getElementById('connect-session-body').innerHTML = `
 		<button class="btn-ghost back-link" onclick="goTab('connect')">&larr; Back to Community</button>
 		<div class="kicker">Circle Community</div>
-		<div class="h1" style="font-size:26px;margin-bottom:6px;">${escapeHtml(session.title)}</div>
-		<p class="caption" style="margin-bottom:16px;">${escapeHtml(session.status)} \u00b7 60 min gathering</p>
-		<div class="card outlined prep-home-card" onclick="startPrepFlow(${openOpts})">
-			<div class="kicker">Your Prep</div>
-			<b style="font-size:16px;display:block;margin-bottom:4px;">${allDone ? "You're ready for this gathering" : 'Get ready on your own'}</b>
-			<p class="caption" style="margin-bottom:10px;">Classroom \u00b7 Personal Exercise \u00b7 Reflect &amp; Prep \u00b7 ${doneCount} of 3 done</p>
-			<div class="progress-bg"><div class="progress-fill" style="width:${(doneCount / 3 * 100).toFixed(0)}%"></div></div>
-			<button class="btn btn-light btn-small" style="margin-top:10px;" onclick="event.stopPropagation();startPrepFlow(${openOpts})">${allDone ? 'Open Checklist' : doneCount > 0 ? 'Continue Prep' : "Let's Get Prepped"}</button>
-		</div>
-		<button class="start-live-btn" onclick="startFacilitatorMode()">&#9654; Start Facilitator Mode</button>
-		<div class="fac-note" id="fac-note">
-			<div class="fac-note-header" onclick="toggleFacNote()">
-				<span class="fac-note-icon">&#128161;</span>
-				<span class="fac-note-title">${FAC_NOTE.title}</span>
-				<span class="fac-note-chevron">&#9662;</span>
+		<div class="session-title-row">
+			<div class="h1" style="font-size:26px;margin:0;">${escapeHtml(session.title)}</div>
+			<div class="session-menu">
+				<button type="button" class="session-menu-btn" onclick="toggleSessionMenu(event)" aria-label="Session options" aria-expanded="false">&#8942;</button>
+				<div class="session-menu-dropdown" hidden>
+					<button type="button" class="session-menu-item" onclick="startFacilitatorMode()">Facilitator Mode</button>
+					${session.status === 'Completed' ? '' : `<button type="button" class="session-menu-item" onclick="markSessionCompleted()">Mark ${escapeHtml(session.title)} completed</button>`}
+				</div>
 			</div>
-			<div class="fac-note-body">${FAC_NOTE.body}</div>
 		</div>
-		${session.sections.map((sec, si) => `
-			<div class="section-group">
-				<div class="section-group-title"><span>${escapeHtml(sec.name)}</span><span>${sec.start}\u2013${sec.end} min</span></div>
-				${sec.subs.map((sub, bi) => `
-					<div class="guide-item" onclick="openGuidePiece(${si},${bi})">
-						<div class="guide-num">${bi + 1}</div>
-						<div class="guide-text"><div class="title">${escapeHtml(sub.title)}</div><div class="sub">${sub.readAloud ? 'Read aloud to the small group' : 'Facilitator instructions'}</div></div>
-					</div>`).join('')}
-			</div>`).join('')}
+		<p class="caption" style="margin-bottom:18px;">${escapeHtml(session.status)} \u00b7 60 min gathering</p>
+		<div class="session-section">
+			<div class="session-section-title">Your prep</div>
+			<div class="card outlined prep-home-card" onclick="startPrepFlow(${openOpts})">
+				<div class="kicker">On your own, before you gather</div>
+				<b style="font-size:16px;display:block;margin-bottom:4px;">${allDone ? "You're ready for this gathering" : 'Get ready on your own'}</b>
+				<p class="caption" style="margin-bottom:10px;">Learning \u00b7 Personal Exercise \u00b7 Reflect &amp; Prep \u00b7 ${doneCount} of 3 done</p>
+				<div class="progress-bg"><div class="progress-fill" style="width:${(doneCount / 3 * 100).toFixed(0)}%"></div></div>
+				<button class="btn btn-dark btn-small" style="margin-top:10px;" onclick="event.stopPropagation();startPrepFlow(${openOpts})">${allDone ? 'Open Checklist' : doneCount > 0 ? 'Continue Prep' : "Let's Get Prepped"}</button>
+			</div>
+		</div>
+		<div class="session-section">
+			<div class="session-section-title">During the gathering</div>
+			<div class="fac-note" id="fac-note">
+				<div class="fac-note-header" onclick="toggleFacNote()">
+					<span class="fac-note-icon">&#128161;</span>
+					<span class="fac-note-title">${FAC_NOTE.title}</span>
+					<span class="fac-note-chevron">&#9662;</span>
+				</div>
+				<div class="fac-note-body">${FAC_NOTE.body}</div>
+			</div>
+			${session.sections.map((sec, si) => `
+				<div class="section-group">
+					<div class="section-group-title"><span>${escapeHtml(sec.name)}</span><span>${sec.start}\u2013${sec.end} min</span></div>
+					${sec.subs.map((sub, bi) => `
+						<div class="guide-item" onclick="openGuidePiece(${si},${bi})">
+							<div class="guide-num">${bi + 1}</div>
+							<div class="guide-text"><div class="title">${escapeHtml(sub.title)}</div><div class="sub">${sub.readAloud ? 'Read aloud to the small group' : 'Facilitator instructions'}</div></div>
+						</div>`).join('')}
+				</div>`).join('')}
+		</div>
 		<div style="height:16px"></div>`;
 	showTabBar();
 	showScreen('connect-session-overlay');
@@ -1111,6 +1182,37 @@ function detailPrev() { if (currentPieceFlat > 0) { currentPieceFlat--; renderCu
 function closeGuidePiece() {
 	showTabBar();
 	openConnectSession(currentSessionIdx);
+}
+
+function toggleSessionMenu(e) {
+	e.stopPropagation();
+	const wrap = e.currentTarget.closest('.session-menu');
+	const menu = wrap && wrap.querySelector('.session-menu-dropdown');
+	const btn = e.currentTarget;
+	if (!menu) return;
+	const open = menu.hasAttribute('hidden');
+	closeSessionMenu();
+	if (open) {
+		menu.removeAttribute('hidden');
+		btn.setAttribute('aria-expanded', 'true');
+		setTimeout(() => document.addEventListener('click', closeSessionMenu, { once: true }), 0);
+	}
+}
+
+function closeSessionMenu() {
+	document.querySelectorAll('.session-menu-dropdown').forEach(menu => menu.setAttribute('hidden', ''));
+	document.querySelectorAll('.session-menu-btn').forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+}
+
+function markSessionCompleted(idx) {
+	if (typeof idx === 'number') currentSessionIdx = idx;
+	const session = currentSession();
+	session.status = 'Completed';
+	if (session.id === 1) App.prep.homeDismissed = true;
+	showToast(session.title + ' marked complete.');
+	const overlay = document.getElementById('connect-session-overlay');
+	if (overlay && overlay.classList.contains('active')) openConnectSession(currentSessionIdx);
+	else goTab('home');
 }
 
 let liveSectionIdx = 0, liveElapsedSeconds = 0, liveTimerInterval = null;
@@ -1225,7 +1327,7 @@ const COACH_STEPS = [
 	},
 	{
 		title: 'Home',
-		body: "Home is your overview — what's next for Circle Community, a personal exercise whenever you have a quiet moment, and a window into how your patterns are growing.",
+		body: "Home is where you get ready for Circle Community. Prep is the next step — a personal exercise lives inside it until you're ready.",
 		selector: '.tab-item[data-tab="home"]',
 		pill: true
 	},
