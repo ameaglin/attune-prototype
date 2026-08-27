@@ -121,16 +121,16 @@ for (const id of ['name', 'email', 'password', 'settings', 'faqs', 'help', 'ai',
 await evalp(() => openSettings());
 
 /* -------------------------------------------------------------------------
-   Personal exercise flow (from paid home)
+   Personal exercise flow + completion
    ------------------------------------------------------------------------- */
 await evalp(() => {
-	goTab('home');
-	startExercise({ returnTab: 'home' });
+	goTab('exercise');
+	startExercise({ returnTab: 'exercise' });
 });
 await shot('30-ex-privacy');
 await evalp(() => showAIInfo('exercise-overlay', renderExercisePrivacy));
 await shot('31-ex-ai-info');
-await evalp(() => renderExercisePrivacy());
+await evalp(() => { if (typeof _stubPrimaryAction === 'function') _stubPrimaryAction(); });
 await evalp(() => renderExerciseWarmup());
 await shot('32-ex-warmup');
 await evalp(() => setWarmupMode('audio'));
@@ -159,19 +159,52 @@ for (let i = 0; i < stepSlugs.length; i++) {
 await evalp(() => skipThink());
 await shot('37-ex-step-ready-to-type');
 await evalp(() => {
-	ex.responses = EXERCISE_STEPS.map((s, i) => ({
-		label: s.label,
-		text: i === 0 ? 'A conversation that stayed with me after I left the room.' : 'Placeholder response for this export.',
-		mode: 'type'
-	}));
+	ex.responses = [
+		'A conversation that stayed with me after I left the room.',
+		'I can still notice when I start to rush.',
+		'I treat the clock as a judge.',
+		'My manager',
+		'They named the deadline clearly.',
+		'I assume they need me to absorb it all.',
+		'The deadline',
+		'It makes the work concrete.',
+		'It crowds out any pause.',
+		'Stop rushing the work. See the deadline as it is — not as a verdict on me.'
+	];
 	renderExerciseOutput();
 });
 await shot('38-ex-recap');
+await evalp(() => {
+	const sc = document.querySelector('.recap-scroll');
+	if (sc) sc.scrollTop = sc.scrollHeight;
+});
+await shot('38b-ex-recap-listen');
 await evalp(() => renderExerciseRating());
 await shot('39-ex-rating');
 await evalp(() => setRating(4));
 await shot('40-ex-rating-filled');
-await evalp(() => cancelExercise());
+await evalp(() => finishExercise());
+await shot('41-ex-tab-after-finish');
+await evalp(() => {
+	const list = document.getElementById('exercise-past-list');
+	if (list) list.scrollIntoView({ block: 'start' });
+});
+await shot('41b-ex-tab-after-finish-past');
+await evalp(() => {
+	const sc = document.getElementById('exercise');
+	if (sc) sc.scrollTop = 0;
+});
+await evalp(() => {
+	const newest = App.exercises[App.exercises.length - 1];
+	openPastRecap(newest.id);
+});
+await shot('42-ex-completed-recap');
+await evalp(() => {
+	const sc = document.querySelector('.recap-scroll');
+	if (sc) sc.scrollTop = sc.scrollHeight;
+});
+await shot('42b-ex-completed-recap-listen');
+await evalp(() => closePastRecap());
 
 /* -------------------------------------------------------------------------
    Exercises tab states
@@ -183,6 +216,11 @@ await load('paid-circle.html?start=exercise&ex=few');
 await shot('51-ex-tab-few');
 await evalp(() => openPastRecap(App.exercises[0].id));
 await shot('52-ex-past-recap');
+await evalp(() => {
+	const sc = document.querySelector('.recap-scroll');
+	if (sc) sc.scrollTop = sc.scrollHeight;
+});
+await shot('52b-ex-past-recap-listen');
 await evalp(() => closePastRecap());
 
 await load('paid-circle.html?start=exercise&ex=ready');
