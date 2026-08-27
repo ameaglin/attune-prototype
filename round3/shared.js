@@ -37,40 +37,39 @@ function decorateTabIcons() {
 	});
 }
 
-/* Onboarding concept marks — 72pt, circular brand language, not UI chrome */
+/* Onboarding concept marks — 72pt illustrations (Listen / growth / app / Circle).
+   Coral fill behind a thick midnight ring; coral wave from the wordmark. Not nav chrome. */
 const OB_MARKS = {
 	attunement: `<svg class="ob-mark" viewBox="0 0 72 72" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
-		<path d="M8 30 C18 16 26 44 36 30 S54 16 64 30" stroke="#CC664F" stroke-width="3.5"/>
-		<path d="M8 42 C18 28 26 56 36 42 S54 28 64 42" stroke="#CC664F" stroke-width="3.5"/>
+		<circle cx="28" cy="36" r="20" fill="#CC664F" stroke="none"/>
+		<circle cx="44" cy="36" r="20" stroke="#123845" stroke-width="3.4"/>
+		<path d="M34 29c6.5 3 6.5 11 0 14" stroke="#123845" stroke-width="2.2"/>
+		<path d="M37 32c3.8 1.8 3.8 6.2 0 8" stroke="#123845" stroke-width="2.2"/>
 	</svg>`,
-	why: `<svg class="ob-mark" viewBox="0 0 72 72" aria-hidden="true">
-		<circle cx="28" cy="36" r="18" fill="#CC664F"/>
-		<circle cx="44" cy="36" r="18" fill="none" stroke="#123845" stroke-width="3.25"/>
+	why: `<svg class="ob-mark" viewBox="0 0 72 72" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
+		<circle cx="28" cy="38" r="20" fill="#859E9E" stroke="none"/>
+		<circle cx="44" cy="35" r="20" stroke="#123845" stroke-width="3.4"/>
+		<path d="M44 50V26" stroke="#123845" stroke-width="2.3"/>
+		<path d="M44 38c-6-3.5-8.5-8-6.5-13" stroke="#123845" stroke-width="2.1"/>
+		<path d="M44 35c6-3.2 8.2-7.5 6-12.5" stroke="#123845" stroke-width="2.1"/>
+		<path d="M44 22v8M40 26h8" stroke="#CC664F" stroke-width="2.4"/>
 	</svg>`,
 	app: `<svg class="ob-mark" viewBox="0 0 72 72" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
-		<circle cx="36" cy="36" r="24" stroke="#123845" stroke-width="3.25"/>
-		<path d="M18 32 C26 22 32 42 36 32 S46 22 54 32" stroke="#CC664F" stroke-width="3"/>
-		<path d="M18 42 C26 32 32 52 36 42 S46 32 54 42" stroke="#CC664F" stroke-width="3"/>
+		<circle cx="28" cy="36" r="20" fill="#C9D1CC" stroke="none"/>
+		<circle cx="44" cy="36" r="20" stroke="#123845" stroke-width="3.4"/>
+		<path d="M22 32 C30 22 36 42 40 32 S50 22 58 32" stroke="#CC664F" stroke-width="2.8"/>
+		<path d="M22 42 C30 32 36 52 40 42 S50 32 58 42" stroke="#CC664F" stroke-width="2.8"/>
 	</svg>`,
-	circle: `<svg class="ob-mark" viewBox="0 0 72 72" aria-hidden="true">
-		<circle cx="28" cy="42" r="16" fill="#CC664F"/>
-		<circle cx="44" cy="42" r="16" fill="none" stroke="#123845" stroke-width="3"/>
-		<circle cx="36" cy="26" r="16" fill="none" stroke="#859E9E" stroke-width="3"/>
+	circle: `<svg class="ob-mark" viewBox="0 0 72 72" aria-hidden="true" fill="none" stroke-linecap="round">
+		<circle cx="27" cy="42" r="16" fill="#CC664F" stroke="none"/>
+		<circle cx="45" cy="42" r="16" fill="#859E9E" stroke="none"/>
+		<circle cx="36" cy="26" r="16" stroke="#123845" stroke-width="3.4"/>
 	</svg>`
 };
 
 function decorateObIcons() {
-	document.querySelectorAll('[data-ob-icon]').forEach(el => {
+	document.querySelectorAll('.swiper-icon[data-ob-icon]').forEach(el => {
 		el.innerHTML = OB_MARKS[el.dataset.obIcon] || '';
-	});
-}
-	const labels = { home: 'Home', exercise: 'Exercises', connect: 'Circle', profile: 'Profile' };
-	document.querySelectorAll('.tab-item[data-tab]').forEach(item => {
-		const tab = item.dataset.tab;
-		item.innerHTML = `<span class="tab-glyph">${glyphIcon(tab)}</span><span>${labels[tab] || tab}</span>`;
-	});
-	document.querySelectorAll('.settings-btn').forEach(btn => {
-		btn.innerHTML = glyphIcon('settings');
 	});
 }
 
@@ -94,8 +93,8 @@ const App = {
 	renderers: {}, // { home, exercise, explore, connect } -> fn()
 
 	init() {
-		decorateObIcons();
 		decorateTabIcons();
+		decorateObIcons();
 		hideTabBar(); // stays hidden until finishOnboarding() -> goTab('home') reveals it
 	}
 };
