@@ -1,0 +1,10 @@
+{
+  "name": "round3-pngs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Export Round 3 prototype screens as PNGs for Figma",
+  "dependencies": {
+    "puppeteer-core": "^25.8.0"
+  }
+}

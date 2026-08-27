@@ -490,43 +490,64 @@ function recapFromRecord(rec) {
 	};
 }
 
-function recapField(label, body) {
+function recapField(label, body, kind) {
+	const text = String(body || '');
+	const empty = !text.trim() || text.charAt(0) === '(';
+	const cls = ['recap-field', kind === 'lead' ? 'recap-field-lead' : '', kind === 'quote' ? 'recap-field-quote' : '', empty ? 'is-empty' : ''].filter(Boolean).join(' ');
 	return `
-		<div class="output-card">
-			<div class="output-step-label">${escapeHtml(label)}</div>
-			<div class="output-response" style="margin-bottom:0;">${escapeHtml(body)}</div>
+		<div class="${cls}">
+			<div class="recap-field-label">${escapeHtml(label)}</div>
+			<div class="recap-field-body">${escapeHtml(text)}</div>
+		</div>`;
+}
+
+function recapChromeHTML() {
+	return `
+		<div class="recap-hero">
+			<div class="kicker">Personal exercise</div>
+			<div class="h1">Your recap</div>
+			<p class="caption">What you discerned — this is what you'd reopen, and may take to the gathering.</p>
 		</div>`;
 }
 
 function recapCardsHTML(data, aiOnclick) {
 	const matrix = (data.matrix || []).map(row => `
-		<div class="output-card">
-			<div class="output-step-label">${escapeHtml(row.relation)}${row.who ? ' \u00b7 ' + escapeHtml(row.who) : ''}</div>
-			<p class="caption" style="margin:0 0 4px;font-weight:600;color:var(--ink);">Serving well</p>
-			<div class="output-response">${escapeHtml(row.good)}</div>
-			<p class="caption" style="margin:8px 0 4px;font-weight:600;color:var(--ink);">Not serving well</p>
-			<div class="output-response" style="margin-bottom:0;">${escapeHtml(row.broken)}</div>
+		<div class="recap-matrix-item">
+			<div class="recap-field-label">${escapeHtml(row.relation)}${row.who ? ' \u00b7 ' + escapeHtml(row.who) : ''}</div>
+			<div class="recap-pair">
+				<div>
+					<p class="recap-pair-label">Serving well</p>
+					<p class="recap-pair-body">${escapeHtml(row.good)}</p>
+				</div>
+				<div>
+					<p class="recap-pair-label">Not serving well</p>
+					<p class="recap-pair-body">${escapeHtml(row.broken)}</p>
+				</div>
+			</div>
 		</div>`).join('');
 	return `
-		${recapField('Situation', data.situation)}
-		${recapField("Key themes of God's guidance", data.themes)}
-		${recapField("God's heart posture", data.heartPosture)}
-		${recapField('Key next steps', data.nextSteps)}
-		${(data.matrix && data.matrix.length) ? `<div class="recap-matrix-kicker">On the way there</div>
-		<p class="caption" style="margin:-4px 0 12px;">Listen artifacts — the three relationships, good and broken. These sit under the themes, not above them.</p>
-		${matrix}` : ''}
-		<p class="caption" style="margin:8px 0 0;"><a href="javascript:void(0)" onclick="${aiOnclick}" style="color:var(--muted);text-decoration:underline;">How is AI used?</a></p>`;
+		<div class="recap-primary">
+			${recapField('Situation', data.situation, 'lead')}
+			${recapField("Key themes of God's guidance", data.themes, 'quote')}
+			${recapField("God's heart posture", data.heartPosture, 'quote')}
+			${recapField('Key next steps', data.nextSteps)}
+		</div>
+		${(data.matrix && data.matrix.length) ? `<div class="recap-listen">
+			<div class="kicker">Listen</div>
+			<p class="caption recap-listen-lede">The three relationships — good and broken. These sit under the themes, not above them.</p>
+			${matrix}
+		</div>` : ''}
+		<p class="recap-ai"><a href="javascript:void(0)" onclick="${aiOnclick}">How is AI used?</a></p>`;
 }
 
 function renderExerciseOutput() {
 	const data = recapFromLive();
 	exOverlay(`
-		<div class="h1" style="margin-bottom:6px;">Your Recap</div>
-		<p class="caption" style="margin-bottom:16px;">What you discerned — this is what you'd reopen, and may take to the gathering.</p>
-		<div style="flex:1;overflow-y:auto;">
+		${recapChromeHTML()}
+		<div class="recap-scroll">
 		${recapCardsHTML(data, "showAIInfo('exercise-overlay', renderExerciseOutput)")}
 		</div>
-		<button class="btn btn-dark btn-block-mt" onclick="renderExerciseRating()">Continue &rarr;</button>
+		<button class="btn btn-dark btn-block-mt" onclick="renderExerciseRating()">Continue</button>
 		<div style="height:16px"></div>`);
 }
 
@@ -1328,9 +1349,8 @@ function openPastRecap(id) {
 	showScreen('exercise-overlay');
 	exOverlay(`
 		<button class="btn-ghost back-link" onclick="closePastRecap()">&larr; Back</button>
-		<div class="h1" style="margin-bottom:6px;">Your Recap</div>
-		<p class="caption" style="margin-bottom:16px;">What you discerned — this is what you'd reopen, and may take to the gathering.</p>
-		<div style="flex:1;overflow-y:auto;">
+		${recapChromeHTML()}
+		<div class="recap-scroll">
 		${recapCardsHTML(data, `showAIInfo('exercise-overlay', function(){ openPastRecap(${id}); })`)}
 		</div>
 		<div style="height:16px"></div>`);
@@ -1353,15 +1373,54 @@ function prepDoneCount() {
 	return ['classroom', 'exercise', 'reflect'].filter(k => App.prep[k]).length;
 }
 
+function prepStackHTML(opts) {
+	opts = opts || {};
+	const doneCount = prepDoneCount();
+	const allDone = doneCount === 3;
+	const toChecklist = allDone || doneCount > 0;
+	const title = opts.sessionTitle || 'Session 1';
+	const collapsible = !!opts.collapsible;
+	const open = collapsible ? !!opts.open : true;
+	const ret = opts.returnScreen || '';
+	const flowArg = `{toChecklist:${toChecklist}${ret ? `, returnScreen:'${ret}'` : ''}}`;
+	const cta = allDone ? 'Open checklist' : doneCount > 0 ? 'Continue prep' : "Let's get prepped";
+	const heading = allDone ? (opts.readyLabel || "You're ready for Session 1") : 'Prep for the gathering';
+	const headRight = collapsible
+		? `<button type="button" class="prep-collapse-btn" onclick="event.stopPropagation();togglePrepStack()" aria-expanded="${open ? 'true' : 'false'}" aria-controls="acc-prep-rows" aria-label="${open ? 'Collapse prep' : 'Expand prep'}">&#9662;</button>`
+		: `<div class="session-menu">
+				<button type="button" class="session-menu-btn" onclick="event.stopPropagation();toggleSessionMenu(event)" aria-label="Session options" aria-expanded="false">&#8942;</button>
+				<div class="session-menu-dropdown" hidden>
+					<button type="button" class="session-menu-item" onclick="event.stopPropagation();markSessionCompleted(0)">Mark Session 1 completed</button>
+				</div>
+			</div>`;
+	const heroClick = collapsible ? '' : ` onclick="startPrepFlow(${flowArg})"`;
+	return `
+	<div class="home-prep-stack${collapsible ? ' collapsible' : ''}${collapsible && open ? ' open' : ''}"${collapsible ? ' id="acc-prep"' : ''}>
+		<div class="hero-card gradient prep-home-card"${heroClick}>
+			<div class="prep-card-head">
+				<div class="kicker">${escapeHtml(title)} \u00b7 On your own</div>
+				${headRight}
+			</div>
+			<b style="font-size:16px;display:block;margin-bottom:4px;">${heading}</b>
+			<p class="caption" style="margin-bottom:16px;">This will help you show up for Circle.</p>
+			<button class="btn btn-dark btn-small" onclick="event.stopPropagation();startPrepFlow(${flowArg})">${cta}</button>
+		</div>
+		<div class="card static prep-rows-card"${collapsible ? ' id="acc-prep-rows"' : ''}>
+			${prepStepRowsHTML(ret || undefined)}
+		</div>
+	</div>`;
+}
+
 function prepStepRowsHTML(returnScreen) {
 	const retArg = returnScreen ? `, '${returnScreen}'` : '';
 	const row = (done, step, title, caption) => `
 		<button type="button" class="prep-step" onclick="event.stopPropagation();openPrepStep('${step}'${retArg})">
 			<div class="chk-circle${done ? ' done' : ''}">${done ? '&#10003;' : ''}</div>
-			<div>
+			<div class="prep-step-body">
 				<b>${escapeHtml(title)}</b>
-				<p class="caption">${escapeHtml(caption)}</p>
+				<p class="caption">${done ? 'Done' : escapeHtml(caption)}</p>
 			</div>
+			${done ? '' : '<span class="prep-step-chevron" aria-hidden="true">&#8250;</span>'}
 		</button>`;
 	return `<div class="prep-steps">
 		${row(App.prep.classroom, 'classroom', 'Learning', 'Short pieces for this session — not the whole library.')}
@@ -1407,7 +1466,7 @@ function prepShowIntro() {
 	prepOverlay(`
 		<button class="btn-ghost back-link" onclick="closePrepOverlay()">&larr; Back</button>
 		<div class="h1" style="margin-bottom:12px;">Getting ready for the Circle</div>
-		<p class="body-text" style="margin-bottom:20px;">Session 1 is coming up. Whenever it feels right before then, spend a few unhurried minutes on your own — a short Learning piece, a personal exercise, and Reflect &amp; Prep for what you'll bring to the room. No need to do it all at once.</p>
+		<p class="body-text" style="margin-bottom:20px;">Session 1 is coming up. Spend a few unhurried minutes on your own — a short Learning piece, a personal exercise, and Reflect. Together, they'll help you show up for Circle.</p>
 		<button class="btn btn-dark btn-block-mt" onclick="prepShowChecklist()">Let's Get Prepped &rarr;</button>
 		<div style="height:16px"></div>`);
 }
@@ -1657,8 +1716,6 @@ function gatheringAgendaHTML(session) {
 function openConnectSession(idx, opts) {
 	currentSessionIdx = idx;
 	const session = currentSession();
-	const doneCount = prepDoneCount();
-	const roomOpen = !!(opts && opts.room);
 	const facItem = `<button type="button" class="session-menu-item" onclick="startFacilitatorMode()">Facilitator Mode</button>`;
 	document.getElementById('connect-session-body').innerHTML = `
 		<button class="btn-ghost back-link" onclick="goTab('connect')">&larr; Back to Circle</button>
@@ -1674,43 +1731,32 @@ function openConnectSession(idx, opts) {
 			</div>
 		</div>
 		<p class="caption" style="margin-bottom:18px;">${escapeHtml(session.status)} \u00b7 60 min gathering</p>
-		<div class="sess-acc${roomOpen ? '' : ' open'}" id="acc-prep">
-			<button type="button" class="sess-acc-head" onclick="toggleSessAcc('prep')">
-				<div>
-					<div class="kicker">On your own</div>
-					<b>Prepare</b>
-					<p class="caption">${doneCount} of 3 before you show up</p>
-				</div>
-				<span class="sess-acc-chevron">&#9662;</span>
-			</button>
-			<div class="sess-acc-body">${prepStepRowsHTML('connect-session-overlay')}</div>
-		</div>
-		<div class="sess-acc${roomOpen ? ' open' : ''}" id="acc-room">
-			<button type="button" class="sess-acc-head" onclick="toggleSessAcc('room')">
-				<div>
-					<div class="kicker">Together</div>
-					<b>In the room</b>
-					<p class="caption">Agenda for the gathering. Expand when you are together.</p>
-				</div>
-				<span class="sess-acc-chevron">&#9662;</span>
-			</button>
-			<div class="sess-acc-body">${gatheringAgendaHTML(session)}</div>
+		${prepStackHTML({
+			collapsible: true,
+			open: true,
+			sessionTitle: session.title,
+			returnScreen: 'connect-session-overlay',
+			readyLabel: "You're ready for this gathering"
+		})}
+		<div class="session-room-block">
+			<div class="kicker">Together</div>
+			<b>In the room</b>
+			<p class="caption">Agenda for the gathering.</p>
+			${gatheringAgendaHTML(session)}
 		</div>
 		<div style="height:16px"></div>`;
 	showTabBar();
 	showScreen('connect-session-overlay');
 }
 
-function toggleSessAcc(which) {
+function togglePrepStack() {
 	const prep = document.getElementById('acc-prep');
-	const room = document.getElementById('acc-room');
-	if (!prep || !room) return;
-	if (which === 'prep') {
-		prep.classList.add('open');
-		room.classList.remove('open');
-	} else {
-		room.classList.add('open');
-		prep.classList.remove('open');
+	if (!prep) return;
+	const open = prep.classList.toggle('open');
+	const btn = prep.querySelector('.prep-collapse-btn');
+	if (btn) {
+		btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+		btn.setAttribute('aria-label', open ? 'Collapse prep' : 'Expand prep');
 	}
 }
 
@@ -1951,7 +1997,7 @@ const COACH_STEPS = [
 	{
 		title: 'Get ready for Circle Community',
 		body: 'This card is your prep for the gathering. Open it when you have a quiet stretch — it will walk you through getting ready, so you show up to Session 1 already oriented.',
-		selector: '#home-prep-card-slot .card',
+		selector: '#home-prep-card-slot .home-prep-stack',
 		pill: false
 	},
 	{
@@ -1986,7 +2032,7 @@ function startCoachTour() {
 	if (!document.getElementById('coach-overlay')) return;
 	if (_coach) return;
 	const begin = () => {
-		if (!document.querySelector('#home-prep-card-slot .card')) return;
+		if (!document.querySelector('#home-prep-card-slot .home-prep-stack')) return;
 		const overlay = document.getElementById('coach-overlay');
 		const rail = document.getElementById('coach-rail');
 		rail.classList.add('no-swipe');
