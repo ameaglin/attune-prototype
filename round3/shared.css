@@ -761,13 +761,36 @@ body {
 	margin: 0 auto 22px; padding: 0;
 	background: none; font-size: 0;
 }
-.ob-mark, .concept-mark {
+.swiper-icon img {
 	width: 72px; height: 72px; display: block;
+	object-fit: contain;
 }
-.swiper-dots { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); display: flex; gap: 7px; }
-.dot-ctr { width: 8px; height: 8px; background: var(--line-strong); border-radius: 50%; cursor: pointer; }
-.dot-ctr.on { background: var(--ink); }
-.ob-foot { position: absolute; left: 24px; right: 24px; bottom: 52px; text-align: center; }
+.swiper-dots {
+	position: absolute;
+	bottom: 18px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	z-index: 5;
+	pointer-events: auto;
+}
+.dot-ctr {
+	display: block;
+	flex: 0 0 8px;
+	width: 8px;
+	height: 8px;
+	background: var(--sage);
+	opacity: 0.5;
+	border-radius: 50%;
+	cursor: pointer;
+}
+.dot-ctr.on {
+	background: var(--midnight);
+	opacity: 1;
+}
+.ob-foot { position: absolute; left: 24px; right: 24px; bottom: 40px; text-align: center; z-index: 4; }
 .ob-quote { display: block; margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); font-style: italic; text-decoration: none; }
 .ob-quote:hover { color: var(--ink); }
 .ob-quote cite { display: block; font-style: normal; font-size: 12px; font-weight: 600; margin-top: 6px; color: var(--faint); }
@@ -863,4 +886,8 @@ body {
 
 #ob-intro-1, #ob-intro-2, #ob-intro-3, #ob-intro-4 {
 	background: var(--grad-light);
+	padding-bottom: 48px;
+}
+#ob-intro-2, #ob-intro-3 {
+	padding-bottom: 96px;
 }
