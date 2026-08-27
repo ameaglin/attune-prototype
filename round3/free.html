@@ -70,7 +70,7 @@
 <div id="ob-account" class="screen">
 	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
 	<button class="btn-ghost back-link" onclick="showScreen('ob-intro-4')">&larr; Back</button>
-	<div class="h1" style="font-size:28px;">Create your account</div>
+	<div class="h1">Create your account</div>
 	<p class="body-text" style="margin-bottom:20px;">Needed to save your reflections and come back later.</p>
 	<input type="text" placeholder="Username" class="input-box">
 	<input type="password" placeholder="Password" class="input-box">
@@ -81,7 +81,7 @@
 <div id="ob-name" class="screen">
 	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
 	<button class="btn-ghost back-link" onclick="showScreen('ob-account')">&larr; Back</button>
-	<div class="h1" style="font-size:28px;">What should we call you?</div>
+	<div class="h1">What should we call you?</div>
 	<p class="body-text" style="margin-bottom:20px;">First and last name — editable later in Settings.</p>
 	<input type="text" id="ob-first-name" placeholder="First name" class="input-box" value="Jordan">
 	<input type="text" placeholder="Last name" class="input-box" value="Lee">
@@ -92,7 +92,7 @@
 <div id="ob-path" class="screen">
 	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
 	<button class="btn-ghost back-link" onclick="showScreen('ob-name')">&larr; Back</button>
-	<div class="h1" style="font-size:28px;">How will you use Attune?</div>
+	<div class="h1">How will you use Attune?</div>
 	<p class="body-text" style="margin-bottom:20px;">Choose one to continue.</p>
 	<div class="path-option selected" data-path="circle" onclick="selectObPath('circle')">
 		<span class="path-radio" aria-hidden="true"></span>
@@ -115,7 +115,7 @@
 <div id="ob-circle-join" class="screen">
 	<img src="assets/attune-logo.png" alt="Attune" class="home-logo ob-top-logo">
 	<button class="btn-ghost back-link" onclick="showScreen('ob-path')">&larr; Back</button>
-	<div class="h1" style="font-size:28px;">Join a Circle</div>
+	<div class="h1">Join a Circle</div>
 	<p class="body-text" style="margin-bottom:16px;">A code from your organization can mean it's paid for, discounted, or just associates you with the group. If you still need to pay, you'll do that next.</p>
 	<div class="guidance-card" style="margin-bottom:16px;">
 		<div class="caption" style="font-weight:600;color:var(--ink);margin-bottom:6px;">Your Exercise Stays Private</div>
@@ -136,7 +136,7 @@
 		<div class="h2">Welcome, <span id="home-name">Jordan</span></div>
 	</div>
 
-	<div class="hero-card soft" onclick="startExercise({returnTab:'home'})">
+	<div class="hero-card gradient" onclick="startExercise({returnTab:'home'})">
 		<div class="kicker">Personal Exercise</div>
 		<div class="h3">Featured Exercise</div>
 		<p class="caption" style="margin:6px 0 16px;">Today's personal exercise — about 10–15 min, on your own, whenever you have a quiet moment.</p>
@@ -180,7 +180,7 @@
 <!-- Find a Circle (reachable from Home + Explore + Connect) -->
 <div id="find-a-circle" class="screen has-tab-bar">
 	<button class="btn-ghost back-link" onclick="goTab(App.currentTab)">&larr; Back</button>
-	<div class="h1" style="font-size:26px;margin-bottom:8px;">Find a Circle Community</div>
+	<div class="h1" style="margin-bottom:8px;">Find a Circle Community</div>
 	<p class="body-text" style="margin-bottom:18px;">Enter your zip code to see Circle Communities meeting near you.</p>
 	<input type="text" placeholder="Zip code" class="input-box">
 	<button class="btn btn-dark" onclick="showStub('Find a Circle Community', 'This demo doesn\'t include real listings yet — in the full app, you\'d see nearby groups here.', 'Back', function(){ goTab(App.currentTab); })">Search</button>

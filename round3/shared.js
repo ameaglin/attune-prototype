@@ -30,7 +30,7 @@ function decorateTabIcons() {
 	const labels = { home: 'Home', exercise: 'Exercises', connect: 'Circle', profile: 'Profile' };
 	document.querySelectorAll('.tab-item[data-tab]').forEach(item => {
 		const tab = item.dataset.tab;
-		item.innerHTML = `${glyphIcon(tab)}<span>${labels[tab] || tab}</span>`;
+		item.innerHTML = `<span class="tab-glyph">${glyphIcon(tab)}</span><span>${labels[tab] || tab}</span>`;
 	});
 	document.querySelectorAll('.settings-btn').forEach(btn => {
 		btn.innerHTML = glyphIcon('settings');
@@ -308,7 +308,7 @@ const WARMUP_MODES = [
 function renderExerciseWarmup() {
 	exOverlay(`
 		<button class="btn-ghost back-link" onclick="renderExercisePrivacy()">&larr; Back</button>
-		<div class="h1" style="font-size:26px;margin-bottom:6px;">Warm-Up</div>
+		<div class="h1" style="margin-bottom:6px;">Warm-Up</div>
 		<p class="caption" style="margin-bottom:16px;">A short warm-up before your personal exercise. Just listen or read — no need to respond.</p>
 		<div class="warmup-mode-list" id="warmup-mode-list">
 			${WARMUP_MODES.map(m => `
@@ -332,9 +332,9 @@ function setWarmupMode(id) {
 	if (mode.id === 'audio') {
 		preview.innerHTML = `<div class="card static" style="text-align:center;padding:24px;"><div class="triad-waveform" style="justify-content:center;">${Array.from({ length: 7 }).map((_, i) => `<span class="triad-wave-bar" style="height:${12 + (i * 4) % 22}px;animation-delay:${(i * 0.1).toFixed(1)}s"></span>`).join('')}</div><p class="caption">[ Playing warm-up audio · 3–4 min ]</p></div>`;
 	} else if (mode.id === 'words') {
-		preview.innerHTML = `<div class="card static"><p class="body-text" style="font-size:14px;">Take a moment to settle. Notice your breath, the weight of your body, the sounds around you. There's nothing to solve right now — just arrive, and let your attention soften before the exercise begins.</p></div>`;
+		preview.innerHTML = `<div class="card static"><p class="body-text">Take a moment to settle. Notice your breath, the weight of your body, the sounds around you. There's nothing to solve right now — just arrive, and let your attention soften before the exercise begins.</p></div>`;
 	} else {
-		preview.innerHTML = `<div class="card static" style="text-align:center;padding:24px;"><div class="triad-waveform" style="justify-content:center;">${Array.from({ length: 7 }).map((_, i) => `<span class="triad-wave-bar" style="height:${12 + (i * 4) % 22}px;animation-delay:${(i * 0.1).toFixed(1)}s"></span>`).join('')}</div><p class="caption" style="margin-bottom:10px;">[ Playing audio · 3–4 min ]</p><p class="body-text" style="font-size:13px;">Take a moment to settle. Notice your breath, the weight of your body, the sounds around you.</p></div>`;
+		preview.innerHTML = `<div class="card static" style="text-align:center;padding:24px;"><div class="triad-waveform" style="justify-content:center;">${Array.from({ length: 7 }).map((_, i) => `<span class="triad-wave-bar" style="height:${12 + (i * 4) % 22}px;animation-delay:${(i * 0.1).toFixed(1)}s"></span>`).join('')}</div><p class="caption" style="margin-bottom:10px;">[ Playing audio · 3–4 min ]</p><p class="body-text">Take a moment to settle. Notice your breath, the weight of your body, the sounds around you.</p></div>`;
 	}
 	document.getElementById('warmup-begin-btn').disabled = false;
 }
@@ -353,6 +353,12 @@ function setThinkBleed(on) {
 	if (el) el.classList.toggle('think-bleed', !!on);
 }
 
+function exerciseMovement(idx) {
+	if (idx === 0) return 'Name';
+	if (idx === EXERCISE_STEPS.length - 1) return 'Discern';
+	return 'Listen';
+}
+
 function renderExerciseStep(idx) {
 	clearThinkTimer();
 	setThinkBleed(false);
@@ -361,17 +367,15 @@ function renderExerciseStep(idx) {
 	const isLast = idx === EXERCISE_STEPS.length - 1;
 	const c = 2 * Math.PI * 18;
 	exOverlay(`
-		<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-			<button class="btn-ghost" onclick="${idx === 0 ? "renderExerciseWarmup()" : `renderExerciseStep(${idx - 1})`}">&larr; Back</button>
-			<button class="btn-ghost" onclick="cancelExercise()">&#10005; Exit</button>
-		</div>
 		<div class="exercise-topbar">
-			<span class="exercise-step-count">Step ${idx + 1} of ${EXERCISE_STEPS.length}</span>
-			<span class="caption">${escapeHtml(step.label)}</span>
+			<button class="btn-ghost" onclick="${idx === 0 ? "renderExerciseWarmup()" : `renderExerciseStep(${idx - 1})`}" aria-label="Back">&#10005;</button>
+			<span class="exercise-step-count">${exerciseMovement(idx)} · ${idx + 1} of ${EXERCISE_STEPS.length}</span>
+			<button class="btn-ghost" onclick="cancelExercise()">Save</button>
 		</div>
-		<div class="seg-toggle" style="margin-top:10px;">
-			<button class="seg-toggle-btn${ex.mode === 'practice' ? ' active' : ''}" onclick="setExerciseMode(this,'practice')">Practice</button>
+		<div class="pace-track" aria-hidden="true"><div class="pace-fill" style="width:${((idx + 1) / EXERCISE_STEPS.length) * 100}%"></div></div>
+		<div class="seg-toggle" style="margin-top:2px;">
 			<button class="seg-toggle-btn${ex.mode === 'training' ? ' active' : ''}" onclick="setExerciseMode(this,'training')">Training</button>
+			<button class="seg-toggle-btn${ex.mode === 'practice' ? ' active' : ''}" onclick="setExerciseMode(this,'practice')">Practice</button>
 		</div>
 		<div id="ex-guidance-card" style="display:${ex.mode === 'training' ? 'block' : 'none'}">
 			<div class="guidance-card"><p class="caption" style="color:var(--body);">${escapeHtml(step.hint)}</p></div>
@@ -517,7 +521,7 @@ function recapCardsHTML(data, aiOnclick) {
 function renderExerciseOutput() {
 	const data = recapFromLive();
 	exOverlay(`
-		<div class="h1" style="font-size:26px;margin-bottom:6px;">Your Recap</div>
+		<div class="h1" style="margin-bottom:6px;">Your Recap</div>
 		<p class="caption" style="margin-bottom:16px;">What you discerned — this is what you'd reopen, and may take to the gathering.</p>
 		<div style="flex:1;overflow-y:auto;">
 		${recapCardsHTML(data, "showAIInfo('exercise-overlay', renderExerciseOutput)")}
@@ -916,6 +920,7 @@ function renderPatternCalendar(quotes) {
 			<span><i class="pcal-cell trust"></i>Trust &amp; Surrender</span>
 			<span><i class="pcal-cell patience"></i>Patience</span>
 			<span><i class="pcal-cell clarity"></i>Clarity</span>
+			<span><i class="pcal-cell mix"></i>More than one</span>
 		</div>
 	</div>`;
 }
@@ -928,7 +933,7 @@ function exerciseTabKind() {
 }
 
 function krlCardHTML(variant) {
-	const cls = variant === 'soft' ? 'hero-card soft' : 'hero-card';
+	const cls = variant === 'soft' ? 'hero-card soft' : 'hero-card gradient';
 	return `
 	<div class="${cls}" onclick="startExercise({returnTab:'exercise'})">
 		<div class="kicker">On your own</div>
@@ -940,7 +945,7 @@ function krlCardHTML(variant) {
 
 function dgeCardHTML(again) {
 	return `
-	<div class="${again ? 'card outlined static' : 'hero-card'}" ${again ? '' : 'onclick="startDGE()"'}>
+	<div class="${again ? 'card outlined static' : 'hero-card gradient'}" ${again ? '' : 'onclick="startDGE()"'}>
 		<div class="kicker">Circle \u00b7 The season</div>
 		<div class="h3">${again ? 'Do Discernment of Growth Edges again' : 'Discernment of Growth Edges'}</div>
 		<p class="caption" style="margin:6px 0 16px;">A second exercise — same three movements, object is the season. Looks across your past exercises; it does not create the patterns.</p>
@@ -1006,7 +1011,7 @@ function renderDgeIntro() {
 	exOverlay(`
 		<button class="btn-ghost back-link" onclick="cancelDGE()">&larr; Back</button>
 		<div class="kicker">The season</div>
-		<div class="h1" style="font-size:26px;margin-bottom:10px;">Discernment of Growth Edges</div>
+		<div class="h1" style="margin-bottom:10px;">Discernment of Growth Edges</div>
 		<p class="body-text" style="margin-bottom:14px;">God is mostly after formation &mdash; not only guidance for one situation. Growth Edges are 1&ndash;3 invitations for this season. They are an open door, not a demand.</p>
 		<p class="caption" style="margin-bottom:24px;">Pattern Recognition looks across your past exercises. The themes are a starting point. You discern what, if anything, is an invitation.</p>
 		<button class="btn btn-dark btn-block-mt" onclick="renderDgeRange()">Begin</button>
@@ -1025,7 +1030,7 @@ function renderDgeRange() {
 	const customOn = dge.range === 'custom';
 	exOverlay(`
 		<button class="btn-ghost back-link" onclick="renderDgeIntro()">&larr; Back</button>
-		<div class="h1" style="font-size:26px;margin-bottom:8px;">Date range</div>
+		<div class="h1" style="margin-bottom:8px;">Date range</div>
 		<p class="caption" style="margin-bottom:16px;">This filters which past exercises Pattern Recognition includes. It does not create the patterns.</p>
 		<button type="button" class="path-option${sinceOn ? ' selected' : ''}" data-dge-range="since" onclick="selectDgeRange('since')">
 			<span class="path-radio"></span>
@@ -1108,7 +1113,7 @@ function renderDgeThemes() {
 		</div>`).join('') : `<p class="caption">Not enough in this range yet. Try a wider window.</p>`;
 	exOverlay(`
 		<button class="btn-ghost back-link" onclick="renderDgeRange()">&larr; Back</button>
-		<div class="h1" style="font-size:26px;margin-bottom:6px;">What keeps showing up</div>
+		<div class="h1" style="margin-bottom:6px;">What keeps showing up</div>
 		<p class="caption" style="margin-bottom:12px;">Scroll the cards. Sit with them. These are starting points &mdash; not your Growth Edges yet.</p>
 		<div class="dge-rail">${cards}</div>
 		<button class="btn btn-dark btn-block-mt" onclick="renderDgeEdges()">Name Growth Edges</button>
@@ -1118,7 +1123,7 @@ function renderDgeThemes() {
 function renderDgeEdges() {
 	exOverlay(`
 		<button class="btn-ghost back-link" onclick="${dge.fromEdit ? 'cancelDGE()' : 'renderDgeThemes()'}">&larr; Back</button>
-		<div class="h1" style="font-size:26px;margin-bottom:6px;">Name 1&ndash;3 Growth Edges</div>
+		<div class="h1" style="margin-bottom:6px;">Name 1&ndash;3 Growth Edges</div>
 		<p class="caption" style="margin-bottom:14px;">You name them. Type, or speak and we&rsquo;ll turn it into text &mdash; we don&rsquo;t extract or decide the edges for you. 1&ndash;3 sentences each is enough.</p>
 		<label class="ge-label">Growth Edge 1</label>
 		<textarea class="dge-edge${dge.focus === 0 ? ' selected' : ''}" rows="3" onfocus="dgeFocusEdge(0)" id="dge-e0">${escapeHtml(dge.edges[0])}</textarea>
@@ -1323,7 +1328,7 @@ function openPastRecap(id) {
 	showScreen('exercise-overlay');
 	exOverlay(`
 		<button class="btn-ghost back-link" onclick="closePastRecap()">&larr; Back</button>
-		<div class="h1" style="font-size:26px;margin-bottom:6px;">Your Recap</div>
+		<div class="h1" style="margin-bottom:6px;">Your Recap</div>
 		<p class="caption" style="margin-bottom:16px;">What you discerned — this is what you'd reopen, and may take to the gathering.</p>
 		<div style="flex:1;overflow-y:auto;">
 		${recapCardsHTML(data, `showAIInfo('exercise-overlay', function(){ openPastRecap(${id}); })`)}
@@ -1401,7 +1406,7 @@ function prepShowIntro() {
 	showTabBar();
 	prepOverlay(`
 		<button class="btn-ghost back-link" onclick="closePrepOverlay()">&larr; Back</button>
-		<div class="h1" style="font-size:26px;margin-bottom:12px;">Getting ready for the Circle</div>
+		<div class="h1" style="margin-bottom:12px;">Getting ready for the Circle</div>
 		<p class="body-text" style="margin-bottom:20px;">Session 1 is coming up. Whenever it feels right before then, spend a few unhurried minutes on your own — a short Learning piece, a personal exercise, and Reflect &amp; Prep for what you'll bring to the room. No need to do it all at once.</p>
 		<button class="btn btn-dark btn-block-mt" onclick="prepShowChecklist()">Let's Get Prepped &rarr;</button>
 		<div style="height:16px"></div>`);
@@ -1413,7 +1418,7 @@ function prepShowChecklist() {
 	const allDone = doneCount === 3;
 	prepOverlay(`
 		<button class="btn-ghost back-link" onclick="closePrepOverlay()">&larr; Back to Home</button>
-		<div class="h1" style="font-size:26px;margin-bottom:6px;">Your Prep Checklist</div>
+		<div class="h1" style="margin-bottom:6px;">Your Prep Checklist</div>
 		<p class="prep-progress-caption">${doneCount} of 3 complete</p>
 		<div class="card outlined prep-checklist-item" onclick="prepShowClassroom()">
 			<div class="chk-circle${App.prep.classroom ? ' done' : ''}">${App.prep.classroom ? '&#10003;' : ''}</div>
@@ -1434,7 +1439,7 @@ function prepShowChecklist() {
 function prepShowClassroom() {
 	prepOverlay(`
 		<button class="btn-ghost back-link" onclick="prepShowChecklist()">&larr; Back to Prep</button>
-		<div class="h1" style="font-size:26px;margin-bottom:6px;">Learning</div>
+		<div class="h1" style="margin-bottom:6px;">Learning</div>
 		<p class="caption" style="margin-bottom:4px;">A short set of pieces bundled for Session 1.</p>
 		<p class="classroom-progress-text" id="prep-classroom-progress"></p>
 		<div id="prep-classroom-list"></div>
@@ -1450,7 +1455,7 @@ function prepGoExercise() {
 function prepShowReflect() {
 	prepOverlay(`
 		<button class="btn-ghost back-link" onclick="prepShowChecklist()">&larr; Back to Prep</button>
-		<div class="h1" style="font-size:26px;margin-bottom:6px;">Reflect &amp; Prep</div>
+		<div class="h1" style="margin-bottom:6px;">Reflect &amp; Prep</div>
 		<p class="body-text" style="margin-bottom:8px;">What is one takeaway you want to share with your group tonight?</p>
 		${renderInputTriadHTML('triad-reflect')}
 		<button class="btn btn-dark btn-block-mt" onclick="prepSubmitReflect()">Submit</button>
@@ -1659,7 +1664,7 @@ function openConnectSession(idx, opts) {
 		<button class="btn-ghost back-link" onclick="goTab('connect')">&larr; Back to Circle</button>
 		<div class="kicker">Circle</div>
 		<div class="session-title-row">
-			<div class="h1" style="font-size:26px;margin:0;">${escapeHtml(session.title)}</div>
+			<div class="h1" style="margin:0;">${escapeHtml(session.title)}</div>
 			<div class="session-menu">
 				<button type="button" class="session-menu-btn" onclick="toggleSessionMenu(event)" aria-label="Session options" aria-expanded="false">&#8942;</button>
 				<div class="session-menu-dropdown" hidden>
@@ -1910,7 +1915,7 @@ function openProfilePage(id) {
 	if (!page) return;
 	document.getElementById('settings-body').innerHTML = `
 		<button class="btn-ghost back-link" onclick="openSettings()">&larr; Back</button>
-		<div class="h1" style="font-size:26px;margin-bottom:12px;">${page.title}</div>
+		<div class="h1" style="margin-bottom:12px;">${page.title}</div>
 		<div class="profile-article">${page.body}</div>
 		<div style="height:16px"></div>`;
 }
