@@ -37,6 +37,43 @@ function decorateTabIcons() {
 	});
 }
 
+/* Onboarding concept marks — 72pt, circular brand language, not UI chrome */
+const OB_MARKS = {
+	attunement: `<svg class="ob-mark" viewBox="0 0 72 72" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
+		<path d="M8 30 C18 16 26 44 36 30 S54 16 64 30" stroke="#CC664F" stroke-width="3.5"/>
+		<path d="M8 42 C18 28 26 56 36 42 S54 28 64 42" stroke="#CC664F" stroke-width="3.5"/>
+	</svg>`,
+	why: `<svg class="ob-mark" viewBox="0 0 72 72" aria-hidden="true">
+		<circle cx="28" cy="36" r="18" fill="#CC664F"/>
+		<circle cx="44" cy="36" r="18" fill="none" stroke="#123845" stroke-width="3.25"/>
+	</svg>`,
+	app: `<svg class="ob-mark" viewBox="0 0 72 72" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
+		<circle cx="36" cy="36" r="24" stroke="#123845" stroke-width="3.25"/>
+		<path d="M18 32 C26 22 32 42 36 32 S46 22 54 32" stroke="#CC664F" stroke-width="3"/>
+		<path d="M18 42 C26 32 32 52 36 42 S46 32 54 42" stroke="#CC664F" stroke-width="3"/>
+	</svg>`,
+	circle: `<svg class="ob-mark" viewBox="0 0 72 72" aria-hidden="true">
+		<circle cx="28" cy="42" r="16" fill="#CC664F"/>
+		<circle cx="44" cy="42" r="16" fill="none" stroke="#123845" stroke-width="3"/>
+		<circle cx="36" cy="26" r="16" fill="none" stroke="#859E9E" stroke-width="3"/>
+	</svg>`
+};
+
+function decorateObIcons() {
+	document.querySelectorAll('[data-ob-icon]').forEach(el => {
+		el.innerHTML = OB_MARKS[el.dataset.obIcon] || '';
+	});
+}
+	const labels = { home: 'Home', exercise: 'Exercises', connect: 'Circle', profile: 'Profile' };
+	document.querySelectorAll('.tab-item[data-tab]').forEach(item => {
+		const tab = item.dataset.tab;
+		item.innerHTML = `<span class="tab-glyph">${glyphIcon(tab)}</span><span>${labels[tab] || tab}</span>`;
+	});
+	document.querySelectorAll('.settings-btn').forEach(btn => {
+		btn.innerHTML = glyphIcon('settings');
+	});
+}
+
 /* -------------------------------------------------------------------------
    App state — each persona file sets App.tier + render callbacks, then
    calls App.init(). Nothing here persists across a page reload.
@@ -57,6 +94,7 @@ const App = {
 	renderers: {}, // { home, exercise, explore, connect } -> fn()
 
 	init() {
+		decorateObIcons();
 		decorateTabIcons();
 		hideTabBar(); // stays hidden until finishOnboarding() -> goTab('home') reveals it
 	}
