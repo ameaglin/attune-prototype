@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attune — Round 3 Prototype</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+body { justify-content: center; }
+.landing { max-width: 420px; width: 100%; text-align: center; padding-top: 12px; }
+.landing p { margin-bottom: 28px; }
+.flow-list { display: flex; flex-direction: column; gap: 12px; }
+.flow-link { display: block; padding: 18px 20px; background: var(--surface); border: 1.5px solid var(--line-strong); border-radius: var(--r-card); text-decoration: none; color: var(--ink); text-align: left; transition: 0.15s; }
+.flow-link:hover { border-color: var(--faint); background: var(--surface-2); }
+.flow-link strong { display: block; font-size: 16px; margin-bottom: 4px; }
+.flow-link span { font-size: 13px; color: var(--muted); }
+.hint { margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="landing">
+	<h1 class="h1" style="margin-bottom:8px;">Attune Prototype — Round 3</h1>
+	<p class="body-text">Two full journeys through Home / Exercises / Circle / Profile. Click a persona to explore — no login required. Built from Round 2; Aug 21 design updates applied one at a time.</p>
+	<div class="flow-list">
+		<a href="paid-circle.html?start=exercise&amp;ex=empty" class="flow-link">
+			<strong>Exercises · none yet</strong>
+			<span>Circle member, empty tab — start a personal exercise.</span>
+		</a>
+		<a href="paid-circle.html?start=exercise&amp;ex=few" class="flow-link">
+			<strong>Exercises · 1–2 done</strong>
+			<span>Start an exercise + past recaps. Sam’s default.</span>
+		</a>
+		<a href="paid-circle.html?start=exercise&amp;ex=ready" class="flow-link">
+			<strong>Exercises · 3+ / before Growth Edges</strong>
+			<span>Growth Edges CTA, See Patterns, Past. Personal exercise is in the +.</span>
+		</a>
+		<a href="paid-circle.html?start=exercise&amp;ex=after" class="flow-link">
+			<strong>Exercises · after Growth Edges</strong>
+			<span>Season chips on top. Personal exercise and Growth Edges again are in the +.</span>
+		</a>
+		<a href="paid-circle.html" class="flow-link">
+			<strong>&#9733; Paid &amp; Circle Community member</strong>
+			<span>Full journey from onboarding. Session 1 prep, Exercises (1–2 done), Circle, Profile.</span>
+		</a>
+		<a href="free.html" class="flow-link">
+			<strong>&#9829; Not paid &amp; not in a Circle Community</strong>
+			<span>A personal exercise on its own, intro content on Home, and locked teasers for Circle learning. No DGE.</span>
+		</a>
+	</div>
+	<p class="caption hint">Wireframe only — grayscale design system, placeholder copy. <a href="../round2/index.html" style="color:var(--muted);">&larr; Round 2</a> · <a href="../index.html" style="color:var(--muted);">Round 1 archive</a></p>
+</div>
+</body>
+</html>
