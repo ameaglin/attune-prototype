@@ -47,7 +47,11 @@ const App = {
 	currentTab: 'home',
 	exercises: [],           // past Attunement Exercise records
 	dgeDone: false,          // Circle: Discernment of Growth Edges completed this season
+	dgeUnlocked: false,      // Circle Session 4 prep — DGE offered, not 3+ solo
 	lastDgeDay: null,        // YYYY-MM-DD of last DGE; null = never
+	exerciseSubtab: 'patterns', // 'patterns' | 'past'
+	pastSearch: '',
+	fabCoached: false,
 	growthEdges: {
 		edges: ['I rush to prove I am enough.', 'Waiting feels like failure.'],
 		goSteps: ['Pause before I say yes.', 'Name one true sentence in the hard conversation.']
@@ -121,11 +125,20 @@ const SEED_KRLS = [
 function applyExerciseDemoFromQuery() {
 	const params = new URLSearchParams(location.search);
 	const ex = params.get('ex');
-	if (ex === 'empty') { App.exercises = []; App.dgeDone = false; App.lastDgeDay = null; }
-	else if (ex === 'few') { App.exercises = SEED_KRLS.slice(0, 2); App.dgeDone = false; App.lastDgeDay = null; }
-	else if (ex === 'ready') { App.exercises = SEED_KRLS.slice(0, 4); App.dgeDone = false; App.lastDgeDay = null; }
-	else if (ex === 'after') { App.exercises = SEED_KRLS.slice(0, 4); App.dgeDone = true; App.lastDgeDay = '2026-08-10'; }
-	const mark = ex || (App.exercises.length >= 3 ? (App.dgeDone ? 'after' : 'ready') : App.exercises.length ? 'few' : 'empty');
+	App.dgeUnlocked = false;
+	App.fabCoached = true;
+	if (ex === 'empty') {
+		App.exercises = []; App.dgeDone = false; App.lastDgeDay = null; App.dgeUnlocked = false; App.fabCoached = false;
+	} else if (ex === 'few') {
+		App.exercises = SEED_KRLS.slice(0, 2); App.dgeDone = false; App.lastDgeDay = null;
+	} else if (ex === 'ready') {
+		App.exercises = SEED_KRLS.slice(0, 4); App.dgeDone = false; App.lastDgeDay = null;
+	} else if (ex === 's4') {
+		App.exercises = SEED_KRLS.slice(0, 4); App.dgeDone = false; App.lastDgeDay = null; App.dgeUnlocked = true;
+	} else if (ex === 'after') {
+		App.exercises = SEED_KRLS.slice(0, 4); App.dgeDone = true; App.lastDgeDay = '2026-08-10'; App.dgeUnlocked = true;
+	}
+	const mark = ex || (App.dgeDone ? 'after' : App.dgeUnlocked ? 's4' : App.exercises.length >= 3 ? 'ready' : App.exercises.length ? 'few' : 'empty');
 	document.querySelectorAll('[data-ex]').forEach(a => {
 		a.classList.toggle('active', a.dataset.ex === mark);
 	});
@@ -149,6 +162,7 @@ function selectObPath(which) {
 }
 function continueObPath() {
 	if (_obPath === 'circle') showScreen('ob-circle-join');
+	else if (_obPath === 'explore') showScreen('ob-explore-circle');
 	else if (typeof onPersonalPractice === 'function') onPersonalPractice();
 }
 
@@ -184,6 +198,7 @@ function goTab(tab) {
 	showTabBar();
 	if (App.renderers[tab]) App.renderers[tab]();
 	syncExerciseFab();
+	if (tab === 'exercise') maybeCoachFab();
 }
 
 /* -------------------------------------------------------------------------
@@ -268,13 +283,17 @@ const PATTERN_META = {
 };
 const PATTERN_ORDER = ['trust', 'patience', 'clarity'];
 
-const ex = { mode: 'training', warmup: null, stepIdx: 0, responses: [], returnTab: 'exercise', fromPrep: false, rating: 0 };
+const ex = { mode: 'training', introAudio: false, warmupAudio: true, warmupWords: true, warmupPlaying: false, stepIdx: 0, responses: [], recap: null, returnTab: 'exercise', fromPrep: false, rating: 0 };
 
 function startExercise(opts) {
 	ex.mode = 'training';
-	ex.warmup = null;
+	ex.introAudio = false;
+	ex.warmupAudio = true;
+	ex.warmupWords = true;
+	ex.warmupPlaying = false;
 	ex.stepIdx = 0;
 	ex.responses = [];
+	ex.recap = null;
 	ex.rating = 0;
 	ex.returnTab = (opts && opts.returnTab) || App.currentTab || 'exercise';
 	ex.fromPrep = !!(opts && opts.fromPrep);
@@ -288,69 +307,208 @@ function exOverlay(html) {
 }
 
 function renderExercisePrivacy() {
+	clearSitTimers();
+	setSitImmersive(false);
+	const listening = ex.introAudio;
 	exOverlay(`
-		<div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;">
-			<div class="privacy-icon">&#128274;</div>
-			<div class="h2" style="margin-bottom:12px;">Before you begin</div>
-			<p class="body-text" style="margin-bottom:10px;">What you share here is private. It's not shared with a facilitator or your group unless you choose to share it.</p>
-			<p class="caption" style="margin-bottom:28px;"><a href="javascript:void(0)" onclick="showAIInfo('exercise-overlay', renderExercisePrivacy)" style="color:inherit;text-decoration:underline;">How is AI used?</a></p>
-			<button class="btn btn-dark" onclick="renderExerciseWarmup()">Continue</button>
-			<button class="btn btn-ghost" style="margin-top:14px;align-self:center;" onclick="renderExerciseWarmup()">Don't show me this again</button>
-		</div>`);
+		<div class="h1" style="margin-bottom:6px;">A personal exercise</div>
+		<p class="caption" style="margin-bottom:16px;">One real situation &middot; about 15&ndash;20 minutes</p>
+		<button type="button" class="btn btn-light" style="margin-bottom:16px;" onclick="toggleIntroAudio()">${listening ? 'Playing intro' : 'Listen to intro'}</button>
+		${listening ? `<div class="card static" style="text-align:center;padding:20px;margin-bottom:16px;">
+			<div class="triad-waveform" style="justify-content:center;">${Array.from({ length: 7 }).map((_, i) => `<span class="triad-wave-bar" style="height:${12 + (i * 4) % 22}px;animation-delay:${(i * 0.1).toFixed(1)}s"></span>`).join('')}</div>
+			<p class="caption">[ Playing intro &middot; ~1 min ]</p>
+		</div>` : ''}
+		<p class="body-text" style="margin-bottom:12px;">You&rsquo;ll bring one current situation and walk it through Listen, Discern, and Go. Notice what&rsquo;s serving you and what isn&rsquo;t &mdash; in yourself, in another person or group, and in any circumstance or system in the mix. Then name what you&rsquo;re sensing God invite, and a next step.</p>
+		<p class="body-text" style="margin-bottom:12px;">Give each prompt the full time. Let it come to you rather than pushing through. You can always continue when you&rsquo;re ready.</p>
+		<p class="caption" style="margin-bottom:8px;">What you write stays private. It is not shared with a facilitator or your Circle unless you choose.</p>
+		<p class="caption" style="margin-bottom:20px;"><a href="javascript:void(0)" onclick="showAIInfo('exercise-overlay', renderExercisePrivacy)" style="color:inherit;text-decoration:underline;">How is AI used?</a></p>
+		<button class="btn btn-dark btn-block-mt" onclick="renderExerciseWarmup()">Continue</button>
+		<button class="btn-ghost" style="margin-top:14px;align-self:center;" onclick="renderExerciseWarmup()">Don&rsquo;t show me this again</button>`);
 }
 
-const WARMUP_MODES = [
-	{ id: 'audio', label: 'Audio', desc: 'Listen to a short 3–4 min warm-up.' },
-	{ id: 'words', label: 'Words', desc: 'Read the warm-up at your own pace.' },
-	{ id: 'both', label: 'Audio + Words', desc: 'Listen and read along together.' }
-];
+function toggleIntroAudio() {
+	ex.introAudio = !ex.introAudio;
+	renderExercisePrivacy();
+}
+
+const SIT_ORB_MS = 12000;
+const WARMUP_MS = 24000;
+const THINK_MS = 60000;
+let _sitTimer = null;
+let _sitRaf = null;
+let _breathTimer = null;
+let _sitDone = false;
+
+function sitRingCircumference() { return 2 * Math.PI * 18; }
+
+function sitSkipButtonHTML(onclick) {
+	const c = sitRingCircumference();
+	return `
+		<button type="button" class="think-next" onclick="${onclick}" aria-label="Continue when ready">
+			<svg class="think-ring" viewBox="0 0 40 40">
+				<circle class="think-ring-track" cx="20" cy="20" r="18"/>
+				<circle class="think-ring-fill" id="think-ring-fill" cx="20" cy="20" r="18"
+					stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${c.toFixed(2)}"/>
+			</svg>
+			<span class="think-next-inner">&rsaquo;</span>
+		</button>`;
+}
+
+function sitStageInnerHTML(opts) {
+	const kicker = opts.kicker ? `<div class="think-kicker">${opts.kicker}</div>` : '';
+	const title = opts.title ? `<p class="think-prompt">${opts.title}</p>` : '';
+	const extra = opts.extra || '';
+	return `
+		<div class="sit-fade" id="sit-fade"></div>
+		<div class="sit-stage-inner">
+			${kicker}
+			<div class="sit-orb" aria-hidden="true"></div>
+			${title}
+			<div class="think-foot">
+				<div class="think-breathe" id="think-breathe">Breathe in</div>
+				${opts.showSkip ? sitSkipButtonHTML(opts.skipOnclick) : ''}
+			</div>
+			${extra}
+		</div>`;
+}
+
+function setSitImmersive(on) {
+	const el = document.getElementById('exercise-overlay');
+	if (!el) return;
+	el.classList.toggle('sit-immersive', !!on);
+	if (!on) el.classList.remove('sit-light');
+}
+
+function breathCueAt(elapsed) {
+	const t = elapsed % SIT_ORB_MS;
+	if (t < 4560) return 'Breathe in';
+	if (t < 6000) return 'Hold';
+	if (t < 10560) return 'Breathe out';
+	return 'Breathe in';
+}
+
+function clearSitTimers() {
+	if (_sitTimer) { clearTimeout(_sitTimer); _sitTimer = null; }
+	if (_sitRaf) { cancelAnimationFrame(_sitRaf); _sitRaf = null; }
+	if (_breathTimer) { clearInterval(_breathTimer); _breathTimer = null; }
+}
+
+function markSitReady() {
+	_sitDone = true;
+	const fade = document.getElementById('sit-fade');
+	if (fade) fade.style.opacity = '1';
+	const fill = document.getElementById('think-ring-fill');
+	if (fill) fill.style.strokeDashoffset = '0';
+	const b = document.getElementById('think-breathe');
+	if (b) b.textContent = 'Whenever you\u2019re ready';
+	const stage = document.querySelector('.sit-stage');
+	if (stage) stage.classList.add('is-light');
+	const overlay = document.getElementById('exercise-overlay');
+	if (overlay && overlay.classList.contains('sit-immersive')) overlay.classList.add('sit-light');
+}
+
+function startSitTimer(durationMs) {
+	clearSitTimers();
+	_sitDone = false;
+	const c = sitRingCircumference();
+	const fill = document.getElementById('think-ring-fill');
+	const fade = document.getElementById('sit-fade');
+	const started = Date.now();
+	function tick() {
+		if (_sitDone) return;
+		const p = Math.min(1, (Date.now() - started) / durationMs);
+		if (fill) fill.style.strokeDashoffset = String(c * (1 - p));
+		if (fade) fade.style.opacity = String(p);
+		const stage = document.querySelector('.sit-stage');
+		if (stage && p >= 0.45) stage.classList.add('is-light');
+		const overlay = document.getElementById('exercise-overlay');
+		if (overlay && overlay.classList.contains('sit-immersive') && p >= 0.45) overlay.classList.add('sit-light');
+		if (p >= 1) { clearSitTimers(); markSitReady(); return; }
+		_sitRaf = requestAnimationFrame(tick);
+	}
+	_breathTimer = setInterval(() => {
+		if (_sitDone) return;
+		const b = document.getElementById('think-breathe');
+		if (b) b.textContent = breathCueAt(Date.now() - started);
+	}, 200);
+	_sitTimer = setTimeout(() => { clearSitTimers(); markSitReady(); }, durationMs);
+	tick();
+}
+
+function skipSit() {
+	clearSitTimers();
+	markSitReady();
+}
+
+const WARMUP_WORDS = 'Take a moment to settle. Notice your breath, the weight of your body, the sounds around you. There\'s nothing to solve right now — just arrive, and let your attention soften before the exercise begins.';
+
+function warmupAudioHTML() {
+	return `<div class="sit-listen"><div class="triad-waveform">${Array.from({ length: 7 }).map((_, i) => `<span class="triad-wave-bar" style="height:${12 + (i * 4) % 22}px;animation-delay:${(i * 0.1).toFixed(1)}s"></span>`).join('')}</div><p class="caption">[ Playing warm-up audio &middot; 3&ndash;4 min ]</p></div>`;
+}
+
+function paintWarmupSlots() {
+	const audioSlot = document.getElementById('warmup-audio-slot');
+	const wordsSlot = document.getElementById('warmup-words-slot');
+	if (audioSlot) audioSlot.innerHTML = (ex.warmupPlaying && ex.warmupAudio) ? warmupAudioHTML() : '';
+	if (wordsSlot) wordsSlot.innerHTML = (ex.warmupPlaying && ex.warmupWords) ? `<p class="body-text sit-words">${WARMUP_WORDS}</p>` : '';
+}
+
+function paintWarmupToggles() {
+	document.querySelectorAll('[data-warmup-toggle]').forEach(btn => {
+		const on = btn.dataset.warmupToggle === 'audio' ? ex.warmupAudio : ex.warmupWords;
+		btn.classList.toggle('active', on);
+	});
+}
+
+function toggleWarmupFlag(which) {
+	if (which === 'audio') ex.warmupAudio = !ex.warmupAudio;
+	else ex.warmupWords = !ex.warmupWords;
+	paintWarmupToggles();
+	paintWarmupSlots();
+}
+
+function startWarmupPlay() {
+	ex.warmupPlaying = true;
+	renderExerciseWarmup();
+}
 
 function renderExerciseWarmup() {
+	const playing = !!ex.warmupPlaying;
+	if (!playing) clearSitTimers();
+	setSitImmersive(false);
+	const extra = playing
+		? `<div id="warmup-audio-slot"></div><div id="warmup-words-slot"></div>`
+		: `<button type="button" class="sit-play" onclick="startWarmupPlay()" aria-label="Start warm-up"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg></button>`;
 	exOverlay(`
-		<button class="btn-ghost back-link" onclick="renderExercisePrivacy()">&larr; Back</button>
-		<div class="h1" style="margin-bottom:6px;">Warm-Up</div>
-		<p class="caption" style="margin-bottom:16px;">A short warm-up before your personal exercise. Just listen or read — no need to respond.</p>
-		<div class="warmup-mode-list" id="warmup-mode-list">
-			${WARMUP_MODES.map(m => `
-			<div class="card outlined" data-warmup="${m.id}" onclick="setWarmupMode('${m.id}')">
-				<b style="font-size:15px;display:block;margin-bottom:4px;">${m.label}</b>
-				<span class="caption">${m.desc}</span>
-			</div>`).join('')}
-		</div>
-		<div id="warmup-preview"></div>
-		<button class="btn btn-dark btn-block-mt" id="warmup-begin-btn" disabled onclick="renderExerciseStep(0)">Begin Personal Exercise &rarr;</button>
-		<div style="height:16px"></div>`);
+		<div class="warmup-page">
+			<button class="btn-ghost back-link" onclick="renderExercisePrivacy()">&larr; Back</button>
+			<div class="h1" style="margin-bottom:6px;">Warm-up</div>
+			<p class="caption">A short warm-up before your personal exercise. Just listen or read — no need to respond.</p>
+			<div class="warmup-toggles">
+				<button type="button" class="warmup-toggle${ex.warmupAudio ? ' active' : ''}" data-warmup-toggle="audio" onclick="toggleWarmupFlag('audio')">Audio</button>
+				<button type="button" class="warmup-toggle${ex.warmupWords ? ' active' : ''}" data-warmup-toggle="words" onclick="toggleWarmupFlag('words')">Words</button>
+			</div>
+			<div class="sit-stage sit-stage--full${playing ? '' : ' is-idle'}">
+				${sitStageInnerHTML({
+					kicker: 'Warm-up',
+					showSkip: playing,
+					skipOnclick: 'skipSit()',
+					extra
+				})}
+			</div>
+			${playing ? `<div class="sit-actions"><button class="btn btn-dark" onclick="renderExerciseStep(0)">I&rsquo;m ready</button></div>` : ''}
+		</div>`);
+	if (playing) {
+		paintWarmupSlots();
+		startSitTimer(WARMUP_MS);
+	}
 }
 
 function setWarmupMode(id) {
-	ex.warmup = id;
-	document.querySelectorAll('#warmup-mode-list .card').forEach(c => {
-		c.style.borderColor = c.dataset.warmup === id ? 'var(--ink)' : 'var(--line-strong)';
-	});
-	const preview = document.getElementById('warmup-preview');
-	const mode = WARMUP_MODES.find(m => m.id === id);
-	if (mode.id === 'audio') {
-		preview.innerHTML = `<div class="card static" style="text-align:center;padding:24px;"><div class="triad-waveform" style="justify-content:center;">${Array.from({ length: 7 }).map((_, i) => `<span class="triad-wave-bar" style="height:${12 + (i * 4) % 22}px;animation-delay:${(i * 0.1).toFixed(1)}s"></span>`).join('')}</div><p class="caption">[ Playing warm-up audio · 3–4 min ]</p></div>`;
-	} else if (mode.id === 'words') {
-		preview.innerHTML = `<div class="card static"><p class="body-text">Take a moment to settle. Notice your breath, the weight of your body, the sounds around you. There's nothing to solve right now — just arrive, and let your attention soften before the exercise begins.</p></div>`;
-	} else {
-		preview.innerHTML = `<div class="card static" style="text-align:center;padding:24px;"><div class="triad-waveform" style="justify-content:center;">${Array.from({ length: 7 }).map((_, i) => `<span class="triad-wave-bar" style="height:${12 + (i * 4) % 22}px;animation-delay:${(i * 0.1).toFixed(1)}s"></span>`).join('')}</div><p class="caption" style="margin-bottom:10px;">[ Playing audio · 3–4 min ]</p><p class="body-text">Take a moment to settle. Notice your breath, the weight of your body, the sounds around you.</p></div>`;
-	}
-	document.getElementById('warmup-begin-btn').disabled = false;
-}
-
-const THINK_MS = 60000;
-let _thinkTimer = null;
-let _thinkRaf = null;
-
-function clearThinkTimer() {
-	if (_thinkTimer) { clearTimeout(_thinkTimer); _thinkTimer = null; }
-	if (_thinkRaf) { cancelAnimationFrame(_thinkRaf); _thinkRaf = null; }
-}
-
-function setThinkBleed(on) {
-	const el = document.getElementById('exercise-overlay');
-	if (el) el.classList.toggle('think-bleed', !!on);
+	ex.warmupAudio = id === 'audio' || id === 'both';
+	ex.warmupWords = id === 'words' || id === 'both';
+	paintWarmupToggles();
+	paintWarmupSlots();
 }
 
 function exerciseMovement(idx) {
@@ -360,12 +518,11 @@ function exerciseMovement(idx) {
 }
 
 function renderExerciseStep(idx) {
-	clearThinkTimer();
-	setThinkBleed(false);
+	clearSitTimers();
+	setSitImmersive(false);
 	ex.stepIdx = idx;
 	const step = EXERCISE_STEPS[idx];
 	const isLast = idx === EXERCISE_STEPS.length - 1;
-	const c = 2 * Math.PI * 18;
 	exOverlay(`
 		<div class="exercise-topbar">
 			<button class="btn-ghost" onclick="${idx === 0 ? "renderExerciseWarmup()" : `renderExerciseStep(${idx - 1})`}" aria-label="Back">&#10005;</button>
@@ -380,56 +537,18 @@ function renderExerciseStep(idx) {
 		<div id="ex-guidance-card" style="display:${ex.mode === 'training' ? 'block' : 'none'}">
 			<div class="guidance-card"><p class="caption" style="color:var(--body);">${escapeHtml(step.hint)}</p></div>
 		</div>
-		<div class="think-panel">
-			<div class="think-kicker">Sit with this</div>
-			<svg class="think-sun" viewBox="0 0 24 24" aria-hidden="true">
-				<path fill="none" stroke="#fff" stroke-width="1.4" d="M4 16h16M6 16a6 6 0 0 1 12 0"/>
-				<path fill="none" stroke="#fff" stroke-width="1.4" d="M12 4v3M5.5 7.5l2 2M18.5 7.5l-2 2"/>
-			</svg>
-			<p class="think-prompt">${escapeHtml(step.prompt)}</p>
-			<div class="think-foot">
-				<div class="think-breathe" id="think-breathe">Breathe</div>
-				<button type="button" class="think-next" onclick="skipThink()" aria-label="Skip sitting and answer now">
-					<svg class="think-ring" viewBox="0 0 40 40">
-						<circle class="think-ring-track" cx="20" cy="20" r="18"/>
-						<circle class="think-ring-fill" id="think-ring-fill" cx="20" cy="20" r="18"
-							stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${c.toFixed(2)}"/>
-					</svg>
-					<span class="think-next-inner">&rsaquo;</span>
-				</button>
-			</div>
+		<div class="think-panel sit-stage sit-stage--panel">
+			${sitStageInnerHTML({
+				kicker: 'Sit with this',
+				title: escapeHtml(step.prompt),
+				showSkip: true,
+				skipOnclick: 'skipSit()'
+			})}
 		</div>
 		${renderInputTriadHTML('triad-current')}
 		<button class="btn btn-dark btn-block-mt" onclick="exerciseNext(${idx}, ${isLast})">${isLast ? 'Continue to Recap &rarr;' : 'Next &rarr;'}</button>
 		<div style="height:16px"></div>`);
-	startThinkRing(c);
-}
-
-function startThinkRing(c) {
-	const fill = document.getElementById('think-ring-fill');
-	const started = Date.now();
-	function finishSit() {
-		clearThinkTimer();
-		if (fill) fill.style.strokeDashoffset = '0';
-		const b = document.getElementById('think-breathe');
-		if (b) b.textContent = 'Whenever you\u2019re ready';
-	}
-	function tick() {
-		const p = Math.min(1, (Date.now() - started) / THINK_MS);
-		if (fill) fill.style.strokeDashoffset = String(c * (1 - p));
-		if (p >= 1) { finishSit(); return; }
-		_thinkRaf = requestAnimationFrame(tick);
-	}
-	_thinkTimer = setTimeout(finishSit, THINK_MS);
-	tick();
-}
-
-function skipThink() {
-	clearThinkTimer();
-	const fill = document.getElementById('think-ring-fill');
-	if (fill) fill.style.strokeDashoffset = '0';
-	const b = document.getElementById('think-breathe');
-	if (b) b.textContent = 'Whenever you\u2019re ready';
+	startSitTimer(THINK_MS);
 }
 
 function setExerciseMode(btn, mode) {
@@ -490,10 +609,18 @@ function recapFromRecord(rec) {
 	};
 }
 
-function recapField(label, body, kind) {
+function recapField(label, body, kind, opts) {
 	const text = String(body || '');
 	const empty = !text.trim() || text.charAt(0) === '(';
-	const cls = ['recap-field', kind === 'lead' ? 'recap-field-lead' : '', kind === 'quote' ? 'recap-field-quote' : '', empty ? 'is-empty' : ''].filter(Boolean).join(' ');
+	const edit = !!(opts && opts.edit);
+	const cls = ['recap-field', kind === 'lead' ? 'recap-field-lead' : '', kind === 'quote' ? 'recap-field-quote' : '', !edit && empty ? 'is-empty' : ''].filter(Boolean).join(' ');
+	if (edit) {
+		return `
+		<div class="${cls}">
+			<div class="recap-field-label">${escapeHtml(label)}</div>
+			<textarea class="recap-edit" data-recap="${escapeHtml(opts.name)}" rows="4">${escapeHtml(text)}</textarea>
+		</div>`;
+	}
 	return `
 		<div class="${cls}">
 			<div class="recap-field-label">${escapeHtml(label)}</div>
@@ -501,16 +628,18 @@ function recapField(label, body, kind) {
 		</div>`;
 }
 
-function recapChromeHTML() {
+function recapChromeHTML(edit) {
 	return `
 		<div class="recap-hero">
 			<div class="kicker">Personal exercise</div>
 			<div class="h1">Your recap</div>
-			<p class="caption">What you discerned — this is what you'd reopen, and may take to the gathering.</p>
+			<p class="caption">${edit
+				? 'This is a first pass. Edit anything that missed the nuance \u2014 we want this in your words.'
+				: 'What you discerned \u2014 this is what you\u2019d reopen, and may take to the gathering.'}</p>
 		</div>`;
 }
 
-function recapCardsHTML(data, aiOnclick) {
+function recapCardsHTML(data, aiOnclick, edit) {
 	const matrix = (data.matrix || []).map(row => `
 		<div class="recap-matrix-item">
 			<div class="recap-field-label">${escapeHtml(row.relation)}${row.who ? ' \u00b7 ' + escapeHtml(row.who) : ''}</div>
@@ -527,10 +656,10 @@ function recapCardsHTML(data, aiOnclick) {
 		</div>`).join('');
 	return `
 		<div class="recap-primary">
-			${recapField('Situation', data.situation, 'lead')}
-			${recapField("Key themes of God's guidance", data.themes, 'quote')}
-			${recapField("God's heart posture", data.heartPosture, 'quote')}
-			${recapField('Key next steps', data.nextSteps)}
+			${recapField('Situation', data.situation, 'lead', edit ? { edit: true, name: 'situation' } : null)}
+			${recapField("Key themes of God's guidance", data.themes, 'quote', edit ? { edit: true, name: 'themes' } : null)}
+			${recapField("God's heart posture", data.heartPosture, 'quote', edit ? { edit: true, name: 'heartPosture' } : null)}
+			${recapField('Key next steps', data.nextSteps, null, edit ? { edit: true, name: 'nextSteps' } : null)}
 		</div>
 		${(data.matrix && data.matrix.length) ? `<div class="recap-listen">
 			<div class="kicker">Listen</div>
@@ -541,49 +670,60 @@ function recapCardsHTML(data, aiOnclick) {
 }
 
 function renderExerciseOutput() {
+	clearSitTimers();
+	setSitImmersive(false);
 	const data = recapFromLive();
 	exOverlay(`
-		${recapChromeHTML()}
+		${recapChromeHTML(true)}
 		<div class="recap-scroll">
-		${recapCardsHTML(data, "showAIInfo('exercise-overlay', renderExerciseOutput)")}
+		${recapCardsHTML(data, "showAIInfo('exercise-overlay', renderExerciseOutput)", true)}
 		</div>
-		<button class="btn btn-dark btn-block-mt" onclick="renderExerciseRating()">Continue</button>
+		<button class="btn btn-dark btn-block-mt" onclick="confirmExerciseRecap()">Looks good</button>
 		<div style="height:16px"></div>`);
 }
 
-function renderExerciseRating() {
-	exOverlay(`
-		<div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;">
-			<div class="h2" style="margin-bottom:8px;">Rate this recap</div>
-			<p class="caption" style="margin-bottom:6px;">Help us improve — this feeds nothing but our own learning.</p>
-			<div class="rating-stars" id="rating-stars">
-				${[1, 2, 3, 4, 5].map(n => `<span class="rating-star" data-n="${n}" onclick="setRating(${n})">&#9733;</span>`).join('')}
-			</div>
-			<button class="btn btn-dark" onclick="finishExercise()">Finish</button>
-		</div>`);
+function recapEditValue(name, fallback) {
+	const el = document.querySelector('textarea[data-recap="' + name + '"]');
+	return el ? el.value : fallback;
 }
 
-function setRating(n) {
-	ex.rating = n;
-	document.querySelectorAll('#rating-stars .rating-star').forEach(s => {
-		s.classList.toggle('filled', parseInt(s.dataset.n, 10) <= n);
-	});
+function confirmExerciseRecap() {
+	const data = recapFromLive();
+	ex.recap = {
+		...data,
+		situation: recapEditValue('situation', data.situation),
+		themes: recapEditValue('themes', data.themes),
+		heartPosture: recapEditValue('heartPosture', data.heartPosture),
+		nextSteps: recapEditValue('nextSteps', data.nextSteps)
+	};
+	finishExercise();
 }
 
 function buildExerciseRecord() {
 	const num = App.exercises.length + 1;
-	const situation = (ex.responses[0] && ex.responses[0].length) ? ex.responses[0] : 'A situation from today\u2019s exercise';
+	const recap = ex.recap || recapFromLive();
+	const situation = recap.situation || ((ex.responses[0] && ex.responses[0].length) ? ex.responses[0] : 'A situation from today\u2019s exercise');
 	const quoteAt = [1, 9]; // Self: Good Patterns, What's Resonating
 	const quotes = quoteAt.map(i => {
 		const text = (ex.responses[i] && ex.responses[i].length) ? ex.responses[i] : TRIAD_TRANSCRIPTS[i % TRIAD_TRANSCRIPTS.length];
 		return { theme: deriveTheme(i), text, date: 'Today', day: quoteDayKey({ date: 'Today' }) };
 	});
-	return { id: num, date: 'Today', situation, quotes, responses: ex.responses.slice() };
+	return {
+		id: num,
+		date: 'Today',
+		situation,
+		quotes,
+		responses: ex.responses.slice(),
+		themes: recap.themes,
+		heartPosture: recap.heartPosture,
+		nextSteps: recap.nextSteps,
+		matrix: recap.matrix
+	};
 }
 
 function cancelExercise() {
-	clearThinkTimer();
-	setThinkBleed(false);
+	clearSitTimers();
+	setSitImmersive(false);
 	showTabBar();
 	if (ex.fromPrep) { showScreen('prep-overlay'); prepShowChecklist(); }
 	else goTab(ex.returnTab);
@@ -948,9 +1088,18 @@ function renderPatternCalendar(quotes) {
 
 function exerciseTabKind() {
 	if (App.tier === 'circle' && App.dgeDone) return 'after';
-	if (App.tier === 'circle' && App.exercises.length >= 3) return 'ready';
+	if (App.tier === 'circle' && App.dgeUnlocked) return 's4';
+	if (App.exercises.length >= 3) return 'ready';
 	if (App.exercises.length >= 1) return 'few';
 	return 'empty';
+}
+
+function dgeOfferedOnTab() {
+	return App.tier === 'circle' && App.dgeUnlocked && !App.dgeDone;
+}
+
+function dgeInFab() {
+	return App.tier === 'circle' && (App.dgeUnlocked || App.dgeDone);
 }
 
 function krlCardHTML(variant) {
@@ -1193,6 +1342,7 @@ function finishDGE() {
 	const named = dge.edges.filter(Boolean);
 	App.growthEdges.edges = named;
 	App.dgeDone = true;
+	App.dgeUnlocked = true;
 	App.lastDgeDay = '2026-08-26';
 	showTabBar();
 	goTab('exercise');
@@ -1201,34 +1351,52 @@ function finishDGE() {
 function renderExerciseTab() {
 	const stack = document.getElementById('exercise-tab-stack');
 	if (!stack) return;
-	const kind = exerciseTabKind();
-	const parts = [];
-	if (kind === 'empty') {
-		parts.push(krlCardHTML('hero'));
-	} else if (kind === 'few') {
-		parts.push(krlCardHTML('hero'));
-		parts.push('<div class="h3" style="margin:8px 0 10px;">Past exercises</div><div id="exercise-past-list"></div>');
-	} else if (kind === 'ready') {
-		parts.push(dgeCardHTML(false));
-		parts.push('<div class="h3" style="margin:8px 0 10px;">See Patterns</div><div id="exercise-patterns-slot"></div>');
-		parts.push('<div class="h3" style="margin:16px 0 10px;">Past exercises</div><div id="exercise-past-list"></div>');
-	} else if (kind === 'after') {
-		parts.push(growthEdgesCardHTML());
-		parts.push('<div class="h3" style="margin:8px 0 10px;">See Patterns</div><div id="exercise-patterns-slot"></div>');
-		parts.push('<div class="h3" style="margin:16px 0 10px;">Past exercises</div><div id="exercise-past-list"></div>');
-	}
-	if (App.tier !== 'circle' && App.exercises.length >= 3) {
-		parts.push('<div class="h3" style="margin:8px 0 10px;">See Patterns</div><div id="exercise-patterns-slot"></div>');
-	}
-	parts.push(exerciseFabOn() ? '<div style="height:72px"></div>' : '<div style="height:8px"></div>');
-	stack.innerHTML = parts.join('');
-	if (document.getElementById('exercise-patterns-slot')) renderPatterns('exercise-patterns-slot');
-	if (document.getElementById('exercise-past-list')) renderPastExercises('exercise-past-list');
+	const sub = App.exerciseSubtab === 'past' ? 'past' : 'patterns';
+	stack.innerHTML = `
+		<div class="ex-subnav" role="tablist">
+			<button type="button" class="ex-subnav-btn${sub === 'patterns' ? ' active' : ''}" role="tab" aria-selected="${sub === 'patterns'}" onclick="setExerciseSubtab('patterns')">Patterns</button>
+			<button type="button" class="ex-subnav-btn${sub === 'past' ? ' active' : ''}" role="tab" aria-selected="${sub === 'past'}" onclick="setExerciseSubtab('past')">Past</button>
+		</div>
+		<div id="exercise-subtab-body"></div>
+		<div style="height:72px"></div>`;
+	if (sub === 'past') renderExercisePastPane();
+	else renderExercisePatternsPane();
 	syncExerciseFab();
 }
 
+function setExerciseSubtab(id) {
+	App.exerciseSubtab = id;
+	renderExerciseTab();
+}
+
+function renderExercisePatternsPane() {
+	const el = document.getElementById('exercise-subtab-body');
+	if (!el) return;
+	const parts = [];
+	if (App.tier === 'circle' && App.dgeDone) parts.push(growthEdgesCardHTML());
+	if (dgeOfferedOnTab()) parts.push(dgeCardHTML(false));
+	parts.push('<div id="exercise-patterns-slot"></div>');
+	el.innerHTML = parts.join('');
+	renderPatterns('exercise-patterns-slot');
+}
+
+function renderExercisePastPane() {
+	const el = document.getElementById('exercise-subtab-body');
+	if (!el) return;
+	const q = App.pastSearch || '';
+	el.innerHTML = `
+		<input type="search" class="input-box past-search" id="past-search" placeholder="Search past exercises" value="${escapeHtml(q)}" oninput="filterPastExercises(this.value)">
+		<div id="exercise-past-list"></div>`;
+	renderPastExercises('exercise-past-list');
+}
+
+function filterPastExercises(q) {
+	App.pastSearch = q;
+	renderPastExercises('exercise-past-list');
+}
+
 function exerciseFabOn() {
-	return App.exercises.length >= 3;
+	return true;
 }
 
 function syncExerciseFab() {
@@ -1251,7 +1419,8 @@ function toggleExerciseFab(e) {
 function openExerciseFab() {
 	const sheet = document.getElementById('ex-fab-sheet');
 	if (!sheet) return;
-	const dgeOn = App.tier === 'circle' && App.dgeDone;
+	const dgeOn = dgeInFab();
+	const dgeAgain = App.dgeDone;
 	sheet.innerHTML = `
 		<div class="ex-fab-pop" onclick="event.stopPropagation()">
 			<button type="button" class="ex-fab-opt" onclick="closeExerciseFab();startExercise({returnTab:'exercise'})">
@@ -1261,8 +1430,8 @@ function openExerciseFab() {
 			</button>
 			${dgeOn ? `<button type="button" class="ex-fab-opt" onclick="closeExerciseFab();startDGE()">
 				<div class="kicker">Circle \u00b7 The season</div>
-				<div class="h3">Do Discernment of Growth Edges again</div>
-				<p class="caption" style="margin:0;">Look across the season again.</p>
+				<div class="h3">${dgeAgain ? 'Do Discernment of Growth Edges again' : 'Discernment of Growth Edges'}</div>
+				<p class="caption" style="margin:0;">${dgeAgain ? 'Look across the season again.' : 'Look across this season of practice.'}</p>
 			</button>` : ''}
 		</div>`;
 	sheet.classList.add('open');
@@ -1271,6 +1440,23 @@ function openExerciseFab() {
 function closeExerciseFab() {
 	const sheet = document.getElementById('ex-fab-sheet');
 	if (sheet) { sheet.classList.remove('open'); sheet.innerHTML = ''; }
+}
+
+function renderHomeExerciseCard() {
+	const el = document.getElementById('home-exercise-slot');
+	if (!el) return;
+	const prepActive = App.tier === 'circle' && !App.prep.homeDismissed && prepDoneCount() < 3;
+	if (prepActive || App.exercises.length > 0) {
+		el.innerHTML = '';
+		return;
+	}
+	el.innerHTML = `
+	<div class="hero-card gradient" onclick="startExercise({returnTab:'home'})">
+		<div class="kicker">Personal Exercise</div>
+		<div class="h3">Do an exercise</div>
+		<p class="caption" style="margin:6px 0 16px;">About 10–15 min, on your own, whenever you have a quiet moment. After this, start from + on Exercises.</p>
+		<button class="btn btn-dark btn-small" onclick="event.stopPropagation();startExercise({returnTab:'home'})">Begin</button>
+	</div>`;
 }
 
 function renderPatterns(containerId) {
@@ -1306,8 +1492,11 @@ function renderPatterns(containerId) {
 	const cards = PATTERN_ORDER.filter(t => byTheme[t] && byTheme[t].length).map(themeKey => {
 		const qs = byTheme[themeKey];
 		const meta = PATTERN_META[themeKey];
+		const max = Math.max.apply(null, PATTERN_ORDER.map(k => (byTheme[k] || []).length).concat([1]));
+		const ratio = qs.length / max;
+		const size = ratio >= 0.75 ? 'size-l' : ratio >= 0.4 ? 'size-m' : 'size-s';
 		return `
-		<div class="pattern-theme-card">
+		<div class="pattern-theme-card ${size}">
 			<div class="pattern-theme-header">
 				<span class="pattern-theme-icon">${meta.icon}</span>
 				<span class="pattern-theme-name">${meta.label}</span>
@@ -1316,7 +1505,7 @@ function renderPatterns(containerId) {
 			${qs.slice(0, 3).map(q => `<div class="pattern-quote">\u201C${escapeHtml(q.text)}\u201D<span class="pattern-quote-date">${escapeHtml(q.date)}</span></div>`).join('')}
 		</div>`;
 	}).join('');
-	el.innerHTML = aiLink + renderPatternCalendar(quotes) + cards;
+	el.innerHTML = aiLink + cards;
 }
 
 /* -------------------------------------------------------------------------
@@ -1326,12 +1515,24 @@ function renderPastExercises(containerId) {
 	const el = document.getElementById(containerId);
 	if (!el) return;
 	if (!App.exercises.length) {
-		el.innerHTML = '';
+		el.innerHTML = `<p class="caption" style="text-align:center;padding:28px 12px;">No exercises yet. Tap + to start one.</p>`;
 		return;
 	}
-	const items = App.exercises.slice().reverse();
+	const q = String(App.pastSearch || '').trim().toLowerCase();
+	const items = App.exercises.slice().reverse().filter(rec => {
+		if (!q) return true;
+		const hay = [
+			rec.date, rec.situation, rec.themes, rec.heartPosture, rec.nextSteps,
+			...(rec.quotes || []).map(x => x.text)
+		].join(' ').toLowerCase();
+		return hay.indexOf(q) !== -1;
+	});
+	if (!items.length) {
+		el.innerHTML = `<p class="caption" style="text-align:center;padding:20px 12px;">Nothing matches that search.</p>`;
+		return;
+	}
 	el.innerHTML = items.map(rec => {
-		const tags = [...new Set(rec.quotes.map(q => q.theme))].map(t => `<span class="tag outline">${PATTERN_META[t].label}</span>`).join(' ');
+		const tags = [...new Set((rec.quotes || []).map(x => x.theme))].map(t => `<span class="tag outline">${PATTERN_META[t].label}</span>`).join(' ');
 		return `
 		<div class="card outlined" onclick="openPastRecap(${rec.id})">
 			<div class="caption" style="margin-bottom:4px;">${escapeHtml(rec.date)}</div>
@@ -2030,14 +2231,14 @@ let _coach = null;
 
 function startCoachTour() {
 	if (!document.getElementById('coach-overlay')) return;
-	if (_coach) return;
+	if (_coach) endCoachTour();
 	const begin = () => {
 		if (!document.querySelector('#home-prep-card-slot .home-prep-stack')) return;
 		const overlay = document.getElementById('coach-overlay');
 		const rail = document.getElementById('coach-rail');
 		rail.classList.add('no-swipe');
 		rail.onscroll = null;
-		_coach = { step: 0, total: COACH_STEPS.length };
+		_coach = { step: 0, total: COACH_STEPS.length, steps: COACH_STEPS };
 		overlay.classList.add('open');
 		overlay.setAttribute('aria-hidden', 'false');
 		renderCoachStep();
@@ -2051,9 +2252,37 @@ function startCoachTour() {
 	begin();
 }
 
+function maybeCoachFab() {
+	if (App.fabCoached || _coach) return;
+	if (!document.getElementById('coach-overlay')) { App.fabCoached = true; return; }
+	if (App.currentTab !== 'exercise') return;
+	const fab = document.getElementById('ex-fab');
+	if (!fab || !fab.classList.contains('visible')) return;
+	const overlay = document.getElementById('coach-overlay');
+	const rail = document.getElementById('coach-rail');
+	if (!overlay || !rail) return;
+	rail.classList.add('no-swipe');
+	rail.onscroll = null;
+	_coach = {
+		step: 0,
+		total: 1,
+		onEnd: function() { App.fabCoached = true; },
+		steps: [{
+			title: 'Do an exercise anytime',
+			body: 'Tap + whenever you want to start. It stays here so you can always find it.',
+			selector: '#ex-fab',
+			pill: false
+		}]
+	};
+	overlay.classList.add('open');
+	overlay.setAttribute('aria-hidden', 'false');
+	renderCoachStep();
+}
+
 function renderCoachStep() {
 	if (!_coach) return;
-	const step = COACH_STEPS[_coach.step];
+	const steps = _coach.steps || COACH_STEPS;
+	const step = steps[_coach.step];
 	document.getElementById('coach-rail').innerHTML = `
 		<div class="coach-page">
 			<div class="h3">${escapeHtml(step.title)}</div>
@@ -2115,6 +2344,7 @@ function skipCoachTour() {
 }
 
 function endCoachTour() {
+	const onEnd = _coach && _coach.onEnd;
 	const overlay = document.getElementById('coach-overlay');
 	const rail = document.getElementById('coach-rail');
 	if (rail) rail.onscroll = null;
@@ -2123,4 +2353,5 @@ function endCoachTour() {
 		overlay.classList.remove('open');
 		overlay.setAttribute('aria-hidden', 'true');
 	}
+	if (onEnd) onEnd();
 }
