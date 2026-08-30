@@ -57,7 +57,7 @@ const App = {
 		goSteps: ['Pause before I say yes.', 'Name one true sentence in the hard conversation.']
 	},
 	classroomWatched: new Set(), // shared watched-state, indices into CLASSROOM_CHUNKS
-	prep: { classroom: false, exercise: false, reflect: false, homeDismissed: false },
+	prep: { classroom: false, exercise: false, reflect: false, dge: false, homeDismissed: false },
 	renderers: {}, // { home, exercise, explore, connect } -> fn()
 
 	init() {
@@ -105,7 +105,8 @@ const SEED_KRLS = [
 		],
 		quotes: [
 			{ theme: 'patience', text: "The scramble is real — staying in the room felt like the smaller, truer thing.", date: 'Aug 14', day: '2026-08-14' },
-			{ theme: 'trust', text: "I do not have to redeem the whole evening in one hour.", date: 'Aug 14', day: '2026-08-14' }
+			{ theme: 'trust', text: "I do not have to redeem the whole evening in one hour.", date: 'Aug 14', day: '2026-08-14' },
+			{ theme: 'presence', text: "They still come find me. I want to be in the room when they do.", date: 'Aug 14', day: '2026-08-14' }
 		] },
 	{ id: 4, date: 'Yesterday', situation: 'A committee decision I am tempted to force so we can be done.',
 		themes: 'Do not manufacture certainty. Let the group arrive.',
@@ -118,7 +119,8 @@ const SEED_KRLS = [
 		],
 		quotes: [
 			{ theme: 'clarity', text: "Forcing a vote would have been relief, not discernment.", date: 'Aug 16', day: '2026-08-16' },
-			{ theme: 'trust', text: "Leaving it open another week felt like the risk.", date: 'Aug 16', day: '2026-08-16' }
+			{ theme: 'trust', text: "Leaving it open another week felt like the risk.", date: 'Aug 16', day: '2026-08-16' },
+			{ theme: 'courage', text: "Ask one more question before I offer a plan.", date: 'Aug 16', day: '2026-08-16' }
 		] }
 ];
 
@@ -128,15 +130,17 @@ function applyExerciseDemoFromQuery() {
 	App.dgeUnlocked = false;
 	App.fabCoached = true;
 	if (ex === 'empty') {
-		App.exercises = []; App.dgeDone = false; App.lastDgeDay = null; App.dgeUnlocked = false; App.fabCoached = false;
+		App.exercises = []; App.dgeDone = false; App.lastDgeDay = null; App.dgeUnlocked = false; App.fabCoached = false; App.prep.dge = false;
 	} else if (ex === 'few') {
 		App.exercises = SEED_KRLS.slice(0, 2); App.dgeDone = false; App.lastDgeDay = null;
 	} else if (ex === 'ready') {
 		App.exercises = SEED_KRLS.slice(0, 4); App.dgeDone = false; App.lastDgeDay = null;
 	} else if (ex === 's4') {
-		App.exercises = SEED_KRLS.slice(0, 4); App.dgeDone = false; App.lastDgeDay = null; App.dgeUnlocked = true;
+		App.exercises = SEED_KRLS.slice(0, 4); App.dgeDone = false; App.lastDgeDay = null; App.dgeUnlocked = true; App.prep.dge = false;
+		currentSessionIdx = 3;
 	} else if (ex === 'after') {
-		App.exercises = SEED_KRLS.slice(0, 4); App.dgeDone = true; App.lastDgeDay = '2026-08-10'; App.dgeUnlocked = true;
+		App.exercises = SEED_KRLS.slice(0, 4); App.dgeDone = true; App.lastDgeDay = '2026-08-10'; App.dgeUnlocked = true; App.prep.dge = true;
+		currentSessionIdx = 3;
 	}
 	const mark = ex || (App.dgeDone ? 'after' : App.dgeUnlocked ? 's4' : App.exercises.length >= 3 ? 'ready' : App.exercises.length ? 'few' : 'empty');
 	document.querySelectorAll('[data-ex]').forEach(a => {
@@ -162,8 +166,17 @@ function selectObPath(which) {
 }
 function continueObPath() {
 	if (_obPath === 'circle') showScreen('ob-circle-join');
-	else if (_obPath === 'explore') showScreen('ob-explore-circle');
+	else if (_obPath === 'find' || _obPath === 'explore') showScreen('ob-find-circle');
 	else if (typeof onPersonalPractice === 'function') onPersonalPractice();
+}
+
+function toggleObGuide(id) {
+	document.querySelectorAll('.ob-acc').forEach(el => {
+		if (el.dataset.obAcc !== id) return;
+		const open = el.classList.toggle('open');
+		const btn = el.querySelector('.ob-acc-head');
+		if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+	});
 }
 
 function setTabActive(tab) {
@@ -279,9 +292,11 @@ const EXERCISE_STEPS = [
 const PATTERN_META = {
 	trust: { label: 'Trust & Surrender', icon: '&#9680;' },
 	patience: { label: 'Patience', icon: '&#8998;' },
-	clarity: { label: 'Clarity', icon: '&#9678;' }
+	clarity: { label: 'Clarity', icon: '&#9678;' },
+	presence: { label: 'Presence', icon: '&#9673;' },
+	courage: { label: 'Courage', icon: '&#9671;' }
 };
-const PATTERN_ORDER = ['trust', 'patience', 'clarity'];
+const PATTERN_ORDER = ['trust', 'patience', 'clarity', 'presence', 'courage'];
 
 const ex = { mode: 'training', introAudio: false, warmupAudio: true, warmupWords: true, warmupPlaying: false, stepIdx: 0, responses: [], recap: null, returnTab: 'exercise', fromPrep: false, rating: 0 };
 
@@ -1117,9 +1132,9 @@ function dgeCardHTML(again) {
 	return `
 	<div class="${again ? 'card outlined static' : 'hero-card gradient'}" ${again ? '' : 'onclick="startDGE()"'}>
 		<div class="kicker">Circle \u00b7 The season</div>
-		<div class="h3">${again ? 'Do Discernment of Growth Edges again' : 'Discernment of Growth Edges'}</div>
-		<p class="caption" style="margin:6px 0 16px;">A second exercise — same three movements, object is the season. Looks across your past exercises; it does not create the patterns.</p>
-		<button class="btn ${again ? 'btn-light' : 'btn-dark'} btn-small" onclick="event.stopPropagation();startDGE()">${again ? 'Begin again' : 'Begin'}</button>
+		<div class="h3">${again ? 'Update growth edges' : 'Discernment of Growth Edges'}</div>
+		<p class="caption" style="margin:6px 0 16px;">${again ? 'Look across the season again \u2014 roughly quarterly.' : 'A second exercise \u2014 same three movements, object is the season. Looks across your past exercises; it does not create the patterns.'}</p>
+		<button class="btn ${again ? 'btn-light' : 'btn-dark'} btn-small" onclick="event.stopPropagation();startDGE()">${again ? 'Discern again' : 'Begin'}</button>
 	</div>`;
 }
 
@@ -1157,12 +1172,21 @@ function editGrowthEdges(focusIdx) {
 	renderDgeEdges();
 }
 
-function startDGE() {
+function startDGE(opts) {
 	dge.range = 'since';
 	dge.fromEdit = false;
+	dge.fromPrep = !!(opts && opts.fromPrep);
 	dge.edges = ['', '', ''];
 	dge.go = '';
 	dge.focus = 0;
+	dge.resonate = '';
+	dge.elseGod = '';
+	dge.customPatterns = [];
+	dge.addingPattern = false;
+	dge.openTheme = null;
+	dge.warmupPlaying = false;
+	dge.warmupAudio = true;
+	dge.warmupWords = true;
 	dge.customStart = dge.customStart || '2026-08-01';
 	dge.customEnd = dge.customEnd || '2026-08-26';
 	hideTabBar();
@@ -1170,22 +1194,96 @@ function startDGE() {
 	renderDgeIntro();
 }
 
-const dge = { range: 'since', edges: ['', '', ''], go: '', focus: 0, fromEdit: false, customStart: '2026-08-01', customEnd: '2026-08-26' };
+const dge = {
+	range: 'since', edges: ['', '', ''], go: '', focus: 0, fromEdit: false, fromPrep: false,
+	customStart: '2026-08-01', customEnd: '2026-08-26',
+	resonate: '', elseGod: '', customPatterns: [], addingPattern: false, openTheme: null,
+	warmupPlaying: false, warmupAudio: true, warmupWords: true
+};
 
 function cancelDGE() {
+	clearSitTimers();
+	setSitImmersive(false);
+	if (dge.fromPrep) {
+		showTabBar();
+		showScreen('prep-overlay');
+		prepShowChecklist();
+		return;
+	}
 	showTabBar();
 	goTab('exercise');
 }
 
 function renderDgeIntro() {
+	clearSitTimers();
+	setSitImmersive(false);
+	const whyNow = App.dgeDone
+		? 'You can look across the season again whenever you want to update what you are carrying.'
+		: 'This is part of Session 4 prep \u2014 the cohort does this together, so it is not a surprise on Exercises.';
 	exOverlay(`
 		<button class="btn-ghost back-link" onclick="cancelDGE()">&larr; Back</button>
 		<div class="kicker">The season</div>
 		<div class="h1" style="margin-bottom:10px;">Discernment of Growth Edges</div>
 		<p class="body-text" style="margin-bottom:14px;">God is mostly after formation &mdash; not only guidance for one situation. Growth Edges are 1&ndash;3 invitations for this season. They are an open door, not a demand.</p>
-		<p class="caption" style="margin-bottom:24px;">Pattern Recognition looks across your past exercises. The themes are a starting point. You discern what, if anything, is an invitation.</p>
+		<p class="body-text" style="margin-bottom:14px;">${escapeHtml(whyNow)}</p>
+		<p class="caption" style="margin-bottom:8px;">What you write stays private. Pattern Recognition looks across your past exercises. The themes are a starting point. You discern what, if anything, is an invitation.</p>
+		<p class="caption" style="margin-bottom:24px;"><a href="javascript:void(0)" onclick="showAIInfo('exercise-overlay', renderDgeIntro)" style="color:inherit;text-decoration:underline;">How is AI used?</a></p>
 		<button class="btn btn-dark btn-block-mt" onclick="renderDgeRange()">Begin</button>
 		<div style="height:16px"></div>`);
+}
+
+function paintDgeWarmupSlots() {
+	const audioSlot = document.getElementById('warmup-audio-slot');
+	const wordsSlot = document.getElementById('warmup-words-slot');
+	if (audioSlot) audioSlot.innerHTML = (dge.warmupPlaying && dge.warmupAudio) ? warmupAudioHTML() : '';
+	if (wordsSlot) wordsSlot.innerHTML = (dge.warmupPlaying && dge.warmupWords) ? `<p class="body-text sit-words">${WARMUP_WORDS}</p>` : '';
+}
+
+function toggleDgeWarmupFlag(which) {
+	if (which === 'audio') dge.warmupAudio = !dge.warmupAudio;
+	else dge.warmupWords = !dge.warmupWords;
+	document.querySelectorAll('[data-dge-warmup]').forEach(btn => {
+		const on = btn.dataset.dgeWarmup === 'audio' ? dge.warmupAudio : dge.warmupWords;
+		btn.classList.toggle('active', on);
+	});
+	paintDgeWarmupSlots();
+}
+
+function startDgeWarmupPlay() {
+	dge.warmupPlaying = true;
+	renderDgeWarmup();
+}
+
+function renderDgeWarmup() {
+	const playing = !!dge.warmupPlaying;
+	if (!playing) clearSitTimers();
+	setSitImmersive(false);
+	const extra = playing
+		? `<div id="warmup-audio-slot"></div><div id="warmup-words-slot"></div>`
+		: `<button type="button" class="sit-play" onclick="startDgeWarmupPlay()" aria-label="Start warm-up"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg></button>`;
+	exOverlay(`
+		<div class="warmup-page">
+			<button class="btn-ghost back-link" onclick="renderDgeRange()">&larr; Back</button>
+			<div class="h1" style="margin-bottom:6px;">Warm-up</div>
+			<p class="caption">Same short settle as a personal exercise. The orb will come back when you pause on patterns and growth edges.</p>
+			<div class="warmup-toggles">
+				<button type="button" class="warmup-toggle${dge.warmupAudio ? ' active' : ''}" data-dge-warmup="audio" onclick="toggleDgeWarmupFlag('audio')">Audio</button>
+				<button type="button" class="warmup-toggle${dge.warmupWords ? ' active' : ''}" data-dge-warmup="words" onclick="toggleDgeWarmupFlag('words')">Words</button>
+			</div>
+			<div class="sit-stage sit-stage--full${playing ? '' : ' is-idle'}">
+				${sitStageInnerHTML({
+					kicker: 'Warm-up',
+					showSkip: playing,
+					skipOnclick: 'skipSit()',
+					extra
+				})}
+			</div>
+			${playing ? `<div class="sit-actions"><button class="btn btn-dark" onclick="renderDgeGather()">I&rsquo;m ready</button></div>` : ''}
+		</div>`);
+	if (playing) {
+		paintDgeWarmupSlots();
+		startSitTimer(WARMUP_MS);
+	}
 }
 
 function dgeLastLabel() {
@@ -1196,6 +1294,8 @@ function dgeLastLabel() {
 }
 
 function renderDgeRange() {
+	clearSitTimers();
+	setSitImmersive(false);
 	const sinceOn = dge.range === 'since';
 	const customOn = dge.range === 'custom';
 	exOverlay(`
@@ -1217,7 +1317,7 @@ function renderDgeRange() {
 			<label class="ge-label">End</label>
 			<input type="date" class="input-box" value="${escapeHtml(dge.customEnd)}" oninput="dge.customEnd=this.value">
 		</div>` : ''}
-		<button class="btn btn-dark btn-block-mt" onclick="renderDgeGather()">Look across these</button>
+		<button class="btn btn-dark btn-block-mt" onclick="renderDgeWarmup()">Look across these</button>
 		<div style="height:16px"></div>`);
 }
 
@@ -1255,11 +1355,26 @@ function dgeThemeGroups() {
 			(byTheme[q.theme] = byTheme[q.theme] || []).push(Object.assign({ situation: e.situation }, q));
 		});
 	});
-	return PATTERN_ORDER.filter(t => byTheme[t] && byTheme[t].length).map(theme => ({
+	const rolled = PATTERN_ORDER.filter(t => byTheme[t] && byTheme[t].length).map(theme => ({
 		theme,
 		meta: PATTERN_META[theme],
-		quotes: byTheme[theme]
+		quotes: byTheme[theme],
+		custom: false
 	}));
+	const custom = (dge.customPatterns || []).map(p => ({
+		theme: p.id,
+		meta: { label: p.label, icon: '+' },
+		quotes: p.quotes || [],
+		custom: true
+	}));
+	return rolled.concat(custom).slice(0, 8);
+}
+
+function dgeThemeSize(count, max) {
+	const ratio = count / (max || 1);
+	if (ratio >= 0.75) return 'size-l';
+	if (ratio >= 0.4) return 'size-m';
+	return 'size-s';
 }
 
 function renderDgeGather() {
@@ -1273,28 +1388,94 @@ function renderDgeGather() {
 }
 
 function renderDgeThemes() {
+	clearSitTimers();
+	setSitImmersive(false);
 	const groups = dgeThemeGroups();
 	const count = dgeFilteredExercises().length;
-	const cards = groups.length ? groups.map(g => `
-		<div class="dge-theme">
-			<div class="kicker">${g.quotes.length} across ${count} situation${count === 1 ? '' : 's'}</div>
-			<div class="h3">${g.meta.label}</div>
-			${g.quotes.slice(0, 2).map(q => `<p class="dge-theme-quote">\u201C${escapeHtml(q.text)}\u201D</p>`).join('')}
-		</div>`).join('') : `<p class="caption">Not enough in this range yet. Try a wider window.</p>`;
+	const max = Math.max.apply(null, groups.map(g => g.quotes.length).concat([1]));
+	const tiles = groups.length ? groups.map(g => `
+		<button type="button" class="dge-tile ${dgeThemeSize(g.quotes.length, max)}" onclick="openDgeTheme('${escapeHtml(g.theme)}')">
+			<div class="kicker">${g.custom ? 'You added' : `${g.quotes.length} across ${count} situation${count === 1 ? '' : 's'}`}</div>
+			<div class="h3">${escapeHtml(g.meta.label)}</div>
+			<p class="caption" style="margin:8px 0 0;">Tap to read this in your words.</p>
+		</button>`).join('') : `<p class="caption">Not enough in this range yet. Try a wider window.</p>`;
 	exOverlay(`
-		<button class="btn-ghost back-link" onclick="renderDgeRange()">&larr; Back</button>
+		<button class="btn-ghost back-link" onclick="renderDgeWarmup()">&larr; Back</button>
 		<div class="h1" style="margin-bottom:6px;">What keeps showing up</div>
-		<p class="caption" style="margin-bottom:12px;">Scroll the cards. Sit with them. These are starting points &mdash; not your Growth Edges yet.</p>
-		<div class="dge-rail">${cards}</div>
-		<button class="btn btn-dark btn-block-mt" onclick="renderDgeEdges()">Name Growth Edges</button>
+		<p class="caption" style="margin-bottom:12px;">More frequent themes are larger. Tap a tile for snippets in your words.</p>
+		<div class="dge-mosaic">${tiles}</div>
+		<button class="btn btn-dark btn-block-mt" onclick="renderDgeListen()">Continue</button>
 		<div style="height:16px"></div>`);
 }
 
-function renderDgeEdges() {
+function openDgeTheme(theme) {
+	dge.openTheme = theme;
+	const g = dgeThemeGroups().find(x => x.theme === theme);
+	if (!g) { renderDgeThemes(); return; }
+	const snippets = g.quotes.length
+		? g.quotes.map(q => `
+			<div class="pattern-quote">
+				\u201C${escapeHtml(q.text)}\u201D
+				<span class="pattern-quote-date">${escapeHtml(q.date || '')}${q.situation ? ' \u00b7 ' + escapeHtml(q.situation) : ''}</span>
+			</div>`).join('')
+		: `<p class="caption">You added this. It did not come from an exercise.</p>`;
 	exOverlay(`
-		<button class="btn-ghost back-link" onclick="${dge.fromEdit ? 'cancelDGE()' : 'renderDgeThemes()'}">&larr; Back</button>
+		<button class="btn-ghost back-link" onclick="renderDgeThemes()">&larr; Back</button>
+		<div class="kicker">${g.custom ? 'You added' : 'In your words'}</div>
+		<div class="h1" style="margin-bottom:10px;">${escapeHtml(g.meta.label)}</div>
+		<p class="caption" style="margin-bottom:16px;">Snippets from the situations you already walked.</p>
+		${snippets}
+		<button class="btn btn-dark btn-block-mt" onclick="renderDgeThemes()">Back to patterns</button>
+		<div style="height:16px"></div>`);
+}
+
+function addDgePattern() {
+	const el = document.getElementById('dge-add-pattern');
+	const label = el && el.value.trim();
+	if (!label) return;
+	dge.customPatterns.push({ id: 'custom-' + (dge.customPatterns.length + 1), label, quotes: [] });
+	dge.addingPattern = false;
+	renderDgeThemes();
+}
+
+function captureDgeListen() {
+	const r = document.getElementById('dge-resonate');
+	const e = document.getElementById('dge-else');
+	if (r) dge.resonate = r.value;
+	if (e) dge.elseGod = e.value;
+}
+
+function renderDgeListen() {
+	clearSitTimers();
+	setSitImmersive(false);
+	exOverlay(`
+		<button class="btn-ghost back-link" onclick="captureDgeListen();renderDgeThemes()">&larr; Back</button>
+		<div class="h1" style="margin-bottom:6px;">Listen</div>
+		<p class="caption" style="margin-bottom:12px;">Slowly read what keeps showing up. Capture what resonates. Leave room for what never made it into an exercise.</p>
+		<div class="think-panel sit-stage sit-stage--panel">
+			${sitStageInnerHTML({
+				kicker: 'Sit with this',
+				title: 'What is God inviting you to notice in this season?',
+				showSkip: true,
+				skipOnclick: 'skipSit()'
+			})}
+		</div>
+		<label class="ge-label">What resonates</label>
+		<textarea class="dge-edge" id="dge-resonate" rows="3" placeholder="Which patterns feel most true?">${escapeHtml(dge.resonate)}</textarea>
+		<label class="ge-label">Anything else God has been showing you</label>
+		<textarea class="dge-edge" id="dge-else" rows="3" placeholder="Something that never showed up in an exercise.">${escapeHtml(dge.elseGod)}</textarea>
+		<button class="btn btn-dark btn-block-mt" onclick="captureDgeListen();renderDgeEdges()">Name Growth Edges</button>
+		<div style="height:16px"></div>`);
+	startSitTimer(THINK_MS);
+}
+
+function renderDgeEdges() {
+	clearSitTimers();
+	setSitImmersive(false);
+	exOverlay(`
+		<button class="btn-ghost back-link" onclick="${dge.fromEdit ? 'cancelDGE()' : 'renderDgeListen()'}">&larr; Back</button>
 		<div class="h1" style="margin-bottom:6px;">Name 1&ndash;3 Growth Edges</div>
-		<p class="caption" style="margin-bottom:14px;">You name them. Type, or speak and we&rsquo;ll turn it into text &mdash; we don&rsquo;t extract or decide the edges for you. 1&ndash;3 sentences each is enough.</p>
+		<p class="caption" style="margin-bottom:14px;">You name them. Related to the patterns or not. Language can differ from the theme names. 1&ndash;3 sentences each is enough.</p>
 		<label class="ge-label">Growth Edge 1</label>
 		<textarea class="dge-edge${dge.focus === 0 ? ' selected' : ''}" rows="3" onfocus="dgeFocusEdge(0)" id="dge-e0">${escapeHtml(dge.edges[0])}</textarea>
 		<label class="ge-label">Growth Edge 2 (optional)</label>
@@ -1309,6 +1490,31 @@ function renderDgeEdges() {
 				</button>
 			</div>
 		</div>
+		<button class="btn btn-dark btn-block-mt" onclick="${dge.fromEdit ? 'finishDgeEdit()' : 'continueDgeEdges()'}">${dge.fromEdit ? 'Save' : 'Go steps'}</button>
+		<div style="height:16px"></div>`);
+}
+
+function continueDgeEdges() {
+	collectDgeEdges();
+	renderDgeGhost();
+}
+
+function finishDgeEdit() {
+	collectDgeEdges();
+	App.growthEdges.edges = dge.edges.filter(Boolean);
+	cancelDGE();
+}
+
+function renderDgeGhost() {
+	clearSitTimers();
+	setSitImmersive(false);
+	exOverlay(`
+		<button class="btn-ghost back-link" onclick="renderDgeEdges()">&larr; Back</button>
+		<div class="kicker">Go</div>
+		<div class="h1" style="margin-bottom:6px;">Go steps</div>
+		<p class="caption" style="margin-bottom:14px;">The access pieces from this discernment \u2014 small, doable ways to live the edges. These stay on Exercises with your Growth Edges.</p>
+		<label class="ge-label">Go steps</label>
+		<textarea class="dge-edge" id="dge-go" rows="5" placeholder="One step per line.">${escapeHtml(dge.go)}</textarea>
 		<button class="btn btn-dark btn-block-mt" onclick="finishDGE()">Save this season</button>
 		<div style="height:16px"></div>`);
 }
@@ -1339,13 +1545,21 @@ function collectDgeEdges() {
 
 function finishDGE() {
 	collectDgeEdges();
-	const named = dge.edges.filter(Boolean);
-	App.growthEdges.edges = named;
+	const goEl = document.getElementById('dge-go');
+	if (goEl) dge.go = goEl.value.trim();
+	App.growthEdges.edges = dge.edges.filter(Boolean);
+	App.growthEdges.goSteps = growthList(dge.go);
 	App.dgeDone = true;
 	App.dgeUnlocked = true;
+	App.prep.dge = true;
 	App.lastDgeDay = '2026-08-26';
 	showTabBar();
-	goTab('exercise');
+	if (dge.fromPrep) {
+		showScreen('prep-overlay');
+		prepShowChecklist();
+	} else {
+		goTab('exercise');
+	}
 }
 
 function renderExerciseTab() {
@@ -1430,8 +1644,8 @@ function openExerciseFab() {
 			</button>
 			${dgeOn ? `<button type="button" class="ex-fab-opt" onclick="closeExerciseFab();startDGE()">
 				<div class="kicker">Circle \u00b7 The season</div>
-				<div class="h3">${dgeAgain ? 'Do Discernment of Growth Edges again' : 'Discernment of Growth Edges'}</div>
-				<p class="caption" style="margin:0;">${dgeAgain ? 'Look across the season again.' : 'Look across this season of practice.'}</p>
+				<div class="h3">${dgeAgain ? 'Update growth edges' : 'Discernment of Growth Edges'}</div>
+				<p class="caption" style="margin:0;">${dgeAgain ? 'Discern again \u2014 look across the season.' : 'Look across this season of practice.'}</p>
 			</button>` : ''}
 		</div>`;
 	sheet.classList.add('open');
@@ -1570,22 +1784,30 @@ function checkPrepClassroomComplete() {
 	App.prep.classroom = anySession1Watched;
 }
 
+function prepKeys() {
+	return App.dgeUnlocked ? ['classroom', 'dge', 'reflect'] : ['classroom', 'exercise', 'reflect'];
+}
+
 function prepDoneCount() {
-	return ['classroom', 'exercise', 'reflect'].filter(k => App.prep[k]).length;
+	return prepKeys().filter(k => App.prep[k]).length;
+}
+
+function prepTotalCount() {
+	return prepKeys().length;
 }
 
 function prepStackHTML(opts) {
 	opts = opts || {};
 	const doneCount = prepDoneCount();
-	const allDone = doneCount === 3;
+	const allDone = doneCount === prepTotalCount();
 	const toChecklist = allDone || doneCount > 0;
-	const title = opts.sessionTitle || 'Session 1';
+	const title = opts.sessionTitle || (App.dgeUnlocked ? 'Session 4' : 'Session 1');
 	const collapsible = !!opts.collapsible;
 	const open = collapsible ? !!opts.open : true;
 	const ret = opts.returnScreen || '';
 	const flowArg = `{toChecklist:${toChecklist}${ret ? `, returnScreen:'${ret}'` : ''}}`;
 	const cta = allDone ? 'Open checklist' : doneCount > 0 ? 'Continue prep' : "Let's get prepped";
-	const heading = allDone ? (opts.readyLabel || "You're ready for Session 1") : 'Prep for the gathering';
+	const heading = allDone ? (opts.readyLabel || (App.dgeUnlocked ? "You're ready for Session 4" : "You're ready for Session 1")) : 'Prep for the gathering';
 	const headRight = collapsible
 		? `<button type="button" class="prep-collapse-btn" onclick="event.stopPropagation();togglePrepStack()" aria-expanded="${open ? 'true' : 'false'}" aria-controls="acc-prep-rows" aria-label="${open ? 'Collapse prep' : 'Expand prep'}">&#9662;</button>`
 		: `<div class="session-menu">
@@ -1623,9 +1845,16 @@ function prepStepRowsHTML(returnScreen) {
 			</div>
 			${done ? '' : '<span class="prep-step-chevron" aria-hidden="true">&#8250;</span>'}
 		</button>`;
+	const exerciseRow = App.dgeUnlocked
+		? ''
+		: row(App.prep.exercise, 'exercise', 'Personal exercise', 'A guided exercise on your own, in service of this gathering.');
+	const dgeRow = App.dgeUnlocked
+		? row(App.prep.dge, 'dge', App.dgeDone ? 'Update growth edges' : 'Discernment of Growth Edges', App.dgeDone ? 'Look across the season again.' : 'This session\'s exercise — look across the season together.')
+		: '';
 	return `<div class="prep-steps">
 		${row(App.prep.classroom, 'classroom', 'Learning', 'Short pieces for this session — not the whole library.')}
-		${row(App.prep.exercise, 'exercise', 'Personal exercise', 'A guided exercise on your own, in service of this gathering.')}
+		${exerciseRow}
+		${dgeRow}
 		${row(App.prep.reflect, 'reflect', 'Reflect', 'Name one takeaway to bring into the room.')}
 	</div>`;
 }
@@ -1634,6 +1863,7 @@ function openPrepStep(step, returnScreen) {
 	startPrepFlow({ toChecklist: true, returnScreen: returnScreen || null });
 	if (step === 'classroom') prepShowClassroom();
 	else if (step === 'exercise') prepGoExercise();
+	else if (step === 'dge') startDGE({ fromPrep: true });
 	else if (step === 'reflect') prepShowReflect();
 }
 
@@ -1667,7 +1897,9 @@ function prepShowIntro() {
 	prepOverlay(`
 		<button class="btn-ghost back-link" onclick="closePrepOverlay()">&larr; Back</button>
 		<div class="h1" style="margin-bottom:12px;">Getting ready for the Circle</div>
-		<p class="body-text" style="margin-bottom:20px;">Session 1 is coming up. Spend a few unhurried minutes on your own — a short Learning piece, a personal exercise, and Reflect. Together, they'll help you show up for Circle.</p>
+		<p class="body-text" style="margin-bottom:20px;">${App.dgeUnlocked
+			? 'Session 4 is coming up. The exercise for this session is Discernment of Growth Edges \u2014 looking across the season, not one situation \u2014 plus Learning and Reflect.'
+			: 'Session 1 is coming up. Spend a few unhurried minutes on your own \u2014 a short Learning piece, a personal exercise, and Reflect. Together, they\'ll help you show up for Circle.'}</p>
 		<button class="btn btn-dark btn-block-mt" onclick="prepShowChecklist()">Let's Get Prepped &rarr;</button>
 		<div style="height:16px"></div>`);
 }
@@ -1675,19 +1907,28 @@ function prepShowIntro() {
 function prepShowChecklist() {
 	showTabBar();
 	const doneCount = prepDoneCount();
-	const allDone = doneCount === 3;
+	const total = prepTotalCount();
+	const allDone = doneCount === total;
+	const exerciseItem = App.dgeUnlocked ? '' : `
+		<div class="card outlined prep-checklist-item" onclick="prepGoExercise()">
+			<div class="chk-circle${App.prep.exercise ? ' done' : ''}">${App.prep.exercise ? '&#10003;' : ''}</div>
+			<div><b style="font-size:16px;">Personal Exercise</b><p class="caption" style="margin:0;">Complete your personal exercise — done on your own.</p></div>
+		</div>`;
+	const dgeItem = App.dgeUnlocked ? `
+		<div class="card outlined prep-checklist-item" onclick="startDGE({ fromPrep: true })">
+			<div class="chk-circle${App.prep.dge ? ' done' : ''}">${App.prep.dge ? '&#10003;' : ''}</div>
+			<div><b style="font-size:16px;">${App.dgeDone ? 'Update growth edges' : 'Discernment of Growth Edges'}</b><p class="caption" style="margin:0;">${App.dgeDone ? 'Look across the season again.' : 'This session\'s exercise — look across the season together.'}</p></div>
+		</div>` : '';
 	prepOverlay(`
 		<button class="btn-ghost back-link" onclick="closePrepOverlay()">&larr; Back to Home</button>
 		<div class="h1" style="margin-bottom:6px;">Your Prep Checklist</div>
-		<p class="prep-progress-caption">${doneCount} of 3 complete</p>
+		<p class="prep-progress-caption">${doneCount} of ${total} complete</p>
 		<div class="card outlined prep-checklist-item" onclick="prepShowClassroom()">
 			<div class="chk-circle${App.prep.classroom ? ' done' : ''}">${App.prep.classroom ? '&#10003;' : ''}</div>
 			<div><b style="font-size:16px;">Learning</b><p class="caption" style="margin:0;">A few short pieces for this session.</p></div>
 		</div>
-		<div class="card outlined prep-checklist-item" onclick="prepGoExercise()">
-			<div class="chk-circle${App.prep.exercise ? ' done' : ''}">${App.prep.exercise ? '&#10003;' : ''}</div>
-			<div><b style="font-size:16px;">Personal Exercise</b><p class="caption" style="margin:0;">Complete your personal exercise — done on your own.</p></div>
-		</div>
+		${exerciseItem}
+		${dgeItem}
 		<div class="card outlined prep-checklist-item" onclick="prepShowReflect()">
 			<div class="chk-circle${App.prep.reflect ? ' done' : ''}">${App.prep.reflect ? '&#10003;' : ''}</div>
 			<div><b style="font-size:16px;">Reflect &amp; Prep</b><p class="caption" style="margin:0;">One takeaway to bring to the group.</p></div>
