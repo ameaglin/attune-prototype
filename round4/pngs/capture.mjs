@@ -62,7 +62,7 @@ await shot('08-paid-join-circle');
 
 await evalp(() => finishOnboarding());
 await shot('09-paid-home-prep');
-await page.click('.prep-card-head .session-menu-btn');
+await page.click('.session-prep-head .session-menu-btn');
 await shot('10-paid-home-prep-menu');
 await evalp(() => closeSessionMenu());
 

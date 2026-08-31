@@ -106,7 +106,7 @@ const SEED_KRLS = [
 		quotes: [
 			{ theme: 'patience', text: "The scramble is real — staying in the room felt like the smaller, truer thing.", date: 'Aug 14', day: '2026-08-14' },
 			{ theme: 'trust', text: "I do not have to redeem the whole evening in one hour.", date: 'Aug 14', day: '2026-08-14' },
-			{ theme: 'presence', text: "They still come find me. I want to be in the room when they do.", date: 'Aug 14', day: '2026-08-14' }
+			{ theme: 'presence', text: "They still come find me. I want to be in the room when they do.", date: 'Jul 18', day: '2026-07-18' }
 		] },
 	{ id: 4, date: 'Yesterday', situation: 'A committee decision I am tempted to force so we can be done.',
 		themes: 'Do not manufacture certainty. Let the group arrive.',
@@ -120,7 +120,7 @@ const SEED_KRLS = [
 		quotes: [
 			{ theme: 'clarity', text: "Forcing a vote would have been relief, not discernment.", date: 'Aug 16', day: '2026-08-16' },
 			{ theme: 'trust', text: "Leaving it open another week felt like the risk.", date: 'Aug 16', day: '2026-08-16' },
-			{ theme: 'courage', text: "Ask one more question before I offer a plan.", date: 'Aug 16', day: '2026-08-16' }
+			{ theme: 'courage', text: "Ask one more question before I offer a plan.", date: 'Jul 8', day: '2026-07-08' }
 		] }
 ];
 
@@ -233,7 +233,7 @@ function renderInputTriadHTML(rootId) {
 				${glyphIcon('type')}<span class="triad-btn-label">Type</span>
 			</button>
 			<button type="button" class="triad-btn" data-mode="speak" onclick="triadSetMode(this,'speak')">
-				${glyphIcon('speak')}<span class="triad-btn-label">Speak</span>
+				${glyphIcon('speak')}<span class="triad-btn-label">Talk</span>
 			</button>
 		</div>
 		<div class="triad-body"></div>
@@ -289,22 +289,33 @@ const EXERCISE_STEPS = [
 	{ label: "What's Resonating", prompt: "What words, phrases, or images are resonating with you as something God may want you to pay attention to?", hint: "There's no wrong answer — just notice what surfaces." }
 ];
 
+const PIGMENTS = ['teal', 'mulberry', 'ochre', 'pine', 'rust', 'olive'];
+function patternPigment(patternId, index) {
+	return PIGMENTS[index % PIGMENTS.length];
+}
+
 const PATTERN_META = {
-	trust: { label: 'Trust & Surrender', icon: '&#9680;' },
-	patience: { label: 'Patience', icon: '&#8998;' },
-	clarity: { label: 'Clarity', icon: '&#9678;' },
-	presence: { label: 'Presence', icon: '&#9673;' },
-	courage: { label: 'Courage', icon: '&#9671;' }
+	trust:    { label: 'Trust & Surrender', icon: '&#9680;', hue: 'teal' },
+	patience: { label: 'Patience', icon: '&#8998;', hue: 'olive' },
+	clarity:  { label: 'Clarity', icon: '&#9678;', hue: 'mulberry' },
+	presence: { label: 'Presence', icon: '&#9673;', hue: 'ochre' },
+	courage:  { label: 'Courage', icon: '&#9671;', hue: 'pine' }
 };
 const PATTERN_ORDER = ['trust', 'patience', 'clarity', 'presence', 'courage'];
 
-const ex = { mode: 'training', introAudio: false, warmupAudio: true, warmupWords: true, warmupPlaying: false, stepIdx: 0, responses: [], recap: null, returnTab: 'exercise', fromPrep: false, rating: 0 };
+function patternHue(themeKey, index) {
+	const meta = PATTERN_META[themeKey];
+	if (meta && meta.hue) return meta.hue;
+	return patternPigment(themeKey, typeof index === 'number' ? index : 0);
+}
+
+const ex = { mode: 'training', introAudio: false, warmupAudio: true, warmupWords: false, warmupPlaying: false, stepIdx: 0, responses: [], recap: null, returnTab: 'exercise', fromPrep: false, rating: 0 };
 
 function startExercise(opts) {
 	ex.mode = 'training';
 	ex.introAudio = false;
 	ex.warmupAudio = true;
-	ex.warmupWords = true;
+	ex.warmupWords = false;
 	ex.warmupPlaying = false;
 	ex.stepIdx = 0;
 	ex.responses = [];
@@ -326,19 +337,27 @@ function renderExercisePrivacy() {
 	setSitImmersive(false);
 	const listening = ex.introAudio;
 	exOverlay(`
-		<div class="h1" style="margin-bottom:6px;">A personal exercise</div>
-		<p class="caption" style="margin-bottom:16px;">One real situation &middot; about 15&ndash;20 minutes</p>
+		<div class="flow-head">
+			<div class="flow-head-row">
+				<div>
+					<div class="h3" style="color:var(--canvas);margin:0;">Personal exercise</div>
+					<div class="kicker" style="color:rgba(251,249,246,0.82);margin:6px 0 0;">Before you begin</div>
+				</div>
+				<button class="btn-ghost flow-head-x" onclick="cancelExercise()">&#10005;</button>
+			</div>
+		</div>
+		<div class="h2" style="margin-bottom:12px;">One situation, about twenty minutes.</div>
 		<button type="button" class="btn btn-light" style="margin-bottom:16px;" onclick="toggleIntroAudio()">${listening ? 'Playing intro' : 'Listen to intro'}</button>
 		${listening ? `<div class="card static" style="text-align:center;padding:20px;margin-bottom:16px;">
 			<div class="triad-waveform" style="justify-content:center;">${Array.from({ length: 7 }).map((_, i) => `<span class="triad-wave-bar" style="height:${12 + (i * 4) % 22}px;animation-delay:${(i * 0.1).toFixed(1)}s"></span>`).join('')}</div>
 			<p class="caption">[ Playing intro &middot; ~1 min ]</p>
 		</div>` : ''}
-		<p class="body-text" style="margin-bottom:12px;">You&rsquo;ll bring one current situation and walk it through Listen, Discern, and Go. Notice what&rsquo;s serving you and what isn&rsquo;t &mdash; in yourself, in another person or group, and in any circumstance or system in the mix. Then name what you&rsquo;re sensing God invite, and a next step.</p>
-		<p class="body-text" style="margin-bottom:12px;">Give each prompt the full time. Let it come to you rather than pushing through. You can always continue when you&rsquo;re ready.</p>
-		<p class="caption" style="margin-bottom:8px;">What you write stays private. It is not shared with a facilitator or your Circle unless you choose.</p>
+		<p class="body-text" style="margin-bottom:12px;">You&rsquo;ll settle for a few minutes, then move through a set of prompts about one situation you&rsquo;re carrying. There are no right answers and nothing to finish quickly.</p>
+		<p class="body-text" style="margin-bottom:12px;font-weight:600;">Take the full time. The pauses are the practice.</p>
+		<p class="caption" style="margin-bottom:8px;">Everything you write stays private to you. You decide what you bring to your Circle.</p>
 		<p class="caption" style="margin-bottom:20px;"><a href="javascript:void(0)" onclick="showAIInfo('exercise-overlay', renderExercisePrivacy)" style="color:inherit;text-decoration:underline;">How is AI used?</a></p>
-		<button class="btn btn-dark btn-block-mt" onclick="renderExerciseWarmup()">Continue</button>
-		<button class="btn-ghost" style="margin-top:14px;align-self:center;" onclick="renderExerciseWarmup()">Don&rsquo;t show me this again</button>`);
+		<button class="btn btn-dark btn-block-mt" onclick="renderExerciseWarmup()">Start the exercise</button>
+		<button class="btn-ghost" style="margin-top:14px;align-self:center;" onclick="renderExerciseWarmup()">Don&rsquo;t show this again</button>`);
 }
 
 function toggleIntroAudio() {
@@ -356,6 +375,32 @@ let _sitDone = false;
 
 function sitRingCircumference() { return 2 * Math.PI * 18; }
 
+function sitChromeHTML(opts) {
+	const total = opts.total || (EXERCISE_STEPS.length + 2);
+	const step = opts.step || 1;
+	const back = opts.backOnclick
+		? `<button class="btn-ghost" onclick="${opts.backOnclick}">&larr; Back</button>`
+		: `<button class="btn-ghost" onclick="${opts.exitOnclick || 'cancelExercise()'}">&#10005; Exit</button>`;
+	const save = `<button class="btn-ghost" onclick="${opts.saveOnclick || 'cancelExercise()'}">Save</button>`;
+	return `
+		<div class="sit-chrome">
+			<div class="sit-chrome-nav">${back}${save}</div>
+			<div class="sit-chrome-row">
+				<span class="sit-chrome-title">${opts.title}</span>
+				<span class="sit-chrome-step">Step ${step} of ${total}</span>
+			</div>
+			<div class="pace-track sit-pace"><div class="pace-fill" style="width:${(step / total) * 100}%"></div></div>
+		</div>`;
+}
+
+function exerciseBeatLabel(idx) {
+	if (idx === 0) return 'Name';
+	if (idx <= 2) return 'Listen \u00b7 Self';
+	if (idx <= 5) return 'Listen \u00b7 Other';
+	if (idx <= 8) return 'Listen \u00b7 Circumstance';
+	return 'Discern';
+}
+
 function sitSkipButtonHTML(onclick) {
 	const c = sitRingCircumference();
 	return `
@@ -372,26 +417,37 @@ function sitSkipButtonHTML(onclick) {
 function sitStageInnerHTML(opts) {
 	const kicker = opts.kicker ? `<div class="think-kicker">${opts.kicker}</div>` : '';
 	const title = opts.title ? `<p class="think-prompt">${opts.title}</p>` : '';
+	const sub = opts.sub ? `<p class="think-sub">${opts.sub}</p>` : '';
 	const extra = opts.extra || '';
+	const skip = opts.showSkip
+		? (opts.readyLabel
+			? `<div class="think-ready-row">${sitSkipButtonHTML(opts.skipOnclick)}<span class="think-ready-label">${opts.readyLabel}</span></div>`
+			: sitSkipButtonHTML(opts.skipOnclick))
+		: '';
 	return `
 		<div class="sit-fade" id="sit-fade"></div>
 		<div class="sit-stage-inner">
 			${kicker}
 			<div class="sit-orb" aria-hidden="true"></div>
 			${title}
+			${sub}
 			<div class="think-foot">
 				<div class="think-breathe" id="think-breathe">Breathe in</div>
-				${opts.showSkip ? sitSkipButtonHTML(opts.skipOnclick) : ''}
+				${skip}
 			</div>
 			${extra}
 		</div>`;
 }
 
-function setSitImmersive(on) {
+function setSitImmersive(on, hue) {
 	const el = document.getElementById('exercise-overlay');
 	if (!el) return;
 	el.classList.toggle('sit-immersive', !!on);
-	if (!on) el.classList.remove('sit-light');
+	el.classList.toggle('pig-iris', hue === 'iris');
+	if (!on) {
+		el.classList.remove('sit-light');
+		el.classList.remove('pig-iris');
+	}
 }
 
 function breathCueAt(elapsed) {
@@ -410,16 +466,10 @@ function clearSitTimers() {
 
 function markSitReady() {
 	_sitDone = true;
-	const fade = document.getElementById('sit-fade');
-	if (fade) fade.style.opacity = '1';
 	const fill = document.getElementById('think-ring-fill');
 	if (fill) fill.style.strokeDashoffset = '0';
 	const b = document.getElementById('think-breathe');
 	if (b) b.textContent = 'Whenever you\u2019re ready';
-	const stage = document.querySelector('.sit-stage');
-	if (stage) stage.classList.add('is-light');
-	const overlay = document.getElementById('exercise-overlay');
-	if (overlay && overlay.classList.contains('sit-immersive')) overlay.classList.add('sit-light');
 }
 
 function startSitTimer(durationMs) {
@@ -427,17 +477,11 @@ function startSitTimer(durationMs) {
 	_sitDone = false;
 	const c = sitRingCircumference();
 	const fill = document.getElementById('think-ring-fill');
-	const fade = document.getElementById('sit-fade');
 	const started = Date.now();
 	function tick() {
 		if (_sitDone) return;
 		const p = Math.min(1, (Date.now() - started) / durationMs);
 		if (fill) fill.style.strokeDashoffset = String(c * (1 - p));
-		if (fade) fade.style.opacity = String(p);
-		const stage = document.querySelector('.sit-stage');
-		if (stage && p >= 0.45) stage.classList.add('is-light');
-		const overlay = document.getElementById('exercise-overlay');
-		if (overlay && overlay.classList.contains('sit-immersive') && p >= 0.45) overlay.classList.add('sit-light');
 		if (p >= 1) { clearSitTimers(); markSitReady(); return; }
 		_sitRaf = requestAnimationFrame(tick);
 	}
@@ -476,8 +520,8 @@ function paintWarmupToggles() {
 }
 
 function toggleWarmupFlag(which) {
-	if (which === 'audio') ex.warmupAudio = !ex.warmupAudio;
-	else ex.warmupWords = !ex.warmupWords;
+	if (which === 'audio') { ex.warmupAudio = true; ex.warmupWords = false; }
+	else { ex.warmupWords = true; ex.warmupAudio = false; }
 	paintWarmupToggles();
 	paintWarmupSlots();
 }
@@ -490,28 +534,26 @@ function startWarmupPlay() {
 function renderExerciseWarmup() {
 	const playing = !!ex.warmupPlaying;
 	if (!playing) clearSitTimers();
-	setSitImmersive(false);
+	setSitImmersive(true);
 	const extra = playing
 		? `<div id="warmup-audio-slot"></div><div id="warmup-words-slot"></div>`
 		: `<button type="button" class="sit-play" onclick="startWarmupPlay()" aria-label="Start warm-up"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg></button>`;
 	exOverlay(`
-		<div class="warmup-page">
-			<button class="btn-ghost back-link" onclick="renderExercisePrivacy()">&larr; Back</button>
-			<div class="h1" style="margin-bottom:6px;">Warm-up</div>
-			<p class="caption">A short warm-up before your personal exercise. Just listen or read — no need to respond.</p>
-			<div class="warmup-toggles">
-				<button type="button" class="warmup-toggle${ex.warmupAudio ? ' active' : ''}" data-warmup-toggle="audio" onclick="toggleWarmupFlag('audio')">Audio</button>
-				<button type="button" class="warmup-toggle${ex.warmupWords ? ' active' : ''}" data-warmup-toggle="words" onclick="toggleWarmupFlag('words')">Words</button>
-			</div>
+		<div class="sit-full-wrap">
+			${sitChromeHTML({ title: 'Warm-up', step: 1 })}
 			<div class="sit-stage sit-stage--full${playing ? '' : ' is-idle'}">
 				${sitStageInnerHTML({
-					kicker: 'Warm-up',
+					title: playing ? '' : 'A few minutes to settle before you begin.',
 					showSkip: playing,
 					skipOnclick: 'skipSit()',
 					extra
 				})}
 			</div>
-			${playing ? `<div class="sit-actions"><button class="btn btn-dark" onclick="renderExerciseStep(0)">I&rsquo;m ready</button></div>` : ''}
+			<div class="warmup-toggles">
+				<button type="button" class="warmup-toggle${ex.warmupAudio ? ' active' : ''}" data-warmup-toggle="audio" onclick="toggleWarmupFlag('audio')">Listen</button>
+				<button type="button" class="warmup-toggle${ex.warmupWords ? ' active' : ''}" data-warmup-toggle="words" onclick="toggleWarmupFlag('words')">Read</button>
+			</div>
+			${playing ? `<div class="sit-actions"><button class="btn btn-sit-outline" onclick="renderExerciseStep(0)">I&rsquo;m ready</button></div>` : ''}
 		</div>`);
 	if (playing) {
 		paintWarmupSlots();
@@ -534,35 +576,25 @@ function exerciseMovement(idx) {
 
 function renderExerciseStep(idx) {
 	clearSitTimers();
-	setSitImmersive(false);
+	setSitImmersive(true);
 	ex.stepIdx = idx;
 	const step = EXERCISE_STEPS[idx];
 	const isLast = idx === EXERCISE_STEPS.length - 1;
+	const back = idx === 0 ? "renderExerciseWarmup()" : `renderExerciseStep(${idx - 1})`;
 	exOverlay(`
-		<div class="exercise-topbar">
-			<button class="btn-ghost" onclick="${idx === 0 ? "renderExerciseWarmup()" : `renderExerciseStep(${idx - 1})`}" aria-label="Back">&#10005;</button>
-			<span class="exercise-step-count">${exerciseMovement(idx)} · ${idx + 1} of ${EXERCISE_STEPS.length}</span>
-			<button class="btn-ghost" onclick="cancelExercise()">Save</button>
-		</div>
-		<div class="pace-track" aria-hidden="true"><div class="pace-fill" style="width:${((idx + 1) / EXERCISE_STEPS.length) * 100}%"></div></div>
-		<div class="seg-toggle" style="margin-top:2px;">
-			<button class="seg-toggle-btn${ex.mode === 'training' ? ' active' : ''}" onclick="setExerciseMode(this,'training')">Training</button>
-			<button class="seg-toggle-btn${ex.mode === 'practice' ? ' active' : ''}" onclick="setExerciseMode(this,'practice')">Practice</button>
-		</div>
-		<div id="ex-guidance-card" style="display:${ex.mode === 'training' ? 'block' : 'none'}">
-			<div class="guidance-card"><p class="caption" style="color:var(--body);">${escapeHtml(step.hint)}</p></div>
-		</div>
-		<div class="think-panel sit-stage sit-stage--panel">
-			${sitStageInnerHTML({
-				kicker: 'Sit with this',
-				title: escapeHtml(step.prompt),
-				showSkip: true,
-				skipOnclick: 'skipSit()'
-			})}
-		</div>
-		${renderInputTriadHTML('triad-current')}
-		<button class="btn btn-dark btn-block-mt" onclick="exerciseNext(${idx}, ${isLast})">${isLast ? 'Continue to Recap &rarr;' : 'Next &rarr;'}</button>
-		<div style="height:16px"></div>`);
+		<div class="sit-full-wrap">
+			${sitChromeHTML({ title: exerciseBeatLabel(idx), step: idx + 2, backOnclick: back })}
+			<div class="sit-stage sit-stage--full">
+				${sitStageInnerHTML({
+					title: escapeHtml(step.prompt),
+					showSkip: true,
+					skipOnclick: `exerciseNext(${idx}, ${isLast})`
+				})}
+			</div>
+			<div class="sit-prompt-input">
+				${renderInputTriadHTML('triad-current')}
+			</div>
+		</div>`);
 	startSitTimer(THINK_MS);
 }
 
@@ -644,12 +676,16 @@ function recapField(label, body, kind, opts) {
 }
 
 function recapChromeHTML(edit) {
+	const total = EXERCISE_STEPS.length + 2;
 	return `
 		<div class="recap-hero">
-			<div class="kicker">Personal exercise</div>
-			<div class="h1">Your recap</div>
+			<div class="sit-chrome-row" style="margin-bottom:14px;">
+				<span class="sit-chrome-title">Recap</span>
+				<span class="sit-chrome-step">Step ${total} of ${total}</span>
+			</div>
+			<div class="h1">Here&rsquo;s what you said.</div>
 			<p class="caption">${edit
-				? 'This is a first pass. Edit anything that missed the nuance \u2014 we want this in your words.'
+				? 'Change anything that isn&rsquo;t quite right \u2014 these are your words, not ours.'
 				: 'What you discerned \u2014 this is what you\u2019d reopen, and may take to the gathering.'}</p>
 		</div>`;
 }
@@ -1080,11 +1116,15 @@ function renderPatternCalendar(quotes) {
 	for (let d = 1; d <= daysInMonth; d++) {
 		const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 		const themes = [...new Set(byDay[key] || [])];
-		let cls = 'pcal-cell';
-		if (themes.length === 1) cls += ' ' + themes[0];
-		else if (themes.length > 1) cls += ' mix';
 		const title = themes.length ? themes.map(t => PATTERN_META[t].label).join(', ') : '';
-		cells.push(`<span class="${cls}" title="${title}"></span>`);
+		if (themes.length === 1) {
+			const hue = patternHue(themes[0]);
+			cells.push(`<span class="pcal-cell" style="background:var(--pig-${hue})" title="${title}"></span>`);
+		} else if (themes.length > 1) {
+			cells.push(`<span class="pcal-cell mix" title="${title}"></span>`);
+		} else {
+			cells.push(`<span class="pcal-cell" title="${title}"></span>`);
+		}
 	}
 	return `
 	<div class="pcal-card">
@@ -1093,9 +1133,7 @@ function renderPatternCalendar(quotes) {
 		<div class="pcal-dow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
 		<div class="pcal-grid">${cells.join('')}</div>
 		<div class="pcal-legend">
-			<span><i class="pcal-cell trust"></i>Trust &amp; Surrender</span>
-			<span><i class="pcal-cell patience"></i>Patience</span>
-			<span><i class="pcal-cell clarity"></i>Clarity</span>
+			${PATTERN_ORDER.slice(0, 3).map(t => `<span><i class="pcal-cell" style="background:var(--pig-${patternHue(t)})"></i>${PATTERN_META[t].label}</span>`).join('')}
 			<span><i class="pcal-cell mix"></i>More than one</span>
 		</div>
 	</div>`;
@@ -1119,22 +1157,23 @@ function dgeInFab() {
 
 function krlCardHTML(variant) {
 	const cls = variant === 'soft' ? 'hero-card soft' : 'hero-card gradient';
+	const btn = variant === 'soft' ? 'btn-dark' : 'btn-on-pigment';
 	return `
 	<div class="${cls}" onclick="startExercise({returnTab:'exercise'})">
 		<div class="kicker">On your own</div>
 		<div class="h3">Do a personal exercise</div>
 		<p class="caption" style="margin:6px 0 16px;">One situation — warm-up, Listen, Discern, Go. About 10–12 prompts, on your own.</p>
-		<button class="btn btn-dark btn-small" onclick="event.stopPropagation();startExercise({returnTab:'exercise'})">Start</button>
+		<button class="btn ${btn} btn-small" onclick="event.stopPropagation();startExercise({returnTab:'exercise'})">Start</button>
 	</div>`;
 }
 
 function dgeCardHTML(again) {
 	return `
-	<div class="${again ? 'card outlined static' : 'hero-card gradient'}" ${again ? '' : 'onclick="startDGE()"'}>
+	<div class="${again ? 'card outlined static' : 'hero-card pig-iris'}" ${again ? '' : 'onclick="startDGE()"'}>
 		<div class="kicker">Circle \u00b7 The season</div>
 		<div class="h3">${again ? 'Update growth edges' : 'Discernment of Growth Edges'}</div>
 		<p class="caption" style="margin:6px 0 16px;">${again ? 'Look across the season again \u2014 roughly quarterly.' : 'A second exercise \u2014 same three movements, object is the season. Looks across your past exercises; it does not create the patterns.'}</p>
-		<button class="btn ${again ? 'btn-light' : 'btn-dark'} btn-small" onclick="event.stopPropagation();startDGE()">${again ? 'Discern again' : 'Begin'}</button>
+		<button class="btn ${again ? 'btn-light' : 'btn-on-pigment'} btn-small" onclick="event.stopPropagation();startDGE()">${again ? 'Discern again' : 'Begin'}</button>
 	</div>`;
 }
 
@@ -1150,15 +1189,13 @@ function growthEdgesCardHTML() {
 		? edges.map((t, i) => `<button type="button" class="ge-chip" onclick="editGrowthEdges(${i})">${escapeHtml(t)}</button>`).join('')
 		: `<span class="caption">None named yet.</span>`;
 	const goChips = gos.length
-		? gos.map(t => `<span class="ge-chip go">${escapeHtml(t)}</span>`).join('')
+		? gos.map(t => `<p class="ge-go-line">${escapeHtml(t)}</p>`).join('')
 		: '';
 	return `
-	<div class="hero-card static ge-card">
-		<div class="kicker">This season</div>
-		<div class="h3">Growth Edges</div>
-		<p class="caption" style="margin:6px 0 10px;">Stay editable \u2014 tap a chip to change it. Session 4 often adds to them.</p>
+	<div class="hero-card pig-iris static ge-card">
+		<div class="kicker">This season's growth edges</div>
 		<div class="ge-chips">${edgeChips}</div>
-		${goChips ? `<div class="ge-label">Go steps</div><div class="ge-chips">${goChips}</div>` : ''}
+		${goChips ? `<div class="ge-label">Go steps</div>${goChips}` : ''}
 	</div>`;
 }
 
@@ -1184,9 +1221,10 @@ function startDGE(opts) {
 	dge.customPatterns = [];
 	dge.addingPattern = false;
 	dge.openTheme = null;
+	dge.themeIdx = 0;
 	dge.warmupPlaying = false;
 	dge.warmupAudio = true;
-	dge.warmupWords = true;
+	dge.warmupWords = false;
 	dge.customStart = dge.customStart || '2026-08-01';
 	dge.customEnd = dge.customEnd || '2026-08-26';
 	hideTabBar();
@@ -1198,7 +1236,7 @@ const dge = {
 	range: 'since', edges: ['', '', ''], go: '', focus: 0, fromEdit: false, fromPrep: false,
 	customStart: '2026-08-01', customEnd: '2026-08-26',
 	resonate: '', elseGod: '', customPatterns: [], addingPattern: false, openTheme: null,
-	warmupPlaying: false, warmupAudio: true, warmupWords: true
+	warmupPlaying: false, warmupAudio: true, warmupWords: false, themeIdx: 0
 };
 
 function cancelDGE() {
@@ -1217,16 +1255,14 @@ function cancelDGE() {
 function renderDgeIntro() {
 	clearSitTimers();
 	setSitImmersive(false);
-	const whyNow = App.dgeDone
-		? 'You can look across the season again whenever you want to update what you are carrying.'
-		: 'This is part of Session 4 prep \u2014 the cohort does this together, so it is not a surprise on Exercises.';
+	const stats = dgeIntroStats();
+	const count = stats.n === 1 ? 'one exercise' : `${stats.n} exercises`;
 	exOverlay(`
-		<button class="btn-ghost back-link" onclick="cancelDGE()">&larr; Back</button>
-		<div class="kicker">The season</div>
-		<div class="h1" style="margin-bottom:10px;">Discernment of Growth Edges</div>
-		<p class="body-text" style="margin-bottom:14px;">God is mostly after formation &mdash; not only guidance for one situation. Growth Edges are 1&ndash;3 invitations for this season. They are an open door, not a demand.</p>
-		<p class="body-text" style="margin-bottom:14px;">${escapeHtml(whyNow)}</p>
-		<p class="caption" style="margin-bottom:8px;">What you write stays private. Pattern Recognition looks across your past exercises. The themes are a starting point. You discern what, if anything, is an invitation.</p>
+		${dgeFlowChromeHTML({ intro: true, title: 'Growth Edges', kicker: 'Session 4 \u00b7 Once a season' })}
+		<div class="h1" style="margin-bottom:14px;">This one looks across the season, not at one situation.</div>
+		<p class="body-text" style="margin-bottom:14px;">You&rsquo;ve done ${count} since ${escapeHtml(stats.since)}. This exercise gathers what kept coming up in them, and then asks you &mdash; not the app &mdash; to name where you&rsquo;re being invited to grow.</p>
+		<p class="body-text" style="margin-bottom:14px;">About thirty minutes. This is the exercise for Session 4.</p>
+		<p class="caption" style="margin-bottom:8px;">The themes are a starting point, not an answer. Everything here stays private to you.</p>
 		<p class="caption" style="margin-bottom:24px;"><a href="javascript:void(0)" onclick="showAIInfo('exercise-overlay', renderDgeIntro)" style="color:inherit;text-decoration:underline;">How is AI used?</a></p>
 		<button class="btn btn-dark btn-block-mt" onclick="renderDgeRange()">Begin</button>
 		<div style="height:16px"></div>`);
@@ -1240,8 +1276,8 @@ function paintDgeWarmupSlots() {
 }
 
 function toggleDgeWarmupFlag(which) {
-	if (which === 'audio') dge.warmupAudio = !dge.warmupAudio;
-	else dge.warmupWords = !dge.warmupWords;
+	if (which === 'audio') { dge.warmupAudio = true; dge.warmupWords = false; }
+	else { dge.warmupWords = true; dge.warmupAudio = false; }
 	document.querySelectorAll('[data-dge-warmup]').forEach(btn => {
 		const on = btn.dataset.dgeWarmup === 'audio' ? dge.warmupAudio : dge.warmupWords;
 		btn.classList.toggle('active', on);
@@ -1257,28 +1293,24 @@ function startDgeWarmupPlay() {
 function renderDgeWarmup() {
 	const playing = !!dge.warmupPlaying;
 	if (!playing) clearSitTimers();
-	setSitImmersive(false);
+	setSitImmersive(true, 'iris');
 	const extra = playing
 		? `<div id="warmup-audio-slot"></div><div id="warmup-words-slot"></div>`
 		: `<button type="button" class="sit-play" onclick="startDgeWarmupPlay()" aria-label="Start warm-up"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg></button>`;
 	exOverlay(`
-		<div class="warmup-page">
-			<button class="btn-ghost back-link" onclick="renderDgeRange()">&larr; Back</button>
-			<div class="h1" style="margin-bottom:6px;">Warm-up</div>
-			<p class="caption">Same short settle as a personal exercise. The orb will come back when you pause on patterns and growth edges.</p>
-			<div class="warmup-toggles">
-				<button type="button" class="warmup-toggle${dge.warmupAudio ? ' active' : ''}" data-dge-warmup="audio" onclick="toggleDgeWarmupFlag('audio')">Audio</button>
-				<button type="button" class="warmup-toggle${dge.warmupWords ? ' active' : ''}" data-dge-warmup="words" onclick="toggleDgeWarmupFlag('words')">Words</button>
-			</div>
-			<div class="sit-stage sit-stage--full${playing ? '' : ' is-idle'}">
+		<div class="sit-full-wrap">
+			${dgeSitChromeHTML('Warm-up', 2)}
+			<div class="sit-stage sit-stage--full pig-iris${playing ? '' : ' is-idle'}">
 				${sitStageInnerHTML({
-					kicker: 'Warm-up',
-					showSkip: playing,
-					skipOnclick: 'skipSit()',
+					title: playing ? '' : 'A few minutes to settle before you look back.',
 					extra
 				})}
 			</div>
-			${playing ? `<div class="sit-actions"><button class="btn btn-dark" onclick="renderDgeGather()">I&rsquo;m ready</button></div>` : ''}
+			<div class="warmup-toggles">
+				<button type="button" class="warmup-toggle${dge.warmupAudio ? ' active' : ''}" data-dge-warmup="audio" onclick="toggleDgeWarmupFlag('audio')">Listen</button>
+				<button type="button" class="warmup-toggle${dge.warmupWords ? ' active' : ''}" data-dge-warmup="words" onclick="toggleDgeWarmupFlag('words')">Read</button>
+			</div>
+			<div class="sit-actions"><button class="btn btn-sit-outline" onclick="renderDgeThemes()">I&rsquo;m ready</button></div>
 		</div>`);
 	if (playing) {
 		paintDgeWarmupSlots();
@@ -1287,10 +1319,12 @@ function renderDgeWarmup() {
 }
 
 function dgeLastLabel() {
-	if (!App.lastDgeDay) return 'You haven\u2019t done this yet \u2014 this uses all the exercises you have.';
+	const n = (App.exercises || []).length;
+	const count = n === 1 ? '1 exercise' : `${n} exercises`;
+	if (!App.lastDgeDay) return `${count} \u00b7 this season. You haven\u2019t named growth edges before.`;
 	const [y, m, d] = App.lastDgeDay.split('-');
 	const label = new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-	return 'Exercises since ' + label + '.';
+	return `${count} \u00b7 since ${label}.`;
 }
 
 function renderDgeRange() {
@@ -1299,17 +1333,19 @@ function renderDgeRange() {
 	const sinceOn = dge.range === 'since';
 	const customOn = dge.range === 'custom';
 	exOverlay(`
-		<button class="btn-ghost back-link" onclick="renderDgeIntro()">&larr; Back</button>
-		<div class="h1" style="margin-bottom:8px;">Date range</div>
-		<p class="caption" style="margin-bottom:16px;">This filters which past exercises Pattern Recognition includes. It does not create the patterns.</p>
+		${dgeFlowChromeHTML({ title: 'Which exercises', step: 1 })}
+		<div class="h1" style="margin-bottom:8px;">How far back should we look?</div>
+		<p class="caption" style="margin-bottom:16px;">This only decides which past exercises are included.</p>
+		<div class="dge-range">
 		<button type="button" class="path-option${sinceOn ? ' selected' : ''}" data-dge-range="since" onclick="selectDgeRange('since')">
 			<span class="path-radio"></span>
-			<span><div class="h3">Since last Growth Edges</div><p class="caption">${escapeHtml(dgeLastLabel())}</p></span>
+			<span><div class="h3">Everything so far</div><p class="caption">${escapeHtml(dgeLastLabel())}</p></span>
 		</button>
 		<button type="button" class="path-option${customOn ? ' selected' : ''}" data-dge-range="custom" onclick="selectDgeRange('custom')">
 			<span class="path-radio"></span>
-			<span><div class="h3">Choose start and end</div><p class="caption">Pick a window of situations to include.</p></span>
+			<span><div class="h3">Choose the months</div><p class="caption">Set a start and an end yourself.</p></span>
 		</button>
+		</div>
 		${customOn ? `
 		<div class="dge-dates">
 			<label class="ge-label">Start</label>
@@ -1317,7 +1353,7 @@ function renderDgeRange() {
 			<label class="ge-label">End</label>
 			<input type="date" class="input-box" value="${escapeHtml(dge.customEnd)}" oninput="dge.customEnd=this.value">
 		</div>` : ''}
-		<button class="btn btn-dark btn-block-mt" onclick="renderDgeWarmup()">Look across these</button>
+		<button class="btn btn-dark btn-block-mt" onclick="renderDgeWarmup()">Continue</button>
 		<div style="height:16px"></div>`);
 }
 
@@ -1378,55 +1414,208 @@ function dgeThemeSize(count, max) {
 }
 
 function renderDgeGather() {
+	clearSitTimers();
+	setSitImmersive(true, 'iris');
 	exOverlay(`
-		<div class="dge-gather">
-			<div class="kicker">Pattern Recognition</div>
-			<div class="h2" style="margin:10px 0 12px;">Looking across your situations</div>
-			<p class="caption">Themes will land as cards you can sit with &mdash; not a verdict.</p>
+		<div class="sit-full-wrap">
+			<div class="sit-topbar" style="display:flex;justify-content:space-between;align-items:center;">
+				<button class="btn-ghost" onclick="cancelDGE()">&#10005; Exit</button>
+				<button class="btn-ghost" onclick="cancelDGE()">Save</button>
+			</div>
+			<div class="sit-stage sit-stage--full pig-iris">
+				${sitStageInnerHTML({
+					kicker: 'A pause',
+					title: 'Looking across your situations',
+					showSkip: true,
+					skipOnclick: 'renderDgeThemes()'
+				})}
+			</div>
 		</div>`);
-	setTimeout(function() { renderDgeThemes(); }, 1400);
+	startSitTimer(WARMUP_MS);
+}
+
+function dgeFlowChromeHTML(opts) {
+	opts = opts || {};
+	const title = opts.title || '';
+	const step = opts.step;
+	const total = opts.total || 7;
+	if (opts.intro) {
+		return `
+		<div class="dge-flow-head dge-intro-band">
+			<div class="flow-head-row">
+				<div>
+					<div class="h2" style="color:var(--canvas);margin:0;">${title}</div>
+					${opts.kicker ? `<div class="kicker" style="color:rgba(251,249,246,0.82);margin:8px 0 0;">${opts.kicker}</div>` : ''}
+				</div>
+				<button class="btn-ghost flow-head-x" onclick="cancelDGE()">&#10005;</button>
+			</div>
+		</div>`;
+	}
+	return `
+		<div class="dge-flow-head">
+			<div class="sit-chrome-row">
+				<span class="sit-chrome-title">${title}</span>
+				<span class="sit-chrome-step">Step ${step} of ${total}</span>
+			</div>
+			<div class="pace-track sit-pace"><div class="pace-fill" style="width:${(step / total) * 100}%"></div></div>
+		</div>`;
+}
+
+function dgeSitChromeHTML(title, step, total) {
+	total = total || 7;
+	return `
+		<div class="sit-chrome">
+			<div class="sit-chrome-nav">
+				<span></span>
+				<button class="btn-ghost" onclick="cancelDGE()">&#10005;</button>
+			</div>
+			<div class="sit-chrome-row">
+				<span class="sit-chrome-title">${title}</span>
+				<span class="sit-chrome-step">Step ${step} of ${total}</span>
+			</div>
+			<div class="pace-track sit-pace"><div class="pace-fill" style="width:${(step / total) * 100}%"></div></div>
+		</div>`;
+}
+
+function dgeIntroStats() {
+	const n = (App.exercises || []).length;
+	const days = (App.exercises || []).map(exerciseDayKey).filter(Boolean).sort();
+	let since = 'this season';
+	if (days[0]) {
+		const [y, m, d] = days[0].split('-');
+		since = new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString('en-US', { month: 'long' });
+	}
+	return { n, since };
+}
+
+function patternIsThisMonth(quotes) {
+	const now = new Date();
+	const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+	return (quotes || []).some(q => (quoteDayKey(q) || '').startsWith(monthPrefix));
 }
 
 function renderDgeThemes() {
 	clearSitTimers();
 	setSitImmersive(false);
 	const groups = dgeThemeGroups();
-	const count = dgeFilteredExercises().length;
-	const max = Math.max.apply(null, groups.map(g => g.quotes.length).concat([1]));
-	const tiles = groups.length ? groups.map(g => `
-		<button type="button" class="dge-tile ${dgeThemeSize(g.quotes.length, max)}" onclick="openDgeTheme('${escapeHtml(g.theme)}')">
-			<div class="kicker">${g.custom ? 'You added' : `${g.quotes.length} across ${count} situation${count === 1 ? '' : 's'}`}</div>
+	if (!groups.length) {
+		exOverlay(`
+			${dgeFlowChromeHTML({ title: 'Patterns', step: 3 })}
+			<div class="h1" style="margin-bottom:6px;">What keeps showing up</div>
+			<p class="caption">Not enough in this range yet. Try a wider window.</p>
+			<button class="btn btn-dark btn-block-mt" onclick="renderDgeListen()">Continue</button>
+			<div style="height:16px"></div>`);
+		return;
+	}
+	if (typeof dge.themeIdx !== 'number' || dge.themeIdx < 0) dge.themeIdx = 0;
+	if (dge.themeIdx >= groups.length) dge.themeIdx = groups.length - 1;
+	const cards = groups.map((g, i) => {
+		const hue = patternHue(g.theme, i);
+		const n = (g.quotes || []).length;
+		const thisMonth = patternIsThisMonth(g.quotes);
+		const fill = thisMonth ? `var(--pig-${hue})` : `var(--pig-${hue}-tint)`;
+		const color = thisMonth ? 'var(--canvas)' : `var(--pig-${hue}-ink)`;
+		const kicker = g.custom ? 'You added' : (n ? `In ${n} situation${n === 1 ? '' : 's'}` : 'In your words');
+		const quotes = (g.quotes || []).slice(0, 2);
+		const snippets = quotes.length
+			? quotes.map(q => `<div class="pattern-quote">\u201C${escapeHtml(q.text)}\u201D</div>`).join('')
+			: `<p class="caption">You added this. It did not come from an exercise.</p>`;
+		const see = n
+			? `<button type="button" class="dge-theme-see" onclick="renderDgeThemeDetail('${g.theme}')">See all ${n} \u203a</button>`
+			: '';
+		return `<article class="dge-theme${thisMonth ? '' : ' is-tint'}" data-theme="${g.theme}" style="background:${fill};color:${color}">
+			<div class="kicker">${kicker}</div>
 			<div class="h3">${escapeHtml(g.meta.label)}</div>
-			<p class="caption" style="margin:8px 0 0;">Tap to read this in your words.</p>
-		</button>`).join('') : `<p class="caption">Not enough in this range yet. Try a wider window.</p>`;
+			${snippets}
+			${see}
+		</article>`;
+	}).join('');
+	const dots = groups.map((g, i) => {
+		const hue = patternHue(g.theme, i);
+		const thisMonth = patternIsThisMonth(g.quotes);
+		const fill = thisMonth ? `var(--pig-${hue})` : `var(--pig-${hue}-tint)`;
+		return `<button type="button" class="dge-dot${i === dge.themeIdx ? ' on' : ''}" style="background:${fill}" aria-label="Pattern ${i + 1}" onclick="dgeScrollToTheme(${i})"></button>`;
+	}).join('');
 	exOverlay(`
-		<button class="btn-ghost back-link" onclick="renderDgeWarmup()">&larr; Back</button>
-		<div class="h1" style="margin-bottom:6px;">What keeps showing up</div>
-		<p class="caption" style="margin-bottom:12px;">More frequent themes are larger. Tap a tile for snippets in your words.</p>
-		<div class="dge-mosaic">${tiles}</div>
+		${dgeFlowChromeHTML({ title: 'Patterns', step: 3 })}
+		<div class="h1" style="margin-bottom:8px;">What keeps showing up</div>
+		<p class="caption" style="margin-bottom:16px;">Scroll the cards and sit with them. These are starting points \u2014 not your growth edges yet.</p>
+		<div class="dge-rail" id="dge-rail">${cards}</div>
+		<div class="dge-dots" id="dge-dots">${dots}</div>
 		<button class="btn btn-dark btn-block-mt" onclick="renderDgeListen()">Continue</button>
 		<div style="height:16px"></div>`);
+	bindDgeRail();
 }
 
+function dgeRailPad() {
+	const rail = document.getElementById('dge-rail');
+	if (!rail) return 0;
+	return parseFloat(getComputedStyle(rail).paddingLeft) || 0;
+}
+
+function bindDgeRail() {
+	const rail = document.getElementById('dge-rail');
+	if (!rail) return;
+	const cards = [...rail.querySelectorAll('.dge-theme')];
+	function syncDots() {
+		if (!cards.length) return;
+		const gap = 12;
+		const w = cards[0].offsetWidth + gap;
+		const idx = Math.max(0, Math.min(cards.length - 1, Math.round(rail.scrollLeft / w)));
+		dge.themeIdx = idx;
+		document.querySelectorAll('#dge-dots .dge-dot').forEach((d, i) => d.classList.toggle('on', i === idx));
+	}
+	rail.addEventListener('scroll', syncDots, { passive: true });
+	if (dge.themeIdx) dgeScrollToTheme(dge.themeIdx, true);
+}
+
+function dgeScrollToTheme(idx, instant) {
+	const rail = document.getElementById('dge-rail');
+	if (!rail) return;
+	const card = rail.querySelectorAll('.dge-theme')[idx];
+	if (!card) return;
+	dge.themeIdx = idx;
+	rail.scrollTo({ left: Math.max(0, card.offsetLeft - dgeRailPad()), behavior: instant ? 'auto' : 'smooth' });
+	document.querySelectorAll('#dge-dots .dge-dot').forEach((d, i) => d.classList.toggle('on', i === idx));
+}
+
+function dgeNextTheme() { dgeScrollToTheme((dge.themeIdx || 0) + 1); }
+function dgePrevTheme() { dgeScrollToTheme(Math.max(0, (dge.themeIdx || 0) - 1)); }
+
 function openDgeTheme(theme) {
-	dge.openTheme = theme;
-	const g = dgeThemeGroups().find(x => x.theme === theme);
+	renderDgeThemeDetail(theme);
+}
+
+function renderDgeThemeDetail(theme) {
+	clearSitTimers();
+	setSitImmersive(false);
+	const groups = dgeThemeGroups();
+	const g = groups.find(x => x.theme === theme) || groups[dge.themeIdx] || groups[0];
 	if (!g) { renderDgeThemes(); return; }
-	const snippets = g.quotes.length
-		? g.quotes.map(q => `
-			<div class="pattern-quote">
-				\u201C${escapeHtml(q.text)}\u201D
-				<span class="pattern-quote-date">${escapeHtml(q.date || '')}${q.situation ? ' \u00b7 ' + escapeHtml(q.situation) : ''}</span>
-			</div>`).join('')
-		: `<p class="caption">You added this. It did not come from an exercise.</p>`;
+	dge.openTheme = g.theme;
+	dge.themeIdx = Math.max(0, groups.findIndex(x => x.theme === g.theme));
+	const hue = patternHue(g.theme, dge.themeIdx);
+	const all = g.quotes || [];
+	const shown = all.slice(0, 3);
+	const n = all.length;
+	const quotes = shown.map(q => `
+		<div class="pattern-quote" style="border-left-color:var(--pig-${hue})">
+			\u201C${escapeHtml(q.text)}\u201D
+			<span class="pattern-quote-date">${escapeHtml(q.date || '')}${q.situation ? ' \u00b7 ' + escapeHtml(q.situation) : ''}</span>
+		</div>`).join('');
+	const kicker = g.custom ? 'You added' : (n ? `In ${n} exercise${n === 1 ? '' : 's'} \u00b7 this month` : 'In your words');
 	exOverlay(`
-		<button class="btn-ghost back-link" onclick="renderDgeThemes()">&larr; Back</button>
-		<div class="kicker">${g.custom ? 'You added' : 'In your words'}</div>
-		<div class="h1" style="margin-bottom:10px;">${escapeHtml(g.meta.label)}</div>
-		<p class="caption" style="margin-bottom:16px;">Snippets from the situations you already walked.</p>
-		${snippets}
-		<button class="btn btn-dark btn-block-mt" onclick="renderDgeThemes()">Back to patterns</button>
-		<div style="height:16px"></div>`);
+		<div class="dge-detail-head" style="background:var(--pig-${hue})">
+			<div class="sit-chrome-nav">
+				<button class="btn-ghost" onclick="renderDgeThemes()">&larr; Back</button>
+				<button class="btn-ghost" onclick="cancelDGE()">Save</button>
+			</div>
+			<div class="kicker">${kicker}</div>
+			<div class="h2">${escapeHtml(g.meta.label)}</div>
+		</div>
+		<p class="caption" style="margin-bottom:14px;">Your words, unedited.</p>
+		${quotes || '<p class="caption">You added this. It did not come from an exercise.</p>'}
+		<div class="dge-detail-foot">${shown.length} of ${n} shown</div>`);
 }
 
 function addDgePattern() {
@@ -1443,54 +1632,49 @@ function captureDgeListen() {
 	const e = document.getElementById('dge-else');
 	if (r) dge.resonate = r.value;
 	if (e) dge.elseGod = e.value;
+	const fromTriad = triadGetValue('triad-current');
+	if (fromTriad) dge.elseGod = fromTriad;
 }
 
 function renderDgeListen() {
 	clearSitTimers();
-	setSitImmersive(false);
+	setSitImmersive(true, 'iris');
 	exOverlay(`
-		<button class="btn-ghost back-link" onclick="captureDgeListen();renderDgeThemes()">&larr; Back</button>
-		<div class="h1" style="margin-bottom:6px;">Listen</div>
-		<p class="caption" style="margin-bottom:12px;">Slowly read what keeps showing up. Capture what resonates. Leave room for what never made it into an exercise.</p>
-		<div class="think-panel sit-stage sit-stage--panel">
-			${sitStageInnerHTML({
-				kicker: 'Sit with this',
-				title: 'What is God inviting you to notice in this season?',
-				showSkip: true,
-				skipOnclick: 'skipSit()'
-			})}
-		</div>
-		<label class="ge-label">What resonates</label>
-		<textarea class="dge-edge" id="dge-resonate" rows="3" placeholder="Which patterns feel most true?">${escapeHtml(dge.resonate)}</textarea>
-		<label class="ge-label">Anything else God has been showing you</label>
-		<textarea class="dge-edge" id="dge-else" rows="3" placeholder="Something that never showed up in an exercise.">${escapeHtml(dge.elseGod)}</textarea>
-		<button class="btn btn-dark btn-block-mt" onclick="captureDgeListen();renderDgeEdges()">Name Growth Edges</button>
-		<div style="height:16px"></div>`);
+		<div class="sit-full-wrap">
+			${dgeSitChromeHTML('Listen', 4)}
+			<div class="sit-stage sit-stage--full pig-iris">
+				${sitStageInnerHTML({
+					title: 'What of that is God still asking you to look at?',
+					sub: 'And anything He&rsquo;s been showing you that never made it into an exercise.',
+					showSkip: true,
+					skipOnclick: 'captureDgeListen();renderDgeEdges()',
+					readyLabel: 'I&rsquo;m ready'
+				})}
+			</div>
+			<div class="sit-prompt-input">
+				${renderInputTriadHTML('triad-current')}
+			</div>
+		</div>`);
 	startSitTimer(THINK_MS);
 }
 
 function renderDgeEdges() {
 	clearSitTimers();
 	setSitImmersive(false);
+	const thirdEmpty = !String(dge.edges[2] || '').trim();
 	exOverlay(`
-		<button class="btn-ghost back-link" onclick="${dge.fromEdit ? 'cancelDGE()' : 'renderDgeListen()'}">&larr; Back</button>
-		<div class="h1" style="margin-bottom:6px;">Name 1&ndash;3 Growth Edges</div>
-		<p class="caption" style="margin-bottom:14px;">You name them. Related to the patterns or not. Language can differ from the theme names. 1&ndash;3 sentences each is enough.</p>
-		<label class="ge-label">Growth Edge 1</label>
+		${dge.fromEdit
+			? `<button class="btn-ghost back-link" onclick="cancelDGE()">&larr; Back</button>`
+			: dgeFlowChromeHTML({ title: 'Your growth edges', step: 5 })}
+		<div class="h1" style="margin-bottom:8px;">Name one to three, in your words.</div>
+		<p class="caption" style="margin-bottom:16px;">They don&rsquo;t have to match the themes, and they don&rsquo;t have to sound tidy.</p>
+		<label class="ge-label">First</label>
 		<textarea class="dge-edge${dge.focus === 0 ? ' selected' : ''}" rows="3" onfocus="dgeFocusEdge(0)" id="dge-e0">${escapeHtml(dge.edges[0])}</textarea>
-		<label class="ge-label">Growth Edge 2 (optional)</label>
+		<label class="ge-label">Second</label>
 		<textarea class="dge-edge${dge.focus === 1 ? ' selected' : ''}" rows="2" onfocus="dgeFocusEdge(1)" id="dge-e1">${escapeHtml(dge.edges[1])}</textarea>
-		<label class="ge-label">Growth Edge 3 (optional)</label>
-		<textarea class="dge-edge${dge.focus === 2 ? ' selected' : ''}" rows="2" onfocus="dgeFocusEdge(2)" id="dge-e2">${escapeHtml(dge.edges[2])}</textarea>
-		<p class="caption" style="margin:4px 0 12px;">Type in a field, or speak into the one you tapped last.</p>
-		<div class="input-triad">
-			<div class="triad-buttons">
-				<button type="button" class="triad-btn" onclick="dgeSpeakIntoFocus()">
-					${glyphIcon('speak')}<span class="triad-btn-label">Speak</span>
-				</button>
-			</div>
-		</div>
-		<button class="btn btn-dark btn-block-mt" onclick="${dge.fromEdit ? 'finishDgeEdit()' : 'continueDgeEdges()'}">${dge.fromEdit ? 'Save' : 'Go steps'}</button>
+		<label class="ge-label">Third \u2014 optional</label>
+		<textarea class="dge-edge${dge.focus === 2 ? ' selected' : ''}${thirdEmpty ? ' is-optional' : ''}" rows="2" onfocus="dgeFocusEdge(2);this.classList.remove('is-optional')" id="dge-e2" placeholder="Add another.">${escapeHtml(dge.edges[2])}</textarea>
+		<button class="btn ${dge.fromEdit ? 'btn-commit' : 'btn-dark'} btn-block-mt" onclick="${dge.fromEdit ? 'finishDgeEdit()' : 'continueDgeEdges()'}">${dge.fromEdit ? 'Save my growth edges' : 'Continue'}</button>
 		<div style="height:16px"></div>`);
 }
 
@@ -1509,13 +1693,12 @@ function renderDgeGhost() {
 	clearSitTimers();
 	setSitImmersive(false);
 	exOverlay(`
-		<button class="btn-ghost back-link" onclick="renderDgeEdges()">&larr; Back</button>
-		<div class="kicker">Go</div>
-		<div class="h1" style="margin-bottom:6px;">Go steps</div>
-		<p class="caption" style="margin-bottom:14px;">The access pieces from this discernment \u2014 small, doable ways to live the edges. These stay on Exercises with your Growth Edges.</p>
-		<label class="ge-label">Go steps</label>
-		<textarea class="dge-edge" id="dge-go" rows="5" placeholder="One step per line.">${escapeHtml(dge.go)}</textarea>
-		<button class="btn btn-dark btn-block-mt" onclick="finishDGE()">Save this season</button>
+		${dgeFlowChromeHTML({ title: 'Go steps', step: 7 })}
+		<div class="h1" style="margin-bottom:8px;">What&rsquo;s one thing you can actually do?</div>
+		<p class="caption" style="margin-bottom:14px;">One per line. Small and specific beats ambitious.</p>
+		<textarea class="dge-edge" id="dge-go" rows="5" placeholder="Add a step">${escapeHtml(dge.go)}</textarea>
+		<p class="caption" style="margin:4px 0 12px;">You can change any of this later.</p>
+		<button class="btn btn-commit btn-block-mt" onclick="finishDGE()">Save my growth edges</button>
 		<div style="height:16px"></div>`);
 }
 
@@ -1669,7 +1852,7 @@ function renderHomeExerciseCard() {
 		<div class="kicker">Personal Exercise</div>
 		<div class="h3">Do an exercise</div>
 		<p class="caption" style="margin:6px 0 16px;">About 10–15 min, on your own, whenever you have a quiet moment. After this, start from + on Exercises.</p>
-		<button class="btn btn-dark btn-small" onclick="event.stopPropagation();startExercise({returnTab:'home'})">Begin</button>
+		<button class="btn btn-on-pigment btn-small" onclick="event.stopPropagation();startExercise({returnTab:'home'})">Begin</button>
 	</div>`;
 }
 
@@ -1680,46 +1863,155 @@ function renderPatterns(containerId) {
 	if (count < 3) {
 		el.innerHTML = `
 		<div class="pattern-gate-card">
-			<span class="pattern-lock-icon">&#128274;</span>
-			<div class="h3" style="margin-bottom:6px;">Patterns are almost unlocked</div>
+			<div class="h3" style="margin-bottom:8px;">Patterns are almost unlocked</div>
 			<p class="caption">Complete 3 exercises to unlock your Patterns — you've done ${count} of 3.</p>
-			<div class="pattern-gate-dots">
-				${[0, 1, 2].map(i => `<span class="streak-dot${i < count ? ' done' : ''}"></span>`).join('')}
-			</div>
 		</div>`;
 		return;
 	}
 	if (App.tier !== 'circle') {
 		el.innerHTML = `
 		<div class="pattern-gate-card">
-			<span class="pattern-lock-icon">&#128274;</span>
-			<div class="h3" style="margin-bottom:6px;">Patterns are ready</div>
+			<div class="h3" style="margin-bottom:8px;">Patterns</div>
 			<p class="caption" style="margin-bottom:16px;">Upgrade to see the themes across your ${count} exercises.</p>
 			<button class="btn btn-dark btn-small" onclick="showStub('Upgrade to unlock Patterns', 'Patterns are part of Growth Edges or Circle Community access. This demo doesn\\'t include a working purchase flow.', 'Back', function(){ goTab(App.currentTab); })">Upgrade</button>
-		</div>`;
+		</div>
+		<div class="pattern-mosaic-foot">${patternMosaicHTML({ dimmed: true })}</div>`;
 		return;
 	}
+	el.innerHTML = `
+		<p class="caption" style="margin-bottom:14px;">${escapeHtml(patternsAcrossCaption())} Tap a pattern to read the sentences behind it.</p>
+		${patternMosaicHTML({ grid: true, tappable: true })}
+		${mostPresentHTML()}`;
+}
+
+function patternsAcrossCaption() {
+	const n = App.exercises.length;
+	const since = earliestExerciseDay();
+	const count = `Across ${n} exercise${n === 1 ? '' : 's'}`;
+	return since ? `${count} since ${formatLongDay(since)}.` : `${count}.`;
+}
+
+function earliestExerciseDay() {
+	let min = null;
+	App.exercises.forEach(e => {
+		(e.quotes || []).forEach(q => {
+			const k = quoteDayKey(q);
+			if (k && (!min || k < min)) min = k;
+		});
+	});
+	return min;
+}
+
+function formatLongDay(dayKey) {
+	const parts = String(dayKey || '').split('-');
+	if (parts.length < 3) return '';
+	const dt = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+	if (isNaN(dt.getTime())) return '';
+	return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+}
+
+function mostPresentHTML() {
 	const quotes = getAllQuotes();
 	const byTheme = {};
 	quotes.forEach(q => { (byTheme[q.theme] = byTheme[q.theme] || []).push(q); });
-	const aiLink = `<p class="caption" style="text-align:right;margin:-4px 0 12px;"><a href="javascript:void(0)" onclick="showAIInfo('${App.currentTab}', function(){ renderPatterns('${containerId}'); })" style="color:var(--muted);text-decoration:underline;">How is AI used?</a></p>`;
-	const cards = PATTERN_ORDER.filter(t => byTheme[t] && byTheme[t].length).map(themeKey => {
-		const qs = byTheme[themeKey];
-		const meta = PATTERN_META[themeKey];
-		const max = Math.max.apply(null, PATTERN_ORDER.map(k => (byTheme[k] || []).length).concat([1]));
-		const ratio = qs.length / max;
-		const size = ratio >= 0.75 ? 'size-l' : ratio >= 0.4 ? 'size-m' : 'size-s';
-		return `
-		<div class="pattern-theme-card ${size}">
-			<div class="pattern-theme-header">
-				<span class="pattern-theme-icon">${meta.icon}</span>
-				<span class="pattern-theme-name">${meta.label}</span>
-				<span class="pattern-theme-count">${qs.length} entr${qs.length === 1 ? 'y' : 'ies'}</span>
-			</div>
-			${qs.slice(0, 3).map(q => `<div class="pattern-quote">\u201C${escapeHtml(q.text)}\u201D<span class="pattern-quote-date">${escapeHtml(q.date)}</span></div>`).join('')}
-		</div>`;
+	const keys = PATTERN_ORDER.filter(t => byTheme[t] && byTheme[t].length);
+	if (!keys.length) return '';
+	keys.sort((a, b) => byTheme[b].length - byTheme[a].length);
+	const theme = keys[0];
+	const q = byTheme[theme][0];
+	if (!q) return '';
+	return `
+	<button type="button" class="card outlined static most-present" onclick="openExercisePattern('${theme}')">
+		<div class="kicker">Most present</div>
+		<div class="h3">${escapeHtml(PATTERN_META[theme].label)}</div>
+		<div class="pattern-quote" style="border-left-color:var(--pig-${patternHue(theme)})">\u201C${escapeHtml(q.text)}\u201D</div>
+	</button>`;
+}
+
+function mosaicPackRows(items) {
+	const n = items.length;
+	if (n <= 3) return [items];
+	if (n === 4 || n === 5) return [items.slice(0, 2), items.slice(2)];
+	const rows = [];
+	for (let i = 0; i < n; i += 3) rows.push(items.slice(i, i + 3));
+	return rows;
+}
+
+function patternMosaicHTML(opts) {
+	opts = opts || {};
+	const quotes = getAllQuotes();
+	const byTheme = {};
+	quotes.forEach(q => { (byTheme[q.theme] = byTheme[q.theme] || []).push(q); });
+	const now = new Date();
+	const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+	const keys = PATTERN_ORDER.filter(t => byTheme[t] && byTheme[t].length);
+	if (!keys.length) return '';
+	if (opts.grid) {
+		const items = keys.map(theme => ({ theme, n: byTheme[theme].length }));
+		const rows = mosaicPackRows(items);
+		const html = rows.map(row => {
+			const cells = row.map(item => {
+				const qs = byTheme[item.theme];
+				const hue = patternHue(item.theme);
+				const thisMonth = qs.some(q => (quoteDayKey(q) || '').startsWith(monthPrefix));
+				const fill = thisMonth ? `var(--pig-${hue})` : `var(--pig-${hue}-tint)`;
+				const color = thisMonth ? 'var(--canvas)' : `var(--pig-${hue}-ink)`;
+				const tap = opts.tappable ? `onclick="openExercisePattern('${item.theme}')"` : '';
+				const tag = opts.tappable ? 'button' : 'div';
+				const type = opts.tappable ? ' type="button"' : '';
+				return `<${tag}${type} class="dge-tile" style="flex:${item.n} 0 0;background:${fill};color:${color}" ${tap}>
+					<div class="h3">${PATTERN_META[item.theme].label}</div>
+					<div class="pattern-mosaic-count">${item.n}</div>
+				</${tag}>`;
+			}).join('');
+			return `<div class="pattern-mosaic-row">${cells}</div>`;
+		}).join('');
+		return `<div class="pattern-mosaic-grid">${html}</div>`;
+	}
+	const tiles = keys.map(theme => {
+		const qs = byTheme[theme];
+		const hue = patternHue(theme);
+		const thisMonth = qs.some(q => (quoteDayKey(q) || '').startsWith(monthPrefix));
+		const fill = thisMonth ? `var(--pig-${hue})` : `var(--pig-${hue}-tint)`;
+		return `<span class="pattern-mosaic-tile" style="flex:${qs.length};background:${fill}"></span>`;
 	}).join('');
-	el.innerHTML = aiLink + cards;
+	return `<div class="pattern-mosaic${opts.dimmed ? ' dimmed' : ''}" aria-hidden="true">${tiles}</div>`;
+}
+
+function openExercisePattern(theme) {
+	const quotes = getAllQuotes().filter(q => q.theme === theme);
+	const meta = PATTERN_META[theme];
+	if (!meta) return;
+	const hue = patternHue(theme);
+	const n = quotes.length;
+	const body = quotes.length
+		? quotes.map(q => {
+			const rec = App.exercises.find(e => e.id === q.exId);
+			const sit = rec && rec.situation ? ' \u00b7 ' + rec.situation : '';
+			return `<div class="pattern-quote" style="border-left-color:var(--pig-${hue})">
+				\u201C${escapeHtml(q.text)}\u201D
+				<span class="pattern-quote-date">${escapeHtml(q.date || '')}${escapeHtml(sit)}</span>
+			</div>`;
+		}).join('')
+		: '<p class="caption">No sentences in this pattern yet.</p>';
+	hideTabBar();
+	showScreen('exercise-overlay');
+	exOverlay(`
+		<div class="dge-detail-head" style="background:var(--pig-${hue})">
+			<div class="sit-chrome-nav">
+				<button class="btn-ghost" onclick="closeExercisePattern()">&larr; Back</button>
+			</div>
+			<div class="kicker">${n ? `In ${n} exercise${n === 1 ? '' : 's'}` : 'In your words'}</div>
+			<div class="h2">${escapeHtml(meta.label)}</div>
+		</div>
+		<p class="caption" style="margin-bottom:14px;">Your words, unedited.</p>
+		${body}
+		<div class="dge-detail-foot">${n} of ${n} shown</div>`);
+}
+
+function closeExercisePattern() {
+	showTabBar();
+	goTab('exercise');
 }
 
 /* -------------------------------------------------------------------------
@@ -1745,35 +2037,66 @@ function renderPastExercises(containerId) {
 		el.innerHTML = `<p class="caption" style="text-align:center;padding:20px 12px;">Nothing matches that search.</p>`;
 		return;
 	}
-	el.innerHTML = items.map(rec => {
-		const tags = [...new Set((rec.quotes || []).map(x => x.theme))].map(t => `<span class="tag outline">${PATTERN_META[t].label}</span>`).join(' ');
+	const countLine = q
+		? `<div class="kicker past-result-count">${items.length} result${items.length === 1 ? '' : 's'}</div>`
+		: '';
+	el.innerHTML = countLine + items.map(rec => {
+		const sit = q ? highlightMatch(rec.situation, q) : escapeHtml(rec.situation);
+		const date = q ? highlightMatch(rec.date, q) : escapeHtml(rec.date);
 		return `
-		<div class="card outlined" onclick="openPastRecap(${rec.id})">
-			<div class="caption" style="margin-bottom:4px;">${escapeHtml(rec.date)}</div>
-			<div class="body-text" style="font-size:14px;margin-bottom:8px;">${escapeHtml(rec.situation)}</div>
-			<div class="output-tags">${tags}</div>
-		</div>`;
+		<button type="button" class="past-row" onclick="openPastRecap(${rec.id})">
+			<span class="past-row-main">
+				<span class="caption">${date}</span>
+				<span class="past-row-sit">${sit}</span>
+			</span>
+			<span class="profile-chevron">&rsaquo;</span>
+		</button>`;
 	}).join('');
 }
 
-function openPastRecap(id) {
+function highlightMatch(text, q) {
+	const raw = String(text == null ? '' : text);
+	const query = String(q || '').trim();
+	if (!query) return escapeHtml(raw);
+	const lower = raw.toLowerCase();
+	const nq = query.toLowerCase();
+	let out = '';
+	let i = 0;
+	while (i < raw.length) {
+		const hit = lower.indexOf(nq, i);
+		if (hit === -1) {
+			out += escapeHtml(raw.slice(i));
+			break;
+		}
+		out += escapeHtml(raw.slice(i, hit));
+		out += `<mark class="past-mark">${escapeHtml(raw.slice(hit, hit + query.length))}</mark>`;
+		i = hit + query.length;
+	}
+	return out;
+}
+
+let _pastRecapFrom = 'exercise';
+function openPastRecap(id, from) {
+	_pastRecapFrom = from || 'exercise';
 	const rec = App.exercises.find(e => e.id === id);
 	if (!rec) return;
 	const data = recapFromRecord(rec);
+	const backPlace = _pastRecapFrom === 'circle' ? 'Circle' : 'Past';
 	hideTabBar();
 	showScreen('exercise-overlay');
 	exOverlay(`
-		<button class="btn-ghost back-link" onclick="closePastRecap()">&larr; Back</button>
+		<button class="btn-ghost back-link" onclick="closePastRecap()">&larr; Back to ${backPlace}</button>
 		${recapChromeHTML()}
 		<div class="recap-scroll">
-		${recapCardsHTML(data, `showAIInfo('exercise-overlay', function(){ openPastRecap(${id}); })`)}
+		${recapCardsHTML(data, `showAIInfo('exercise-overlay', function(){ openPastRecap(${id}${from ? ", '" + from + "'" : ''}); })`)}
 		</div>
 		<div style="height:16px"></div>`);
 }
 
 function closePastRecap() {
 	showTabBar();
-	goTab('exercise');
+	if (_pastRecapFrom === 'circle') openConnectSession(currentSessionIdx);
+	else goTab('exercise');
 }
 
 /* ==========================================================================
@@ -1796,67 +2119,154 @@ function prepTotalCount() {
 	return prepKeys().length;
 }
 
-function prepStackHTML(opts) {
+function prepNextIncomplete() {
+	if (!App.prep.classroom) return { step: 'classroom', title: 'Learning' };
+	if (App.dgeUnlocked) {
+		if (!App.prep.dge) return { step: 'dge', title: App.dgeDone ? 'Update growth edges' : 'Discernment of Growth Edges' };
+	} else if (!App.prep.exercise) {
+		return { step: 'exercise', title: 'Personal exercise' };
+	}
+	if (!App.prep.reflect) return { step: 'reflect', title: 'Reflect' };
+	return null;
+}
+
+function prepCompactHTML(opts) {
 	opts = opts || {};
 	const doneCount = prepDoneCount();
-	const allDone = doneCount === prepTotalCount();
+	const total = prepTotalCount();
+	const allDone = doneCount === total;
+	const next = prepNextIncomplete();
+	const rec = App.exercises.length ? App.exercises[App.exercises.length - 1] : null;
+	const ret = opts.returnScreen || 'connect-session-overlay';
+	if (allDone) {
+		return `
+		<div class="prep-compact">
+			<div class="progress-bg"><div class="progress-fill" style="width:100%"></div></div>
+			<p class="caption" style="margin:0 0 6px;">What you brought</p>
+			${rec ? `<button type="button" class="btn-ghost" onclick="openPastRecap(${rec.id}, 'circle')">Open recap</button>` : ''}
+			<button type="button" class="btn-ghost" onclick="startPrepFlow({toChecklist:true, returnScreen:'${ret}'})">View prep</button>
+		</div>`;
+	}
+	return `
+		<div class="prep-compact">
+			<div class="progress-bg"><div class="progress-fill" style="width:${(doneCount / total) * 100}%"></div></div>
+			<p class="body-text" style="margin:0;">Next: ${escapeHtml(next.title)}</p>
+			<button type="button" class="btn-ghost" onclick="openPrepStep('${next.step}', '${ret}')">Continue prep</button>
+		</div>`;
+}
+
+let sessionPrepOpen = false;
+
+function prepSegHTML() {
+	const doneCount = prepDoneCount();
+	const total = prepTotalCount();
+	return `<div class="prep-seg">${Array.from({ length: total }, (_, i) => `<i class="${i < doneCount ? 'on' : ''}"></i>`).join('')}</div>`;
+}
+
+function prepCardHTML(opts) {
+	opts = opts || {};
+	const variant = opts.variant || 'session';
+	const isHome = variant === 'home';
+	const open = isHome ? true : sessionPrepOpen;
+	const doneCount = prepDoneCount();
+	const total = prepTotalCount();
+	const allDone = doneCount === total;
+	const next = prepNextIncomplete();
+	const ret = isHome ? '' : 'connect-session-overlay';
+	const sessionTitle = App.dgeUnlocked ? 'Session 4' : 'Session 1';
+	const heading = allDone
+		? (App.dgeUnlocked ? "You\u2019re ready for Session 4" : "You\u2019re ready for Session 1")
+		: 'Prep for the gathering';
+	const kicker = isHome ? `${sessionTitle} \u00b7 Coming up` : 'On your own';
 	const toChecklist = allDone || doneCount > 0;
-	const title = opts.sessionTitle || (App.dgeUnlocked ? 'Session 4' : 'Session 1');
-	const collapsible = !!opts.collapsible;
-	const open = collapsible ? !!opts.open : true;
-	const ret = opts.returnScreen || '';
 	const flowArg = `{toChecklist:${toChecklist}${ret ? `, returnScreen:'${ret}'` : ''}}`;
-	const cta = allDone ? 'Open checklist' : doneCount > 0 ? 'Continue prep' : "Let's get prepped";
-	const heading = allDone ? (opts.readyLabel || (App.dgeUnlocked ? "You're ready for Session 4" : "You're ready for Session 1")) : 'Prep for the gathering';
-	const headRight = collapsible
-		? `<button type="button" class="prep-collapse-btn" onclick="event.stopPropagation();togglePrepStack()" aria-expanded="${open ? 'true' : 'false'}" aria-controls="acc-prep-rows" aria-label="${open ? 'Collapse prep' : 'Expand prep'}">&#9662;</button>`
-		: `<div class="session-menu">
+	const footLabel = allDone ? "You\u2019re ready" : (next ? `${next.title} left to do` : '');
+	const cta = allDone ? 'View prep' : 'Open prep';
+	const headRight = isHome
+		? `<div class="session-menu">
 				<button type="button" class="session-menu-btn" onclick="event.stopPropagation();toggleSessionMenu(event)" aria-label="Session options" aria-expanded="false">&#8942;</button>
 				<div class="session-menu-dropdown" hidden>
 					<button type="button" class="session-menu-item" onclick="event.stopPropagation();markSessionCompleted(0)">Mark Session 1 completed</button>
 				</div>
-			</div>`;
-	const heroClick = collapsible ? '' : ` onclick="startPrepFlow(${flowArg})"`;
+			</div>`
+		: `<span class="session-prep-chevron" aria-hidden="true">&#9662;</span>`;
+	const headTag = isHome ? 'div' : 'button';
+	const headAttrs = isHome
+		? ' class="session-prep-head"'
+		: ` type="button" class="session-prep-head" onclick="toggleSessionPrep()" aria-expanded="${open ? 'true' : 'false'}"`;
+	const foot = isHome ? '' : `
+		<div class="session-prep-foot">
+			<span class="caption">${escapeHtml(footLabel)}</span>
+			<span class="btn btn-on-pigment btn-small" onclick="event.stopPropagation();startPrepFlow(${flowArg})">${cta}</span>
+		</div>`;
+	const privacy = isHome ? '' : `<p class="caption session-prep-privacy">None of this is shared with your Circle. You choose what to bring.</p>`;
 	return `
-	<div class="home-prep-stack${collapsible ? ' collapsible' : ''}${collapsible && open ? ' open' : ''}"${collapsible ? ' id="acc-prep"' : ''}>
-		<div class="hero-card gradient prep-home-card"${heroClick}>
-			<div class="prep-card-head">
-				<div class="kicker">${escapeHtml(title)} \u00b7 On your own</div>
-				${headRight}
-			</div>
-			<b style="font-size:16px;display:block;margin-bottom:4px;">${heading}</b>
-			<p class="caption" style="margin-bottom:16px;">This will help you show up for Circle.</p>
-			<button class="btn btn-dark btn-small" onclick="event.stopPropagation();startPrepFlow(${flowArg})">${cta}</button>
+		<div class="session-prep${open ? ' open' : ''}${isHome ? ' home-prep-stack' : ''}" id="${isHome ? 'acc-prep' : 'session-prep'}">
+			<${headTag}${headAttrs}>
+				<div class="session-prep-kicker-row">
+					<span class="kicker">${escapeHtml(kicker)}</span>
+					${headRight}
+				</div>
+				<div class="h3">${heading}</div>
+				${prepSegHTML()}
+				${foot}
+			</${headTag}>
+			<div class="session-prep-rows" ${isHome ? 'id="acc-prep-rows"' : ''}>${prepStepRowsHTML(ret || undefined, true)}</div>
 		</div>
-		<div class="card static prep-rows-card"${collapsible ? ' id="acc-prep-rows"' : ''}>
-			${prepStepRowsHTML(ret || undefined)}
-		</div>
-	</div>`;
+		${privacy}`;
 }
 
-function prepStepRowsHTML(returnScreen) {
+function prepStackHTML() {
+	return prepCardHTML({ variant: 'home' });
+}
+
+function sessionPrepCardHTML() {
+	return prepCardHTML({ variant: 'session' });
+}
+
+function prepStepRowsHTML(returnScreen, asRecord) {
 	const retArg = returnScreen ? `, '${returnScreen}'` : '';
 	const row = (done, step, title, caption) => `
 		<button type="button" class="prep-step" onclick="event.stopPropagation();openPrepStep('${step}'${retArg})">
 			<div class="chk-circle${done ? ' done' : ''}">${done ? '&#10003;' : ''}</div>
 			<div class="prep-step-body">
 				<b>${escapeHtml(title)}</b>
-				<p class="caption">${done ? 'Done' : escapeHtml(caption)}</p>
+				<p class="caption${asRecord && done && (step === 'exercise' || step === 'dge') ? ' prep-step-quote' : ''}">${caption}</p>
 			</div>
-			${done ? '' : '<span class="prep-step-chevron" aria-hidden="true">&#8250;</span>'}
+			<span class="prep-step-chevron" aria-hidden="true">&#8250;</span>
 		</button>`;
 	const exerciseRow = App.dgeUnlocked
 		? ''
-		: row(App.prep.exercise, 'exercise', 'Personal exercise', 'A guided exercise on your own, in service of this gathering.');
+		: row(App.prep.exercise, 'exercise', 'Personal exercise', prepRecordCaption('exercise', App.prep.exercise, asRecord));
 	const dgeRow = App.dgeUnlocked
-		? row(App.prep.dge, 'dge', App.dgeDone ? 'Update growth edges' : 'Discernment of Growth Edges', App.dgeDone ? 'Look across the season again.' : 'This session\'s exercise — look across the season together.')
+		? row(App.prep.dge, 'dge', App.dgeDone ? 'Update growth edges' : 'Discernment of Growth Edges', prepRecordCaption('dge', App.prep.dge, asRecord))
 		: '';
 	return `<div class="prep-steps">
-		${row(App.prep.classroom, 'classroom', 'Learning', 'Short pieces for this session — not the whole library.')}
+		${row(App.prep.classroom, 'classroom', 'Learning', prepRecordCaption('classroom', App.prep.classroom, asRecord))}
 		${exerciseRow}
 		${dgeRow}
-		${row(App.prep.reflect, 'reflect', 'Reflect', 'Name one takeaway to bring into the room.')}
+		${row(App.prep.reflect, 'reflect', 'Reflect', prepRecordCaption('reflect', App.prep.reflect, asRecord))}
 	</div>`;
+}
+
+function prepRecordCaption(step, done, asRecord) {
+	if (asRecord && done) {
+		if (step === 'classroom') return 'Two short pieces \u00b7 watched';
+		if (step === 'exercise') {
+			const rec = App.exercises.length ? App.exercises[App.exercises.length - 1] : null;
+			return rec && rec.situation ? `\u201C${escapeHtml(rec.situation)}\u201D` : 'Done';
+		}
+		if (step === 'dge') {
+			const edge = App.growthEdges && App.growthEdges.edges && App.growthEdges.edges[0];
+			return edge ? `\u201C${escapeHtml(edge)}\u201D` : 'Done';
+		}
+		if (step === 'reflect') return App.prep.reflectText ? escapeHtml(App.prep.reflectText) : 'Named a takeaway';
+	}
+	if (step === 'classroom') return 'Short pieces for this session \u2014 not the whole library.';
+	if (step === 'exercise') return 'A guided exercise on your own, in service of this gathering.';
+	if (step === 'dge') return App.dgeDone ? 'Look across the season again.' : 'This session\'s exercise \u2014 look across the season together.';
+	if (step === 'reflect') return 'Name one takeaway to bring into the room.';
+	return 'Done';
 }
 
 function openPrepStep(step, returnScreen) {
@@ -1892,11 +2302,17 @@ function prepOverlay(html) {
 	document.getElementById('prep-overlay-body').innerHTML = html;
 }
 
+function circleBandHTML(inner) {
+	return `<div class="circle-band">${inner}</div>`;
+}
+
 function prepShowIntro() {
 	showTabBar();
 	prepOverlay(`
-		<button class="btn-ghost back-link" onclick="closePrepOverlay()">&larr; Back</button>
-		<div class="h1" style="margin-bottom:12px;">Getting ready for the Circle</div>
+		${circleBandHTML(`
+			<button class="btn-ghost back-link" onclick="closePrepOverlay()">&larr; Back</button>
+			<div class="h1">Getting ready for the Circle</div>
+		`)}
 		<p class="body-text" style="margin-bottom:20px;">${App.dgeUnlocked
 			? 'Session 4 is coming up. The exercise for this session is Discernment of Growth Edges \u2014 looking across the season, not one situation \u2014 plus Learning and Reflect.'
 			: 'Session 1 is coming up. Spend a few unhurried minutes on your own \u2014 a short Learning piece, a personal exercise, and Reflect. Together, they\'ll help you show up for Circle.'}</p>
@@ -1920,9 +2336,11 @@ function prepShowChecklist() {
 			<div><b style="font-size:16px;">${App.dgeDone ? 'Update growth edges' : 'Discernment of Growth Edges'}</b><p class="caption" style="margin:0;">${App.dgeDone ? 'Look across the season again.' : 'This session\'s exercise — look across the season together.'}</p></div>
 		</div>` : '';
 	prepOverlay(`
-		<button class="btn-ghost back-link" onclick="closePrepOverlay()">&larr; Back to Home</button>
-		<div class="h1" style="margin-bottom:6px;">Your Prep Checklist</div>
-		<p class="prep-progress-caption">${doneCount} of ${total} complete</p>
+		${circleBandHTML(`
+			<button class="btn-ghost back-link" onclick="closePrepOverlay()">&larr; Back to Home</button>
+			<div class="h1">Your Prep Checklist</div>
+			<p class="caption" style="margin:6px 0 0;">${doneCount} of ${total} complete</p>
+		`)}
 		<div class="card outlined prep-checklist-item" onclick="prepShowClassroom()">
 			<div class="chk-circle${App.prep.classroom ? ' done' : ''}">${App.prep.classroom ? '&#10003;' : ''}</div>
 			<div><b style="font-size:16px;">Learning</b><p class="caption" style="margin:0;">A few short pieces for this session.</p></div>
@@ -1939,9 +2357,11 @@ function prepShowChecklist() {
 
 function prepShowClassroom() {
 	prepOverlay(`
-		<button class="btn-ghost back-link" onclick="prepShowChecklist()">&larr; Back to Prep</button>
-		<div class="h1" style="margin-bottom:6px;">Learning</div>
-		<p class="caption" style="margin-bottom:4px;">A short set of pieces bundled for Session 1.</p>
+		${circleBandHTML(`
+			<button class="btn-ghost back-link" onclick="prepShowChecklist()">&larr; Back to Prep</button>
+			<div class="h1">Learning</div>
+			<p class="caption" style="margin:6px 0 0;">A short set of pieces bundled for Session 1.</p>
+		`)}
 		<p class="classroom-progress-text" id="prep-classroom-progress"></p>
 		<div id="prep-classroom-list"></div>
 		<button class="btn btn-dark btn-block-mt" onclick="prepShowChecklist()">Back to Prep &rarr;</button>
@@ -1955,8 +2375,10 @@ function prepGoExercise() {
 
 function prepShowReflect() {
 	prepOverlay(`
-		<button class="btn-ghost back-link" onclick="prepShowChecklist()">&larr; Back to Prep</button>
-		<div class="h1" style="margin-bottom:6px;">Reflect &amp; Prep</div>
+		${circleBandHTML(`
+			<button class="btn-ghost back-link" onclick="prepShowChecklist()">&larr; Back to Prep</button>
+			<div class="h1">Reflect &amp; Prep</div>
+		`)}
 		<p class="body-text" style="margin-bottom:8px;">What is one takeaway you want to share with your group tonight?</p>
 		${renderInputTriadHTML('triad-reflect')}
 		<button class="btn btn-dark btn-block-mt" onclick="prepSubmitReflect()">Submit</button>
@@ -1964,6 +2386,8 @@ function prepShowReflect() {
 }
 
 function prepSubmitReflect() {
+	const el = document.getElementById('triad-reflect');
+	if (el && el.value.trim()) App.prep.reflectText = el.value.trim();
 	App.prep.reflect = true;
 	prepShowChecklist();
 }
@@ -2084,7 +2508,7 @@ function renderTabCard(sub, key) {
 		<div class="guide-mode">
 			<button class="guide-mode-btn active" onclick="switchCardTab(this,'key')">Key Points</button>
 			<button class="guide-mode-btn" onclick="switchCardTab(this,'script')">Full Script</button>
-			<button class="guide-mode-btn" onclick="switchCardTab(this,'play')">Play</button>
+			<button class="guide-mode-btn" data-mode="play" onclick="switchCardTab(this,'play')">Play</button>
 		</div>
 		<div class="tab-panel" data-mode="key">
 			<ul class="key-points-list">${sub.keyPoints.map(k => `<li>${escapeHtml(k)}</li>`).join('')}</ul>
@@ -2108,21 +2532,36 @@ function renderConnectLanding() {
 	const overview = document.getElementById('connect-overview-slot');
 	const list = document.getElementById('connect-sessions');
 	if (!overview || !list) return;
+	const nextIdx = upNextSessionIdx();
+	const doneCount = prepDoneCount();
+	const total = prepTotalCount();
 	overview.innerHTML = `
 		<button type="button" class="connect-overview" onclick="openCircleOverview()">
-			<div class="topic-card-art art-b" style="height:132px;margin-bottom:10px;">
+			<div class="topic-card-art circle-video-art">
 				<span class="topic-kind">Video</span>
 				<span class="topic-play">&#9654;</span>
 			</div>
 			<div class="topic-card-title">The Circle Experience</div>
-			<div class="topic-card-sub">Video \u00b7 2 min \u00b7 How a Circle works together</div>
+			<div class="topic-card-sub">2 min \u00b7 How a Circle works together</div>
 		</button>`;
-	list.innerHTML = CIRCLE_SESSIONS.map((s, i) => `
-		<div class="card outlined" onclick="openConnectSession(${i})">
-			<div class="kicker">${escapeHtml(s.status)} \u00b7 60 min</div>
-			<b style="font-size:16px;display:block;margin-bottom:4px;">${escapeHtml(s.title)}</b>
-			<p class="caption" style="margin:0;">Prepare on your own, or open the gathering when you are together.</p>
-		</div>`).join('');
+	list.innerHTML = CIRCLE_SESSIONS.map((s, i) => {
+		const upNext = i === nextIdx && s.status !== 'Completed';
+		const later = !upNext;
+		const kicker = s.status === 'Completed' ? 'Completed \u00b7 60 min' : (upNext ? 'Up next \u00b7 60 min' : 'Later \u00b7 60 min');
+		const prepped = upNext ? `<span class="caption">${doneCount} of ${total} prepped</span>` : '';
+		const blurb = upNext
+			? `<p class="caption">Prepare on your own, or open the gathering when you are together.</p>`
+			: '';
+		return `
+		<button type="button" class="session-index-card${upNext ? ' up-next' : ''}${later ? ' later' : ''}" onclick="openConnectSession(${i})">
+			<div class="session-index-meta">
+				<span class="kicker">${kicker}</span>
+				${prepped}
+			</div>
+			<div class="h3">${escapeHtml(s.title)}</div>
+			${blurb}
+		</button>`;
+	}).join('');
 }
 
 function openCircleOverview() {
@@ -2138,9 +2577,8 @@ function gatheringAgendaHTML(session) {
 	return `
 		<div class="fac-note collapsed" id="fac-note">
 			<div class="fac-note-header" onclick="toggleFacNote()">
-				<span class="fac-note-icon">&#128161;</span>
-				<span class="fac-note-title">${FAC_NOTE.title}</span>
-				<span class="fac-note-chevron">&#9662;</span>
+				<span class="fac-note-title">Facilitator note: before you begin</span>
+				<span class="fac-note-chevron">&#8250;</span>
 			</div>
 			<div class="fac-note-body">${FAC_NOTE.body}</div>
 		</div>
@@ -2150,18 +2588,36 @@ function gatheringAgendaHTML(session) {
 				${sec.subs.map((sub, bi) => `
 					<div class="guide-item" onclick="openGuidePiece(${si},${bi})">
 						<div class="guide-num">${bi + 1}</div>
-						<div class="guide-text"><div class="title">${escapeHtml(sub.title)}</div><div class="sub">${sub.readAloud ? 'Read aloud to the small group' : 'Facilitator instructions'}</div></div>
+						<div class="guide-text"><div class="title">${escapeHtml(sub.title)}</div><div class="sub">${sub.readAloud ? 'Read aloud to the group' : 'Facilitator instructions'}</div></div>
 					</div>`).join('')}
 			</div>`).join('')}`;
 }
 
+function upNextSessionIdx() {
+	const i = CIRCLE_SESSIONS.findIndex(s => s.status !== 'Completed');
+	return i < 0 ? CIRCLE_SESSIONS.length - 1 : i;
+}
+
+function toggleSessionPrep() {
+	sessionPrepOpen = !sessionPrepOpen;
+	const el = document.getElementById('session-prep');
+	if (!el) return;
+	el.classList.toggle('open', sessionPrepOpen);
+	const btn = el.querySelector('.session-prep-head');
+	if (btn) btn.setAttribute('aria-expanded', sessionPrepOpen ? 'true' : 'false');
+}
+
 function openConnectSession(idx, opts) {
-	currentSessionIdx = idx;
+	if (typeof idx === 'number' && idx !== currentSessionIdx) sessionPrepOpen = false;
+	if (typeof idx === 'number') currentSessionIdx = idx;
 	const session = currentSession();
+	const nextIdx = upNextSessionIdx();
+	const statusLine = session.status === 'Completed'
+		? 'Completed \u00b7 60 min gathering'
+		: (currentSessionIdx === nextIdx ? 'Up next \u00b7 60 min gathering' : 'Later \u00b7 60 min gathering');
 	const facItem = `<button type="button" class="session-menu-item" onclick="startFacilitatorMode()">Facilitator Mode</button>`;
 	document.getElementById('connect-session-body').innerHTML = `
 		<button class="btn-ghost back-link" onclick="goTab('connect')">&larr; Back to Circle</button>
-		<div class="kicker">Circle</div>
 		<div class="session-title-row">
 			<div class="h1" style="margin:0;">${escapeHtml(session.title)}</div>
 			<div class="session-menu">
@@ -2172,22 +2628,18 @@ function openConnectSession(idx, opts) {
 				</div>
 			</div>
 		</div>
-		<p class="caption" style="margin-bottom:18px;">${escapeHtml(session.status)} \u00b7 60 min gathering</p>
-		${prepStackHTML({
-			collapsible: true,
-			open: true,
-			sessionTitle: session.title,
-			returnScreen: 'connect-session-overlay',
-			readyLabel: "You're ready for this gathering"
-		})}
+		<p class="caption" style="margin:0 0 16px;">${statusLine}</p>
+		${sessionPrepCardHTML()}
 		<div class="session-room-block">
 			<div class="kicker">Together</div>
-			<b>In the room</b>
-			<p class="caption">Agenda for the gathering.</p>
+			<div class="h3">In the room</div>
+			<p class="caption" style="margin-bottom:14px;">The agenda for the gathering.</p>
 			${gatheringAgendaHTML(session)}
 		</div>
-		<div style="height:16px"></div>`;
-	showTabBar();
+		<div class="session-open-bar">
+			<button class="btn btn-dark" onclick="startFacilitatorMode()">Open the gathering</button>
+		</div>`;
+	hideTabBar();
 	showScreen('connect-session-overlay');
 }
 
@@ -2346,19 +2798,27 @@ function openSettings() {
 		: profileRow('Circle', 'Not in a Circle yet', "showStub('Add a Circle', 'Enter a code from your organizer to join a Circle. This demo doesn\\'t include a working join flow yet.', 'Back', function(){ goTab('profile'); })");
 	document.getElementById('settings-body').innerHTML = `
 		<div class="app-header"><div class="h2">Profile</div></div>
-		<p class="caption" style="margin-top:-10px;margin-bottom:8px;">Account, settings, and help.</p>
 		<div class="profile-section">Account</div>
-		${profileRow('Name', escapeHtml(App.firstName), "openProfilePage('name')")}
-		${profileRow('Email', 'placeholder@email.com', "openProfilePage('email')")}
-		${profileRow('Password', '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022', "openProfilePage('password')")}
+		<div class="profile-group">
+			${profileRow('Name', escapeHtml(App.firstName), "openProfilePage('name')")}
+			${profileRow('Email', 'placeholder@email.com', "openProfilePage('email')")}
+			${profileRow('Password', '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022', "openProfilePage('password')")}
+		</div>
 		<div class="profile-section">Settings</div>
-		${profileRow('Notifications', 'Session reminders on', "openProfilePage('settings')")}
-		${circleRow}
+		<div class="profile-group">
+			${profileRow('Notifications', 'Session reminders on', "openProfilePage('settings')")}
+			${circleRow}
+		</div>
 		<div class="profile-section">Help</div>
-		${profileRow('FAQs', 'Common questions', "openProfilePage('faqs')")}
-		${profileRow('Need Help?', 'Reach a person', "openProfilePage('help')")}
-		${profileRow('AI Transparency Statement', 'How AI is used here', "openProfilePage('ai')")}
-		${profileRow('Privacy', 'What stays yours', "openProfilePage('privacy')")}
+		<div class="profile-group">
+			${profileRow('FAQs', 'Common questions', "openProfilePage('faqs')")}
+			${profileRow('Need Help?', 'Reach a person', "openProfilePage('help')")}
+			${profileRow('AI Transparency Statement', 'How AI is used here', "openProfilePage('ai')")}
+			${profileRow('Privacy', 'What stays yours', "openProfilePage('privacy')")}
+		</div>
+		<div class="profile-group">
+			${profileRow('Sign out', '', "showStub('Sign out', 'This demo doesn\\'t include a working sign-out.', 'Back', function(){ goTab('profile'); })")}
+		</div>
 		<div style="height:16px"></div>`;
 	showScreen('settings');
 }
@@ -2423,10 +2883,12 @@ function showAIInfo(returnScreenId, renderFn) {
 function showStub(title, body, primaryLabel, primaryAction) {
 	_stubPrimaryAction = primaryAction || (() => goTab(App.currentTab));
 	document.getElementById('stub-overlay-body').innerHTML = `
-		<div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;">
-			<div class="h2" style="margin-bottom:12px;">${escapeHtml(title)}</div>
-			<p class="body-text" style="margin-bottom:26px;">${escapeHtml(body)}</p>
-			<button class="btn btn-dark" onclick="_stubPrimaryAction()">${escapeHtml(primaryLabel || 'Back')}</button>
+		<div class="stub-wrap">
+			<div class="stub-card">
+				<div class="h2">${escapeHtml(title)}</div>
+				<p class="body-text">${escapeHtml(body)}</p>
+				<button class="btn btn-dark" onclick="_stubPrimaryAction()">${escapeHtml(primaryLabel || 'Back')}</button>
+			</div>
 		</div>`;
 	showScreen('stub-overlay');
 }
@@ -2507,16 +2969,19 @@ function maybeCoachFab() {
 	_coach = {
 		step: 0,
 		total: 1,
+		tip: true,
 		onEnd: function() { App.fabCoached = true; },
 		steps: [{
-			title: 'Do an exercise anytime',
-			body: 'Tap + whenever you want to start. It stays here so you can always find it.',
+			title: '',
+			body: 'Start a personal exercise here, whenever you have twenty minutes.',
 			selector: '#ex-fab',
-			pill: false
+			pill: false,
+			round: true
 		}]
 	};
-	overlay.classList.add('open');
+	overlay.classList.add('open', 'is-tip');
 	overlay.setAttribute('aria-hidden', 'false');
+	overlay.onclick = function() { endCoachTour(); };
 	renderCoachStep();
 }
 
@@ -2531,7 +2996,7 @@ function renderCoachStep() {
 		</div>`;
 	updateCoachChrome();
 	requestAnimationFrame(() => {
-		positionCoachTarget(document.querySelector(step.selector), step.pill);
+		positionCoachTarget(document.querySelector(step.selector), step.pill, step.round);
 	});
 }
 
@@ -2542,7 +3007,7 @@ function updateCoachChrome() {
 	if (nextBtn) nextBtn.textContent = _coach.step === _coach.total - 1 ? 'Got it' : 'Next';
 }
 
-function positionCoachTarget(target, pill) {
+function positionCoachTarget(target, pill, round) {
 	const overlay = document.getElementById('coach-overlay');
 	const hole = document.getElementById('coach-hole');
 	const bubble = document.getElementById('coach-bubble');
@@ -2551,6 +3016,7 @@ function positionCoachTarget(target, pill) {
 	const tr = target.getBoundingClientRect();
 	const pad = pill ? 6 : 8;
 	hole.classList.toggle('pill', !!pill);
+	hole.classList.toggle('round', !!round);
 	hole.style.left = (tr.left - frame.left - pad) + 'px';
 	hole.style.top = (tr.top - frame.top - pad) + 'px';
 	hole.style.width = (tr.width + pad * 2) + 'px';
@@ -2591,7 +3057,8 @@ function endCoachTour() {
 	if (rail) rail.onscroll = null;
 	_coach = null;
 	if (overlay) {
-		overlay.classList.remove('open');
+		overlay.classList.remove('open', 'is-tip');
+		overlay.onclick = null;
 		overlay.setAttribute('aria-hidden', 'true');
 	}
 	if (onEnd) onEnd();
